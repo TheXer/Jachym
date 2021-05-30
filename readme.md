@@ -1,14 +1,17 @@
-<h1 margin="center">
+<h1>
+<p style="text-align: center">
     Jáchym 🤖
-<br>
+</p>
 </h1>
 
-<h2 margin="center">
+<h2>
+<p style="text-align: center">
 Open-source skautský discord bot postavený na
 <a href="https://discordpy.readthedocs.io/en/stable/"> discord.py </a>
+</p>
 </h2>
 
-<p margin="center">
+<p style="text-align: center">
   <a href="##about?">O čem?</a>
   •
   <a href="#feat">Funkce</a>
