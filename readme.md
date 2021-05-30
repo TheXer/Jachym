@@ -46,8 +46,6 @@ tímto zlepší Jáchym. Way to go!
 
 #### Proč Jáchyma pozvat na server?
 
-___
-
 Podpoříte tím mně jakožto developera, který se dlouho snažil o nějaký opensource projekt. Za každou zpětnou vazbu,
 podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném čase a myslím si, že má význam ho dávat
 opensource. Jeden z důvodů, proč jsem také dělal Jáchyma byl ten, že čím dál tím víc oddílu přechází na discord jakožto
