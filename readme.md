@@ -1,8 +1,10 @@
 <h1 align=center>
 <br>
     Jáchym 🤖
-<br>
+
 </h1>
+
+___
 
 <h3 align=center>
 Open-source skautský discord bot postavený na
@@ -14,18 +16,26 @@ Open-source skautský discord bot postavený na
   •
   <a href="#feat">Funkce</a>
   •
-  <a href="##todo">To-Do</a>
+  <a href="##todo">TODO</a>
   •
-  <a href="#cred">Credits</a>
+  <a href="#cred">Poděkování</a>
 </p>
 
-<br>
+<div align=center>
+
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![Code Climate](https://codeclimate.com/github/cloudfoundry/membrane.png)](https://codeclimate.com/github/TheXer/Skaut-discord-bot)
+
+
+</div>
+
+___
 
 <div id="#about">
 
 ### ❓ O čem?
 
-<br>
+___
 
 Jáchym vznikl jako projekt do [odborky](https://odborky.skaut.cz/ajtak/) před cca pěti měsíci. Od té doby je pořád ve
 vývoji pro potřeby Potkaního skautského oddílu. Nyní ho dávám opensource, protože proč prostě ne. Pro pozvání Jáchyma na
@@ -36,11 +46,12 @@ tímto zlepší Jáchym. Way to go!
 
 </div>
 
+
 <div id="feat">
 
 ### 🤖 Funkce
 
-<br>
+___
 
 `command_prefix` je klasika `!`
 
@@ -61,7 +72,7 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 
 #### Proč Jáchyma pozvat na server?
 
-<br>
+___
 
 Podpoříte tím mně jakožto developera, který se dlouho snažil o nějaký opensource projekt. Za každou zpětnou vazbu,
 podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném čase a myslím si, že má význam ho dávat
@@ -76,18 +87,19 @@ Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 ### 📝 To-Do
 
-<br>
+___
 
-Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci
+Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:r
 
-- [ ] Komentáře ve kódu
+- [ ] Komentáře ve kódu, sepsat jak příkazy fungují
 - [ ] Lépe pořešit tabulky v databázi a relace mezi nimi. Vyvarovat se opakování záznamů
-- [ ] Statistiky serveru
+- [ ] Statistiky serveru přes matplot nebo jiný modul
 - [ ] Json-ify vše (vlastní text místo toho hardcoded)
 - [ ] Fun commands?
 - [ ] Vlastní R-Pi server místo toho, který momentálně užívám
 - [ ] Napsat dokumentaci jak mít self-hosted bota.
-- [ ]
+- [ ] Udělat malý wrapper pro mysql.connector modul, některý kód se tam opakuje
+- [ ] Napsat dokumentaci pro Jáchyma, chybí tam vysvětlení u některých kódů
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
@@ -95,15 +107,15 @@ potřeba upravit, neváhejte napsat do issues.
 
 ### Licence
 
-<br>
+___
 
 Je to pod MIT licencí.
 
 <div id="cred">
 
-### 📜 Credits
+### 📜 Poděkování
 
-<br>
+___
 
 * Oříškovi, který mi pomohl s Pythonem a uvedl mi tak nový svět informatiky.
 
