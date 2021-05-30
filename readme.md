@@ -4,7 +4,6 @@
 
 </h1>
 
-___
 
 <h3 align=center>
 Open-source skautský discord bot postavený na
