@@ -1,17 +1,15 @@
-<h1>
-<p style="text-align: center">
+<h1 align=center>
+<br>
     Jáchym 🤖
-</p>
+<br>
 </h1>
 
-<h2>
-<p style="text-align: center">
+<h3 align=center>
 Open-source skautský discord bot postavený na
 <a href="https://discordpy.readthedocs.io/en/stable/"> discord.py </a>
-</p>
-</h2>
+</h3>
 
-<p style="text-align: center">
+<p align=center>
   <a href="##about?">O čem?</a>
   •
   <a href="#feat">Funkce</a>
@@ -21,12 +19,14 @@ Open-source skautský discord bot postavený na
   <a href="#cred">Credits</a>
 </p>
 
+<br>
 
 <div id="#about">
 
 ### ❓ O čem?
 
-___
+<br>
+
 Jáchym vznikl jako projekt do [odborky](https://odborky.skaut.cz/ajtak/) před cca pěti měsíci. Od té doby je pořád ve
 vývoji pro potřeby Potkaního skautského oddílu. Nyní ho dávám opensource, protože proč prostě ne. Pro pozvání Jáchyma na
 váš server použijte tento
@@ -40,7 +40,8 @@ tímto zlepší Jáchym. Way to go!
 
 ### 🤖 Funkce
 
-___
+<br>
+
 `command_prefix` je klasika `!`
 
 Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komunikaci oddílu.
@@ -60,7 +61,7 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 
 #### Proč Jáchyma pozvat na server?
 
-___
+<br>
 
 Podpoříte tím mně jakožto developera, který se dlouho snažil o nějaký opensource projekt. Za každou zpětnou vazbu,
 podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném čase a myslím si, že má význam ho dávat
@@ -75,7 +76,8 @@ Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 ### 📝 To-Do
 
-___
+<br>
+
 Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci
 
 - [ ] Komentáře ve kódu
@@ -85,6 +87,7 @@ Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou tř
 - [ ] Fun commands?
 - [ ] Vlastní R-Pi server místo toho, který momentálně užívám
 - [ ] Napsat dokumentaci jak mít self-hosted bota.
+- [ ]
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
@@ -92,7 +95,7 @@ potřeba upravit, neváhejte napsat do issues.
 
 ### Licence
 
-___
+<br>
 
 Je to pod MIT licencí.
 
@@ -100,7 +103,7 @@ Je to pod MIT licencí.
 
 ### 📜 Credits
 
-___
+<br>
 
 * Oříškovi, který mi pomohl s Pythonem a uvedl mi tak nový svět informatiky.
 
