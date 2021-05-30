@@ -4,10 +4,10 @@
 
 </h1>
 
-<h3 align=center>
+<h2 align=center>
 Open-source skautský discord bot postavený na
 <a href="https://discordpy.readthedocs.io/en/stable/">discord.py</a>
-</h3>
+</h2>
 
 <p align=center>
   <a href="##about?">O čem?</a>
@@ -44,6 +44,16 @@ tímto zlepší Jáchym. Way to go!
 
 </div>
 
+#### Proč Jáchyma pozvat na server?
+
+___
+
+Podpoříte tím mně jakožto developera, který se dlouho snažil o nějaký opensource projekt. Za každou zpětnou vazbu,
+podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném čase a myslím si, že má význam ho dávat
+opensource. Jeden z důvodů, proč jsem také dělal Jáchyma byl ten, že čím dál tím víc oddílu přechází na discord jakožto
+hlavní komunikační platformu. Discord jako takový je skvělý, jen na něm nám scházelo pár věcí, které dělá právě Jáchym.
+
+Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 <div id="feat">
 
@@ -67,17 +77,6 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 
 * 🎉 Pak jsou další fun commandy jako `zasifruj` a `desifruj`, který přeloží daný text do morseovky. Další commandy
   najdete v `!help`, který se snažím udržovat co nejaktuálnější.
-
-#### Proč Jáchyma pozvat na server?
-
-___
-
-Podpoříte tím mně jakožto developera, který se dlouho snažil o nějaký opensource projekt. Za každou zpětnou vazbu,
-podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném čase a myslím si, že má význam ho dávat
-opensource. Jeden z důvodů, proč jsem také dělal Jáchyma byl ten, že čím dál tím víc oddílu přechází na discord jakožto
-hlavní komunikační platformu. Discord jako takový je skvělý, jen na něm nám scházelo pár věcí, které dělá právě Jáchym.
-
-Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 </div>
 
