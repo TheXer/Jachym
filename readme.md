@@ -4,10 +4,9 @@
 
 </h1>
 
-
 <h3 align=center>
 Open-source skautský discord bot postavený na
-<a href="https://discordpy.readthedocs.io/en/stable/"> discord.py </a>
+<a href="https://discordpy.readthedocs.io/en/stable/">discord.py</a>
 </h3>
 
 <p align=center>
@@ -28,7 +27,7 @@ Open-source skautský discord bot postavený na
 
 </div>
 
-___
+
 
 <div id="#about">
 
@@ -88,7 +87,7 @@ Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 ___
 
-Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:r
+Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:
 
 - [ ] Komentáře ve kódu, sepsat jak příkazy fungují
 - [ ] Lépe pořešit tabulky v databázi a relace mezi nimi. Vyvarovat se opakování záznamů
