@@ -2,9 +2,10 @@ import datetime
 from os import getenv
 
 import discord
-import mysql.connector.errors
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
+
+from db_folder.mysqlwrapper import MySQLWrapper
 
 load_dotenv("password.env")
 
@@ -14,50 +15,12 @@ HOST = getenv("HOST")
 DATABASE = getenv("DATABASE")
 
 
-# TODO: UDĚLAT MALÝ WRAPPER PRO DATABÁZI
-
-
 class Poll(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.database = mysql.connector.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
-        self.cursor = self.database.cursor()
 
         self.cache.start()
         self.caching = set()
-
-    def connect(self, **kwargs):
-        try:
-            self.database = mysql.connector.connect(**kwargs)
-            self.cursor = self.database.cursor()
-            return self.cursor
-        except (AttributeError,
-                mysql.connector.errors.OperationalError,
-                mysql.connector.errors.ProgrammingError):
-
-            self.database = mysql.connector.connect(**kwargs)
-            cursor = self.database.cursor()
-            return cursor
-
-    def query(self, query, var=None):
-        try:
-            self.cursor.execute(query, var or None)
-            return self.cursor.fetchall()
-
-        except (AttributeError,
-                mysql.connector.errors.OperationalError,
-                mysql.connector.errors.ProgrammingError):
-
-            self.cursor = self.connect(user=USER, password=PASSWORD,
-                                       host=HOST, database=DATABASE)
-            self.cursor.execute(query, var or None)
-            return self.cursor.fetchall()
-
-    def close(self, commit=False):
-        if commit:
-            self.database.commit()
-        self.cursor.close()
-        self.database.close()
 
     # RawReaction pro pool systém, automaticky rozpozná jestli někdo reaguje a dá tak odpovídající reakci na tu anketu
     async def reaction_add_remove(self, payload: discord.RawReactionActionEvent):
@@ -124,20 +87,13 @@ class Poll(commands.Cog):
             for reaction in reactions[:len(answer)]:
                 await sent.add_reaction(reaction)
 
-            try:
-                self.cursor = self.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
+            with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
                 sql = "INSERT INTO `Poll`(PollID, DateOfPoll) VALUES (%s, %s)"
                 val = (sent.id, datetime.datetime.now())
 
-                self.cursor.execute(sql, val)
-                self.caching.add(sent.id)
+                db.execute(sql, val, commit=True)
 
-            except mysql.connector.Error as e:
-                await ctx.send(e)
-                self.database.rollback()
-
-            finally:
-                self.close(commit=True)
+            self.caching.add(sent.id)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
@@ -150,15 +106,13 @@ class Poll(commands.Cog):
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
     @tasks.loop(minutes=30)
     async def cache(self):
-        try:
-            self.cursor = self.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
-
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             # Query pro to, aby se každý záznam, který je starší než sedm dní, smazal
             query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 7;"
-            self.cursor.execute(operation=query2)
+            db.execute(query2, commit=True)
 
             query = "SELECT `PollID` FROM `Poll`"
-            tuples = self.query(query=query)
+            tuples = db.query(query=query)
 
             # ořezání všeho co tam je, předtím to bylo ve tvaru [('987234', ''..)]
             self.caching = {
@@ -168,17 +122,9 @@ class Poll(commands.Cog):
 
             return self.caching
 
-        except mysql.connector.Error as e:
-            print(e)
-            self.database.rollback()
-
-        finally:
-            self.close(commit=True)
-
     @cache.before_loop
     async def before_cache(self):
-        try:
-            self.cursor = self.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE)
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             query = """
 			CREATE TABLE IF NOT EXISTS `Poll` (
 				ID_Row INT NOT NULL AUTO_INCREMENT,
@@ -186,16 +132,8 @@ class Poll(commands.Cog):
 				DateOfPoll DATE NOT NULL,
 				PRIMARY KEY (ID_Row))
 			"""
-            self.cursor.execute(query)
+            db.execute(query)
             print("Table Poll OK")
-
-        except mysql.connector.Error as e:
-            print(e)
-            self.database.rollback()
-            return
-
-        finally:
-            self.close(commit=True)
 
         await self.bot.wait_until_ready()
 

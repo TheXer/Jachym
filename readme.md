@@ -93,7 +93,6 @@ Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou tř
 - [ ] Fun commands?
 - [ ] Vlastní R-Pi server místo toho, který momentálně užívám
 - [ ] Napsat dokumentaci jak mít self-hosted bota.
-- [ ] Udělat malý wrapper pro mysql.connector modul, některý kód se tam opakuje
 - [ ] Napsat dokumentaci pro Jáchyma, chybí tam vysvětlení u některých kódů
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to

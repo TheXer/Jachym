@@ -2,13 +2,14 @@ import datetime
 from os import getenv
 
 import discord
-import mysql.connector
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
+from db_folder.mysqlwrapper import MySQLWrapper
+
 load_dotenv("password.env")
 
-USER = getenv("USER")
+USER = getenv("USER_DATABASE")
 PASSWORD = getenv("PASSWORD")
 HOST = getenv("HOST")
 DATABASE = getenv("DATABASE")
@@ -17,47 +18,10 @@ DATABASE = getenv("DATABASE")
 class EventSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-        self.database = mysql.connector.connect(user=USER, password=PASSWORD,
-                                                host=HOST, database=DATABASE)
-        self.cursor = self.database.cursor()
         self.caching = set()
 
         self.cache.start()
         self.poslanieventu.start()
-
-    def connect(self, **kwargs):
-        try:
-            self.database = mysql.connector.connect(**kwargs)
-            self.cursor = self.database.cursor()
-            return self.cursor
-        except (AttributeError,
-                mysql.connector.errors.OperationalError,
-                mysql.connector.errors.ProgrammingError):
-
-            self.database = mysql.connector.connect(**kwargs)
-            cursor = self.database.cursor()
-            return cursor
-
-    def query(self, query, var=None):
-        try:
-            self.cursor.execute(query, var or None)
-            return self.cursor.fetchall()
-
-        except (AttributeError,
-                mysql.connector.errors.OperationalError,
-                mysql.connector.errors.ProgrammingError):
-
-            self.cursor = self.connect(user=USER, password=PASSWORD,
-                                       host=HOST, database=DATABASE)
-            self.cursor.execute(query, var or None)
-            return self.cursor.fetchall()
-
-    def close(self, commit=False):
-        if commit:
-            self.database.commit()
-        self.cursor.close()
-        self.database.close()
 
     def create_tables(self):
         TABLES = {
@@ -85,26 +49,15 @@ class EventSystem(commands.Cog):
         for table_name in TABLES:
             table_description = TABLES[table_name]
 
-            try:
-                self.cursor = self.connect(user=USER, password=PASSWORD,
-                                           host=HOST, database=DATABASE)
-                print(f"Creating table {table_name}")
-                self.cursor.execute(table_description)
-
-            except mysql.connector.Error as e:
-                print(f"Something went wrong: {e}")
-
-        self.close(commit=True)
+            with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+                db.execute(query=table_description, commit=True)
 
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
     async def cache(self):
-        try:
-            self.cursor = self.connect(user=USER, password=PASSWORD,
-                                       host=HOST, database=DATABASE)
-
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
-            tuples = self.query(query=query)
+            tuples = db.query(query=query)
 
             self.caching = {
                 int(clean_variable)
@@ -113,70 +66,52 @@ class EventSystem(commands.Cog):
 
             return self.caching
 
-        except mysql.connector.Error as e:
-            print(e)
-            self.database.rollback()
-
-        finally:
-            self.close(commit=True)
-
     @cache.before_loop
     async def before_cache(self):
         await self.bot.wait_until_ready()
 
     # Ověřuje databázi jestli něco není starší než dané datum a pak jej pošle.
-    @tasks.loop(seconds=6.0)
+    @tasks.loop(seconds=5.0)
     async def poslanieventu(self):
-        self.cursor = self.connect(user=USER, password=PASSWORD,
-                                   host=HOST, database=DATABASE)
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
 
-        sql = "SELECT * FROM EventPlanner;"
-        result = self.query(query=sql)
+            sql = "SELECT * FROM EventPlanner;"
+            result = db.query(query=sql)
 
-        for GuildID, EventID, EventTitle, EventDescription, EventDate, ChannelID in result:
-            if datetime.datetime.now() < EventDate:
-                continue
+            for GuildID, EventID, EventTitle, EventDescription, EventDate, ChannelID in result:
+                if datetime.datetime.now() < EventDate:
+                    continue
 
-            sql = "SELECT ReactionUser FROM ReactionUsers WHERE EventEmbedID = %s;"
-            result = self.query(query=sql, var=(EventID,))
+                sql = "SELECT ReactionUser FROM ReactionUsers WHERE EventEmbedID = %s;"
+                result = db.query(query=sql, val=(EventID,))
 
-            members = {
-                await self.bot.fetch_user(int(x))
-                for ID in result
-                for x in ID}
+                members = {
+                    await self.bot.fetch_user(int(x))
+                    for ID in result
+                    for x in ID}
 
-            embed = discord.Embed(
-                title=f"**Pořádá se akce:** {EventTitle}",
-                description=f"{EventDescription}",
-                colour=discord.Colour.gold())
+                embed = discord.Embed(
+                    title=f"**Pořádá se akce:** {EventTitle}",
+                    description=f"{EventDescription}",
+                    colour=discord.Colour.gold())
 
-            file = discord.File("fotky/trojuhelnik.png", filename="trojuhelnik.png")
-            embed.set_thumbnail(url="attachment://trojuhelnik.png")
+                file = discord.File("fotky/trojuhelnik.png", filename="trojuhelnik.png")
+                embed.set_thumbnail(url="attachment://trojuhelnik.png")
 
-            if len(members) == 0:
-                embed.add_field(name="Účastníci", value="Nikdo nejede.")
+                if len(members) == 0:
+                    embed.add_field(name="Účastníci", value="Nikdo nejede.")
 
-            elif len(members) > 0:
-                embed.add_field(name="Účastníci", value=f"{','.join(user.mention for user in members)}")
+                elif len(members) > 0:
+                    embed.add_field(name="Účastníci", value=f"{','.join(user.mention for user in members)}")
 
-            channel = self.bot.get_channel(int(ChannelID))
-            await channel.send(file=file, embed=embed)
+                channel = self.bot.get_channel(int(ChannelID))
+                await channel.send(file=file, embed=embed)
 
-            try:
-                self.cursor = self.connect(user=USER, password=PASSWORD,
-                                           host=HOST, database=DATABASE)
                 sql2 = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                self.cursor.execute(sql2, (EventID,))
+                db.execute(sql2, (EventID,), commit=True)
 
                 msg = await channel.fetch_message(EventID)
                 await msg.delete()
-
-            except mysql.connector.Error as e:
-                await channel.send(e)
-                self.database.rollback()
-
-            finally:
-                self.close(commit=True)
 
     @poslanieventu.before_loop
     async def before_poslanieventu(self):
@@ -204,6 +139,7 @@ class EventSystem(commands.Cog):
             datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
             if datetime.datetime.now() > datetime_formatted:
                 return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
+
         except ValueError:
             return await ctx.send(
                 "Špatně zformátované datum. Napiš to ve formátu **DD.MM.YYYY HH:MM**, pro příklad **04.01.2021 12:01**")
@@ -228,18 +164,10 @@ class EventSystem(commands.Cog):
                 ) VALUES (%s, %s, %s, %s, %s, %s)"""
         val = (ctx.guild.id, sent.id, title, description, datetime_formatted, ctx.channel.id)
 
-        try:
-            self.cursor = self.connect(user=USER, password=PASSWORD,
-                                       host=HOST, database=DATABASE)
-            self.cursor.execute(sql, val)
-            self.caching.add(sent.id)
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+            db.execute(sql, val, commit=True)
 
-        except mysql.connector.Error as e:
-            self.database.rollback()
-            print(e)
-
-        finally:
-            self.close(commit=True)
+        self.caching.add(sent.id)
 
     @udalost.command()
     async def vypis(self, ctx):
@@ -248,42 +176,31 @@ class EventSystem(commands.Cog):
 			FROM EventPlanner 
 			WHERE GuildID = %s
 			ORDER BY EventDate; """
-        try:
-            self.cursor = self.connect(user=USER, password=PASSWORD,
-                                       host=HOST, database=DATABASE)
-            result = self.query(query=sql, var=(ctx.guild.id,))
+
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+            result = db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
             for title, description, date in result:
                 embed.add_field(name=title, value=f"{date: %d.%m.%Y %H:%M} | {description}", inline=False)
 
-            await ctx.send(embed=embed)
-        except mysql.connector.Error as e:
-            print(e)
-        finally:
-            self.close()
+        await ctx.send(embed=embed)
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
     async def smazat(self, ctx, ID: str):
-        try:
-            sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
+        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+            try:
+                sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
+                db.execute(sql, (ID,), commit=True)
 
-            self.cursor = self.connect(user=USER, password=PASSWORD,
-                                       host=HOST, database=DATABASE)
-            self.cursor.execute(sql, (ID,))
+                msg = await ctx.fetch_message(ID)
+                await msg.delete()
 
-            msg = await ctx.fetch_message(ID)
-            await msg.delete()
+                await ctx.send("Úspěšně smazán event")
 
-            await ctx.send("Úspěšně smazán event")
-
-        except mysql.connector.Error as e:
-            await ctx.send(f"Nepovedlo se :( Rollback... \nError: {e}")
-            self.database.rollback()
-
-        finally:
-            self.close(commit=True)
+            except:
+                await ctx.send("Zkontroluj si číslo, páč tento není v mé paměti. Možná jsi to blbě napsal?")
 
     # To stejné, akorát s každou reakcí se dává záznam do databáze. Nějak to vylepšit? Přijít na způsob jak to udělat
     @commands.Cog.listener()
@@ -296,6 +213,7 @@ class EventSystem(commands.Cog):
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
             vypis_hlasu = [user.display_name async for user in reaction.users() if not user.id == self.bot.user.id]
+
             if payload.emoji.name == "✅":
                 edit = embed.set_field_at(
                     1,
@@ -311,17 +229,8 @@ class EventSystem(commands.Cog):
                 """
                 val = (payload.message_id, payload.user_id)
 
-                try:
-                    self.cursor = self.connect(user=USER, password=PASSWORD,
-                                               host=HOST, database=DATABASE)
-                    self.cursor.execute(sql, val)
-
-                except mysql.connector.Error as e:
-                    print(f"{e}")
-                    self.database.rollback()
-
-                finally:
-                    self.close(commit=True)
+                with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+                    db.execute(sql, val, commit=True)
 
             if payload.emoji.name == "❌":
                 edit = embed.set_field_at(2, name="Ne, nejedu:",
