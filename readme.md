@@ -94,6 +94,7 @@ Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou tř
 - [ ] Vlastní R-Pi server místo toho, který momentálně užívám
 - [ ] Napsat dokumentaci jak mít self-hosted bota.
 - [ ] Napsat dokumentaci pro Jáchyma, chybí tam vysvětlení u některých kódů
+- [ ] PRIVACY POLICY!!! Hodně důležitá věc, uvědomil jsem si, že můžou být problémy s GDPR a ochranou osobních údajů. DOPLNIT!!!
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
