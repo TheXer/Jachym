@@ -114,3 +114,10 @@ ___
 * Oříškovi, který mi pomohl s Pythonem a uvedl mi tak nový svět informatiky.
 
 </div>
+
+###A protože...
+
+...se tento bot jmenuje Jáchym, zanechávám hlášku z filmu! 
+
+Béda: „Hele, já jsem jí včera, to my to ještě myslelo, složil básničku.” (odkašle si a recituje) „Růže - k lásce schůdeček, s úctou Béda Hudeček...”
+František: „Teda, to jsi složil sám? Teda, to jsi hotovej ten... básník...”
