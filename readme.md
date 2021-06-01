@@ -65,7 +65,7 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 
 * 📊 `anketa` - Příkaz pro anketu, momentálně podporuje maximálně 10 odpovědí. Zobrazí jména i počet hlasujících.
 
-![picture1](fotky/img.png)
+![anketa_gif.gif](https://media.giphy.com/media/twyXyf23KkoUiI7kLY/giphy.gif)
 
 * ⚠️ `udalost` - Příkaz pro jednorázovou událost, funguje na podobném principu jako `anketa`, s tím rozdílem, že se tam
   hlasuje o to, kdo jede na tu událost a kdo ne. Na přesně tom dni se potom označí uživatelé, že jim nějaký event
