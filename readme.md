@@ -71,7 +71,7 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
   hlasuje o to, kdo jede na tu událost a kdo ne. Na přesně tom dni se potom označí uživatelé, že jim nějaký event
   začíná.
 
-![event_gif.gif](https://media.giphy.com/media/twyXyf23KkoUiI7kLY/giphy.gif)
+![event_gif.gif](https://media.giphy.com/media/tjUKo4lkVVk52OA2CW/giphy.gif)
 
 * 🎉 Pak jsou další fun commandy jako `zasifruj` a `desifruj`, který přeloží daný text do morseovky. Další commandy
   najdete v `!help`, který se snažím udržovat co nejaktuálnější.
