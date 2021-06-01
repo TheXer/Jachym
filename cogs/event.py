@@ -23,35 +23,6 @@ class EventSystem(commands.Cog):
         self.cache.start()
         self.poslanieventu.start()
 
-    def create_tables(self):
-        TABLES = {
-            'EventPlanner': ("""
-            CREATE TABLE IF NOT EXISTS `EventPlanner` (
-        		GuildID VARCHAR(255) NOT NULL,
-                EventEmbedID VARCHAR(255) NOT NULL,
-                EventTitle VARCHAR(255) NOT NULL,
-                EventDescription VARCHAR(255) NOT NULL,
-                EventDate DATETIME NOT NULL,
-                ChannelID VARCHAR(255) NOT NULL,
-                PRIMARY KEY (EventEmbedID))
-        """),
-            'ReactionUsers': ("""
-            CREATE TABLE IF NOT EXISTS `ReactionUsers` (
-                ID_row INT NOT NULL AUTO_INCREMENT,
-                EventEmbedID VARCHAR(255) NOT NULL,
-                ReactionUser VARCHAR(255) NOT NULL,
-                PRIMARY KEY (ID_row),
-                FOREIGN KEY (EventEmbedID) 
-                    REFERENCES EventPlanner(EventEmbedID)
-                    ON DELETE CASCADE)
-        """)}
-
-        for table_name in TABLES:
-            table_description = TABLES[table_name]
-
-            with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
-                db.execute(query=table_description, commit=True)
-
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
     async def cache(self):
@@ -115,7 +86,34 @@ class EventSystem(commands.Cog):
 
     @poslanieventu.before_loop
     async def before_poslanieventu(self):
-        self.create_tables()
+        TABLES = {
+            'EventPlanner': ("""
+                    CREATE TABLE IF NOT EXISTS `EventPlanner` (
+                		GuildID VARCHAR(255) NOT NULL,
+                        EventEmbedID VARCHAR(255) NOT NULL,
+                        EventTitle VARCHAR(255) NOT NULL,
+                        EventDescription VARCHAR(255) NOT NULL,
+                        EventDate DATETIME NOT NULL,
+                        ChannelID VARCHAR(255) NOT NULL,
+                        PRIMARY KEY (EventEmbedID))
+                """),
+            'ReactionUsers': ("""
+                    CREATE TABLE IF NOT EXISTS `ReactionUsers` (
+                        ID_row INT NOT NULL AUTO_INCREMENT,
+                        EventEmbedID VARCHAR(255) NOT NULL,
+                        ReactionUser VARCHAR(255) NOT NULL,
+                        PRIMARY KEY (ID_row),
+                        FOREIGN KEY (EventEmbedID) 
+                            REFERENCES EventPlanner(EventEmbedID)
+                            ON DELETE CASCADE)
+                """)}
+
+        for table_name in TABLES:
+            table_description = TABLES[table_name]
+
+            with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+                db.execute(query=table_description, commit=True)
+
         await self.bot.wait_until_ready()
 
     # help systém pro to.
