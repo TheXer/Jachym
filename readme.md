@@ -73,7 +73,7 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 
 ![event_gif.gif](https://media.giphy.com/media/tjUKo4lkVVk52OA2CW/giphy.gif)
 
-<img src="fotky/event_pic.png" alt="fotka eventu" width="50%">
+<img src="fotky/event_pic.png" alt="fotka eventu" width="40%">
 
 * 🎉 Pak jsou další fun commandy jako `zasifruj` a `desifruj`, který přeloží daný text do morseovky. Další commandy
   najdete v `!help`, který se snažím udržovat co nejaktuálnější.
