@@ -65,14 +65,13 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 
 * 📊 `anketa` - Příkaz pro anketu, momentálně podporuje maximálně 10 odpovědí. Zobrazí jména i počet hlasujících.
 
-![anketa_gif.gif](https://media.giphy.com/media/twyXyf23KkoUiI7kLY/giphy.gif)
+<img src="https://media.giphy.com/media/twyXyf23KkoUiI7kLY/giphy.gif" alt="gif eventu" width="50%">
 
 * ⚠️ `udalost` - Příkaz pro jednorázovou událost, funguje na podobném principu jako `anketa`, s tím rozdílem, že se tam
   hlasuje o to, kdo jede na tu událost a kdo ne. Na přesně tom dni se potom označí uživatelé, že jim nějaký event
   začíná.
 
-![event_gif.gif](https://media.giphy.com/media/tjUKo4lkVVk52OA2CW/giphy.gif)
-
+<img src="https://media.giphy.com/media/tjUKo4lkVVk52OA2CW/giphy.gif" alt="gif eventu" width="50%">
 <img src="fotky/event_pic.png" alt="fotka eventu" width="40%">
 
 * 🎉 Pak jsou další fun commandy jako `zasifruj` a `desifruj`, který přeloží daný text do morseovky. Další commandy
