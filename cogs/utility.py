@@ -1,3 +1,5 @@
+import json
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions
@@ -10,6 +12,13 @@ class Utility(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("Jáchym je ready!")
+
+    @commands.command()
+    async def test(self, ctx):
+        with open("text_json/package.json") as f:
+            test = json.load(f)
+            embed = discord.Embed.from_dict(test["test"])
+            await ctx.send(embed=embed)
 
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx):
@@ -33,7 +42,6 @@ class Utility(commands.Cog):
         embed.add_field(name="!clear nebo !smazat",
                         value="Administrátorský příkaz pro smazání zpráv. Maximálně 99 zpráv", inline=False)
 
-        embed.set_footer(text="Jáchyma vytvořil Elf s pomocí Oříška")
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
 
         await ctx.send(file=file, embed=embed)

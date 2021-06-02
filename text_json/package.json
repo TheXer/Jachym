@@ -1,0 +1,15 @@
+{
+  "test": {
+    "color": 16747116,
+    "fields": [
+      {
+        "name": "Pomoc",
+        "value": "> `!pomoc, !help`\nKdyž potřebuješ pomoct s příkazy"
+      },
+      {
+        "name": "Anketa",
+        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset odpověďí."
+      }
+    ]
+  }
+}
