@@ -13,95 +13,38 @@ class Utility(commands.Cog):
     async def on_ready(self):
         print("Jáchym je ready!")
 
-    @commands.command()
-    async def test(self, ctx):
-        with open("text_json/package.json") as f:
-            test = json.load(f)
-            embed = discord.Embed.from_dict(test["test"])
-            await ctx.send(embed=embed)
-
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx):
-        embed = discord.Embed(title="Pomocník", description="Pomůžu ti najít příkazy!",
-                              timestamp=ctx.message.created_at, color=0xff0000)
+        with open("text_json/package.json") as f:
+            test = json.load(f)
+
+        embed = discord.Embed.from_dict(test["help"])
+
         file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
         embed.set_thumbnail(url="attachment://LogoPotkani.png")
-        embed.add_field(name="!pomoc nebo !help", value="Když potřebuješ pomoct s příkazy... :-)", inline=False)
-        embed.add_field(name='!anketa "Otázka" "Odpověď"',
-                        value='Jednoduchá anketa, ukáže počet osob hlasujících i kdo hlasoval. Maximálně 10 odpovědí. '
-                              '\n> `!anketa "Kdo je hlavní vedoucí Potkanů?" "Křeček" "Žiry" "Bára"`',
-                        inline=False)
-        embed.add_field(name="!rozcestnik",
-                        value="Všechny důležité věci, co skaut potřebuje, včetně věcí jako organizace a hospodářství.",
-                        inline=False)
-        embed.add_field(name="!ping", value="Ukáže latenci bota (v případě kdyby něco nefungovalo)", inline=False)
-        embed.add_field(name="!vypis", value="Výpis všech aktuálních členů na discordu podle skupin")
-        embed.add_field(name="!vlakna", value="Výpis všech vláken podle kategorie, včetně těch, kam nemáte přístup")
-        embed.add_field(name="!serverinfo", value="Výpis všech informací na serveru", inline=False)
-        embed.add_field(name="!userinfo", value="Výpis uživatelských informací")
-        embed.add_field(name="!clear nebo !smazat",
-                        value="Administrátorský příkaz pro smazání zpráv. Maximálně 99 zpráv", inline=False)
-
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-
         await ctx.send(file=file, embed=embed)
 
     @commands.command(pass_context=True)
     async def rozcestnik(self, ctx):
-        embed = discord.Embed(title="Rozcestník", description="‎Všechny věci, co skaut potřebuje",
-                              timestamp=ctx.message.created_at, color=0xf5ec00)
-        embed.add_field(name="https://krizovatka.skaut.cz/",
-                        value="-skautská křižovatka \n-rozcestník informací od Junáka \n-stezky \n-materiály "
-                              "\n-komunikace \n-a spousta dalšího \n")
-        embed.add_field(name="https://is.skaut.cz/",
-                        value="-SkautIS \n-přihlašování na kurzy \n-správa informací a členů \n-správa akcí, výprav, "
-                              "táborů")
-        embed.add_field(name="https://discord.gg/ztxcybF",
-                        value="-Skautský discord server \n-setkávání a pokec skautů z ČR \n-nápady, inspirace")
-        embed.add_field(name="https://www.skaut.cz/", value="-hlavní webová stránka Junáka \n-vyhledávání oddílů")
-        embed.add_field(name="https://kurzy.skaut.cz/",
-                        value="-databáze rádcovských, čekatelských, vůdcovských a dalších kurzů")
-        embed.add_field(name="https://krizovatka.skaut.cz/oddil/zakladny-taboriste",
-                        value="-Databáze skautských základen a tábořišť")
-        embed.add_field(name="https://www.facebook.com/groups/skautforum",
-                        value="-celostátní FB skupina skautských vedoucích")
-        embed.add_field(name="https://h.skauting.cz/", value="-hSkauting \n-hospodaření \n-vyúčtování výprav, táborů")
-        embed.add_field(name="https://www.facebook.com/SkautInfo", value="-oficiální skautský informační kanál")
-        embed.add_field(name="https://www.junshop.cz/", value="-obchod se skautským a turistickým vybavením")
-        embed.add_field(name="https://www.facebook.com/potkani53", value="-facebook oddílu \n-fotky, alba")
+        with open("text_json/package.json") as f:
+            test = json.load(f)
 
-        embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+            embed = discord.Embed.from_dict(test["rozcestnik"])
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-
         await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
     async def ping(self, ctx):
         await ctx.send('Odezva je takováhle: {} ms'.format(round(self.bot.latency * 1000)))
 
+    # TODO: Vše co je pod tímto vylepšit nebo pořešit lépe!
+
     @commands.command(pass_context=True)
     async def vypis(self, ctx):
         embed = discord.Embed(title="Výpis všech členů na discordu", timestamp=ctx.message.created_at, color=0xff0000)
-        server = ctx.message.guild
 
-        sedma = ctx.guild.get_role(765546277857263616)
-        mrtvoly = ctx.guild.get_role(765548660380663839)
-        vedouci = ctx.guild.get_role(765549177857376256)
-        lamy = ctx.guild.get_role(765549514630496306)
-
-        def vypis_lidi(role_id, jmeno_skupiny: str):
-            x = []
-            for member in server.members:
-                if role_id in member.roles:
-                    x.append(member)
-
-            return embed.add_field(name=f"{jmeno_skupiny}", value=f"{', '.join(member.display_name for member in x)}",
-                                   inline=False)
-
-        vypis_lidi(sedma, "Sedmička")
-        vypis_lidi(mrtvoly, "Mrtvoly")
-        vypis_lidi(vedouci, "Vedoucí")
-        vypis_lidi(lamy, "Lamy")
+        embed.add_field(name="Členové", value=", ".join([x.display_name for x in ctx.message.guild.members]))
 
         embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
@@ -171,20 +114,12 @@ class Utility(commands.Cog):
     async def serverinfo(self, ctx):
         role_count = len(ctx.guild.roles)
         list_of_bots = [bot.mention for bot in ctx.guild.members if bot.bot]
-        staff_roles = ["Majitel", "Moderátor", "Sedmička", "Vedoucí", "Mrtvoly", "Lamy"]
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=ctx.author.color)
         embed.add_field(name='Jméno', value=f"{ctx.guild.name}", inline=False)
         embed.add_field(name='Hlavní vedoucí', value=f"{ctx.message.guild.owner.display_name} 👑", inline=False)
         embed.add_field(name='Vertifikační level', value=str(ctx.guild.verification_level), inline=False)
         embed.add_field(name='Nejvyšší role', value=ctx.guild.roles[-1], inline=False)
-
-        for r in staff_roles:
-            role = discord.utils.get(ctx.guild.roles, name=r)
-            if role:
-                members = '\n'.join([member.display_name for member in role.members]) or "None"
-                count = len(role.members)
-                embed.add_field(name=f"{role.name} ({count})", value=members)
 
         embed.add_field(name='Celkem rolí', value=str(role_count), inline=False)
         embed.add_field(name='Celkem členů beze botů', value=f"{len([m for m in ctx.guild.members if not m.bot])}",

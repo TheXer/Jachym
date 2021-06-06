@@ -1,6 +1,5 @@
 {
-  "test": {
-    "color": 16747116,
+  "help": {
     "fields": [
       {
         "name": "Pomoc",
@@ -8,7 +7,78 @@
       },
       {
         "name": "Anketa",
-        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset odpověďí."
+        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset odpovědí."
+      },
+      {
+        "name": "Událost (event)",
+        "value": "> `!udalost`\nPomocník pro události"
+      },
+      {
+        "name": "Skautský rozcestník",
+        "value": "> `!rozcestnik`\nVýpis všech odkazů. co skaut potřebuje"
+      },
+      {
+        "name": "Šifrovačka",
+        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný test přeloží do něj."
+      },
+      {
+        "name": "Latence bota",
+        "value": "> `!ping`\nUkáže latenci bota v případě, pokud by něco příliš trvalo nebo nefungovalo"
+      },
+      {
+        "name": "Smazání zpráv",
+        "value": "> `!clear 25, !smazat 14`\nAdministrátorský příkaz pro smazání zpráv. Maximálně však 99 zpráv."
+      }
+    ]
+  },
+  "rozcestnik": {
+    "title": "Rozcestník",
+    "description": "Všechny věci, co skaut potřebuje",
+    "fields": [
+      {
+        "name": "Skautská křížovatka",
+        "value": "> [Skautská křížovatka](https://krizovatka.skaut.cz/)\n• Rozcestník informací od Junáka\n• Stezky\n• Materiály\n• Komunikace\n• A spousta dalších věcí",
+        "inline": true
+      },
+      {
+        "name": "SkautIS",
+        "value": "> [is.skaut.cz](https://is.skaut.cz/)\n• Přihlašování na kurzy\n• Správa informací a členů\n• Správa akcí, výprav a táborů",
+        "inline": true
+      },
+      {
+        "name": "Český skaut (discord)",
+        "value": "> [Pozvánka](https://discord.gg/ztxcybF)\n• Skautský discord server\n• Setkávání a pokec skautů z celé ČR\n• Nápady, inspirace",
+        "inline": true
+      },
+      {
+        "name": "skaut.cz",
+        "value": "> [Webové stránky](https://www.skaut.cz/)\n• Hlavní webová stránka Junáka\n• Vyhledávání oddílů",
+        "inline": true
+      },
+      {
+        "name": "Skautské kurzy",
+        "value": "> [Kurzy](https://kurzy.skaut.cz/)\n• Databáze rádcovských, čekatelských, vůdcovských a dalších kurzů",
+        "inline": true
+      },
+      {
+        "name": "Skautfórum",
+        "value": "> [Facebook skupina](https://www.facebook.com/groups/skautforum)\n• Celostátní FB skupina skautských vedoucích\n",
+        "inline": true
+      },
+      {
+        "name": "hSkauting",
+        "value": "> [hSkauting](https://h.skauting.cz/)\n• Hospodaření\n• Vyúčtování výprav, táborů",
+        "inline": true
+      },
+      {
+        "name": "SkautInfo",
+        "value": "> [Facebook stránka](https://www.facebook.com/SkautInfo)\n• Oficiální skautský informační kanál",
+        "inline": true
+      },
+      {
+        "name": "JunShop",
+        "value": "> [Obchod](https://www.junshop.cz/)\n• Obchod se skautským a turistickým vybavením",
+        "inline": true
       }
     ]
   }
