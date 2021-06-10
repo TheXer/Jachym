@@ -45,7 +45,10 @@ class Poll(commands.Cog):
             }
             i = emoticon_dict[str(payload.emoji)]
 
-            vypis_hlasu = [user.display_name async for user in reaction.users() if not user.id == self.bot.user.id]
+            vypis_hlasu = [
+                user.display_name
+                async for user in reaction.users()
+                if not user.id == self.bot.user.id]
 
             edit = embed.set_field_at(
                 i,

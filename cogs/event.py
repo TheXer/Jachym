@@ -173,7 +173,8 @@ class EventSystem(commands.Cog):
 			SELECT EventTitle, EventDescription, EventDate 
 			FROM EventPlanner 
 			WHERE GuildID = %s
-			ORDER BY EventDate; """
+			ORDER BY EventDate; 
+			"""
 
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             result = db.query(query=sql, val=(ctx.guild.id,))
@@ -186,13 +187,13 @@ class EventSystem(commands.Cog):
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
-    async def smazat(self, ctx, ID: str):
+    async def smazat(self, ctx, embed_id: str):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                db.execute(sql, (ID,), commit=True)
+                db.execute(sql, (embed_id,), commit=True)
 
-                msg = await ctx.fetch_message(ID)
+                msg = await ctx.fetch_message(embed_id)
                 await msg.delete()
 
                 await ctx.send("Úspěšně smazán event")
@@ -244,7 +245,10 @@ class EventSystem(commands.Cog):
             embed = message.embeds[0]
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
-            vypis_hlasu = [user.display_name async for user in reaction.users() if not user.id == self.bot.user.id]
+            vypis_hlasu = [user.display_name
+                           async for user in reaction.users()
+                           if not user.id == self.bot.user.id]
+
             if payload.emoji.name == "✅":
                 edit = embed.set_field_at(1, name="Ano, pojedu:",
                                           value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)

@@ -44,7 +44,8 @@ class Utility(commands.Cog):
     async def vypis(self, ctx):
         embed = discord.Embed(title="Výpis všech členů na discordu", timestamp=ctx.message.created_at, color=0xff0000)
 
-        embed.add_field(name="Členové", value=", ".join([x.display_name for x in ctx.message.guild.members]))
+        embed.add_field(name="Členové",
+                        value=", ".join([x.display_name for x in ctx.message.guild.members if not x.bot]))
 
         embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
@@ -114,16 +115,16 @@ class Utility(commands.Cog):
     async def serverinfo(self, ctx):
         role_count = len(ctx.guild.roles)
         list_of_bots = [bot.mention for bot in ctx.guild.members if bot.bot]
+        member_count = len([m for m in ctx.guild.members if not m.bot])
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=ctx.author.color)
         embed.add_field(name='Jméno', value=f"{ctx.guild.name}", inline=False)
         embed.add_field(name='Hlavní vedoucí', value=f"{ctx.message.guild.owner.display_name} 👑", inline=False)
         embed.add_field(name='Vertifikační level', value=str(ctx.guild.verification_level), inline=False)
-        embed.add_field(name='Nejvyšší role', value=ctx.guild.roles[-1], inline=False)
+        embed.add_field(name='Nejvyšší role', value=ctx.guild.roles[-2], inline=False)
 
         embed.add_field(name='Celkem rolí', value=str(role_count), inline=False)
-        embed.add_field(name='Celkem členů beze botů', value=f"{len([m for m in ctx.guild.members if not m.bot])}",
-                        inline=False)
+        embed.add_field(name='Celkem členů beze botů', value=f"{member_count}", inline=False)
         embed.add_field(name='Botové:', value=(', '.join(list_of_bots)))
         embed.add_field(name='Vytvořeno', value=ctx.guild.created_at.strftime('%d.%m.%Y'), inline=False)
         embed.set_thumbnail(url=ctx.guild.icon_url)
@@ -135,6 +136,7 @@ class Utility(commands.Cog):
     @commands.command(pass_context=True, aliases=["smazat"])
     @has_permissions(administrator=True)
     async def clear(self, ctx, limit: int):
+        await ctx.message.delete()
         if 1 < limit < 100:
             deleted = await ctx.channel.purge(limit=limit)
             await ctx.send("Smazáno {deleted} zpráv.".format(deleted=len(deleted)))

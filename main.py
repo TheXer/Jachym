@@ -1,15 +1,11 @@
 import os
+
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-import discord
-
 load_dotenv("password.env")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-
-
-#testocomment
-
 
 # Co jsou intents? https://discordpy.readthedocs.io/en/stable/intents.html
 intents = discord.Intents.all()
