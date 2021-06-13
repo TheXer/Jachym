@@ -1,5 +1,6 @@
 {
   "help": {
+    "_comment" : "Text of !help, overall help",
     "fields": [
       {
         "name": "Pomoc",
@@ -32,6 +33,7 @@
     ]
   },
   "rozcestnik": {
+    "_comment" : "Výpis příkazu !rozcestnik, obsahuje obecně užitečné odkazy pro skauty",
     "title": "Rozcestník",
     "description": "Všechny věci, co skaut potřebuje",
     "fields": [
