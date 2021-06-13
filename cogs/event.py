@@ -142,6 +142,12 @@ class EventSystem(commands.Cog):
             return await ctx.send(
                 "Špatně zformátované datum. Napiš to ve formátu **DD.MM.YYYY HH:MM**, pro příklad **04.01.2021 12:01**")
 
+        if title == "":
+            return await ctx.send("`Nemůžeš vytvořit událost beze jména`")
+
+        if description == "":
+            return await ctx.send("`Události musíš vytvořit nějaký popis, například co se na ní bude dělat`")
+
         embed = discord.Embed(title=title, description=description, colour=discord.Colour.gold())
         embed.add_field(name="Datum", value=f"{datetime_formatted:%d.%m.%Y %H:%M}")
         embed.add_field(name="Ano, pojedu:", value="0 |", inline=False)
