@@ -86,16 +86,16 @@ class EventSystem(commands.Cog):
 
     @poslanieventu.before_loop
     async def before_poslanieventu(self):
-        TABLES = {
+        tables = {
             'EventPlanner': ("""
                     CREATE TABLE IF NOT EXISTS `EventPlanner` (
-                		GuildID VARCHAR(255) NOT NULL,
-                        EventEmbedID VARCHAR(255) NOT NULL,
-                        EventTitle VARCHAR(255) NOT NULL,
-                        EventDescription VARCHAR(255) NOT NULL,
-                        EventDate DATETIME NOT NULL,
-                        ChannelID VARCHAR(255) NOT NULL,
-                        PRIMARY KEY (EventEmbedID))
+                    GuildID VARCHAR(255) NOT NULL,
+                    EventEmbedID VARCHAR(255) NOT NULL,
+                    EventTitle VARCHAR(255) NOT NULL,
+                    EventDescription VARCHAR(255) NOT NULL,
+                    EventDate DATETIME NOT NULL,
+                    ChannelID VARCHAR(255) NOT NULL,
+                    PRIMARY KEY (EventEmbedID))
                 """),
             'ReactionUsers': ("""
                     CREATE TABLE IF NOT EXISTS `ReactionUsers` (
@@ -108,15 +108,15 @@ class EventSystem(commands.Cog):
                             ON DELETE CASCADE)
                 """)}
 
-        for table_name in TABLES:
-            table_description = TABLES[table_name]
+        for table_name in tables:
+            table_description = tables[table_name]
 
             with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
                 db.execute(query=table_description, commit=True)
 
         await self.bot.wait_until_ready()
 
-    # help systém pro to.
+    # help systém pro to. #todo, jsnoify
     @commands.group(invoke_without_command=True)
     async def udalost(self, ctx):
         embed = discord.Embed(title="Jak na plánování událostí?")
@@ -159,7 +159,7 @@ class EventSystem(commands.Cog):
             await sent.add_reaction(reaction)
 
         sql = """INSERT INTO `EventPlanner` (
-					GuildID,
+                    GuildID,
                     EventEmbedID, 
                     EventTitle,
                     EventDescription,
@@ -176,11 +176,10 @@ class EventSystem(commands.Cog):
     @udalost.command()
     async def vypis(self, ctx):
         sql = """
-			SELECT EventTitle, EventDescription, EventDate 
-			FROM EventPlanner 
-			WHERE GuildID = %s
-			ORDER BY EventDate; 
-			"""
+            SELECT EventTitle, EventDescription, EventDate 
+            FROM EventPlanner 
+            WHERE GuildID = %s
+            ORDER BY EventDate; """
 
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             result = db.query(query=sql, val=(ctx.guild.id,))
@@ -204,7 +203,7 @@ class EventSystem(commands.Cog):
 
                 await ctx.send("Úspěšně smazán event")
 
-            except:
+            except discord.errors.NotFound:
                 await ctx.send("Zkontroluj si číslo, páč tento není v mé paměti. Možná jsi to blbě napsal?")
 
     # To stejné, akorát s každou reakcí se dává záznam do databáze. Nějak to vylepšit? Přijít na způsob jak to udělat

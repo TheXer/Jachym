@@ -129,12 +129,11 @@ class Poll(commands.Cog):
     async def before_cache(self):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             query = """
-			CREATE TABLE IF NOT EXISTS `Poll` (
-				ID_Row INT NOT NULL AUTO_INCREMENT,
-				PollID VARCHAR(255) NOT NULL,
-				DateOfPoll DATE NOT NULL,
-				PRIMARY KEY (ID_Row))
-			"""
+                CREATE TABLE IF NOT EXISTS `Poll` (
+                ID_Row INT NOT NULL AUTO_INCREMENT,
+                PollID VARCHAR(255) NOT NULL,
+                DateOfPoll DATE NOT NULL,
+                PRIMARY KEY (ID_Row))"""
             db.execute(query)
             print("Table Poll OK")
 
