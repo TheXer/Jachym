@@ -33,7 +33,7 @@
     ]
   },
   "rozcestnik": {
-    "_comment" : "Výpis příkazu !rozcestnik, obsahuje obecně užitečné odkazy pro skauty",
+    "_comment" : "Text of !rozcestnik, useful links for czech scouts",
     "title": "Rozcestník",
     "description": "Všechny věci, co skaut potřebuje",
     "fields": [
