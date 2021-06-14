@@ -83,5 +83,23 @@
         "inline": true
       }
     ]
+  },
+  "udalost": {
+    "_comment": "Help system for events",
+    "title": "Událost",
+    "fields": [
+      {
+        "name": "Vytvoření události",
+        "value": "> `!udalost create \"Družinovka\" \"Šéfem bude Právě\" \"12.5.2021 14:00\"`\n> `!anketa create \"Jméno výpravy/akce\" \"Popis výpravy\" \"Datum\"`\nVytvoří událost. Na daný den v přesně tu hodinu se pošle zpráva od bota včetně všech účastníků"
+      },
+      {
+        "name": "Výpis všech událostí",
+        "value": "> `!udalost vypis`\nVypíše všechny události seřazené podle data akce"
+      },
+      {
+        "name": "Smazání události",
+        "value": "> `!udalost delete/smazat ID`\n> `!udalost delete 853927841875750547`\nSmaže event z databáze. Pro číslo se musí vždy zkopírovat ID ze zprávy události, tzn. Najet myší na event, najet na tři tečky napravo a vybrat z výpisu Kopírovat ID"
+      }
+    ]
   }
 }

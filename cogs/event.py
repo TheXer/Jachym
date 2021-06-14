@@ -1,4 +1,5 @@
 import datetime
+import json
 from os import getenv
 
 import discord
@@ -116,19 +117,15 @@ class EventSystem(commands.Cog):
 
         await self.bot.wait_until_ready()
 
-    # help systém pro to. #todo, jsnoify
+    # help systém pro to.
     @commands.group(invoke_without_command=True)
     async def udalost(self, ctx):
-        embed = discord.Embed(title="Jak na plánování událostí?")
-        embed.add_field(name='!udalost create "Jméno" "Popisek nebo kde se bude událost konat" "Datum"',
-                        value='Vytvoří se událost.\n> `!udalost create "Družinovka" "Šéfem bude Právě" "12.5.2021 14:00"`',
-                        inline=False)
-        embed.add_field(name="!udalost vypis",
-                        value="Výpis všech eventů, co se budou konat",
-                        inline=False)
-        embed.add_field(name='!udalost delete/smazat ID',
-                        value="Smaže event z paměti, aby se vůbec nekonal. Pouze pro administrátory",
-                        inline=False)
+        with open("text_json/package.json") as f:
+            test = json.load(f)
+
+        embed = discord.Embed.from_dict(test["udalost"])
+        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+
         await ctx.send(embed=embed)
 
     @udalost.command()
@@ -237,8 +234,10 @@ class EventSystem(commands.Cog):
                     db.execute(sql, val, commit=True)
 
             if payload.emoji.name == "❌":
-                edit = embed.set_field_at(2, name="Ne, nejedu:",
-                                          value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                edit = embed.set_field_at(
+                    2,
+                    name="Ne, nejedu:",
+                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
                 await reaction.message.edit(embed=edit)
 
     @commands.Cog.listener()
@@ -255,13 +254,19 @@ class EventSystem(commands.Cog):
                            if not user.id == self.bot.user.id]
 
             if payload.emoji.name == "✅":
-                edit = embed.set_field_at(1, name="Ano, pojedu:",
-                                          value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                edit = embed.set_field_at(
+                    1,
+                    name="Ano, pojedu:",
+                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
                 await reaction.message.edit(embed=edit)
 
             if payload.emoji.name == "❌":
-                edit = embed.set_field_at(2, name="Ne, nejedu:",
-                                          value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                edit = embed.set_field_at(
+                    2,
+                    name="Ne, nejedu:",
+                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
                 await reaction.message.edit(embed=edit)
 
 
