@@ -24,6 +24,16 @@ class EventSystem(commands.Cog):
         self.cache.start()
         self.poslanieventu.start()
 
+        self.weekdays = {
+            "Monday": "Pondělí",
+            "Tuesday": "Úterý",
+            "Wednesday": "Středa",
+            "Thursday": "Čtvrtek",
+            "Friday": "Pátek",
+            "Saturday": "Sobota",
+            "Sunday": "Neděle"
+        }
+
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
     async def cache(self):
@@ -140,16 +150,17 @@ class EventSystem(commands.Cog):
                 "Špatně zformátované datum. Napiš to ve formátu **DD.MM.YYYY HH:MM**, pro příklad **04.01.2021 12:01**")
 
         if title == "":
-            return await ctx.send("`Nemůžeš vytvořit událost beze jména`")
+            return await ctx.send("Nemůžeš vytvořit událost beze jména")
 
         if description == "":
-            return await ctx.send("`Události musíš vytvořit nějaký popis, například co se na ní bude dělat`")
+            return await ctx.send("Události musíš vytvořit nějaký popis, například co se na ní bude dělat")
 
         embed = discord.Embed(title=title, description=description, colour=discord.Colour.gold())
         embed.add_field(name="Datum", value=f"{datetime_formatted:%d.%m.%Y %H:%M}")
         embed.add_field(name="Ano, pojedu:", value="0 |", inline=False)
         embed.add_field(name="Ne, nejedu:", value="0 |", inline=False)
-        reactions = ["✅", "❌"]
+        embed.add_field(name="Ještě nevím:", value="0 |", inline=False)
+        reactions = ["✅", "❌", "❓"]
 
         sent = await ctx.send(embed=embed)
         for reaction in reactions:
@@ -183,7 +194,10 @@ class EventSystem(commands.Cog):
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
             for title, description, date in result:
-                embed.add_field(name=title, value=f"{date: %d.%m.%Y %H:%M} | {description}", inline=False)
+                embed.add_field(
+                    name=title,
+                    value=f"{self.weekdays[date.strftime('%A')]}, {date: %d.%m.%Y %H:%M}\n{description}",
+                    inline=False)
 
         await ctx.send(embed=embed)
 
@@ -213,7 +227,9 @@ class EventSystem(commands.Cog):
             embed = message.embeds[0]
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
-            vypis_hlasu = [user.display_name async for user in reaction.users() if not user.id == self.bot.user.id]
+            vypis_hlasu = [user.display_name
+                           async for user in reaction.users()
+                           if not user.id == self.bot.user.id]
 
             if payload.emoji.name == "✅":
                 edit = embed.set_field_at(
@@ -238,6 +254,15 @@ class EventSystem(commands.Cog):
                     2,
                     name="Ne, nejedu:",
                     value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
+                await reaction.message.edit(embed=edit)
+
+            if payload.emoji.name == "❓":
+                edit = embed.set_field_at(
+                    3,
+                    name="Ještě nevím:",
+                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
                 await reaction.message.edit(embed=edit)
 
     @commands.Cog.listener()
@@ -265,6 +290,14 @@ class EventSystem(commands.Cog):
                 edit = embed.set_field_at(
                     2,
                     name="Ne, nejedu:",
+                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
+                await reaction.message.edit(embed=edit)
+
+            if payload.emoji.name == "❓":
+                edit = embed.set_field_at(
+                    3,
+                    name="Ještě nevím:",
                     value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
 
                 await reaction.message.edit(embed=edit)
