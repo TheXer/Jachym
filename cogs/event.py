@@ -156,7 +156,10 @@ class EventSystem(commands.Cog):
             return await ctx.send("Události musíš vytvořit nějaký popis, například co se na ní bude dělat")
 
         embed = discord.Embed(title=title, description=description, colour=discord.Colour.gold())
-        embed.add_field(name="Datum", value=f"{datetime_formatted:%d.%m.%Y %H:%M}")
+        embed.add_field(name="Datum",
+                        value=f"{self.weekdays[datetime_formatted.strftime('%A')]}, "
+                              f"{datetime_formatted:%d.%m.%Y %H:%M}")
+
         embed.add_field(name="Ano, pojedu:", value="0 |", inline=False)
         embed.add_field(name="Ne, nejedu:", value="0 |", inline=False)
         embed.add_field(name="Ještě nevím:", value="0 |", inline=False)

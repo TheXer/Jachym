@@ -53,36 +53,6 @@ class Utility(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
-    async def vlakna(self, ctx):
-        embed = discord.Embed(title="Všechny vlákna", timestamp=ctx.message.created_at, color=0xff0000)
-
-        guild = ctx.message.guild
-        obecne = discord.utils.get(guild.categories, id=765544635861827596)
-        organizace = discord.utils.get(guild.categories, id=765552626267324426)
-        projekty = discord.utils.get(guild.categories, id=765597261760561162)
-        vypravy_akce = discord.utils.get(guild.categories, id=765561951064948737)
-        druzinovky = discord.utils.get(guild.categories, id=765595377750638652)
-        archiv = discord.utils.get(guild.categories, id=795225930611687464)
-
-        def vsechny_vlakna(category, nazev: str):
-            x = []
-            for channel in category.channels:
-                x.append(channel)
-            return embed.add_field(name=f"{nazev}", value='\n'.join(channel.name for channel in x), inline=False)
-
-        vsechny_vlakna(obecne, "Obecné")
-        vsechny_vlakna(organizace, "Organizace")
-        vsechny_vlakna(projekty, "Projekty")
-        vsechny_vlakna(vypravy_akce, "Výpravy a jiné akce")
-        vsechny_vlakna(druzinovky, "Družinovky")
-        vsechny_vlakna(archiv, "Archiv")
-
-        embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-
-        await ctx.send(embed=embed)
-
-    @commands.command(pass_context=True)
     async def userinfo(self, ctx, user: discord.Member):
         list_members = ctx.guild.members
         if user in list_members:
