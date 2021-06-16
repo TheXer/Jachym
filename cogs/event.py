@@ -22,7 +22,7 @@ class EventSystem(commands.Cog):
         self.caching = set()
 
         self.cache.start()
-        self.poslanieventu.start()
+        self.send_events.start()
 
         self.weekdays = {
             "Monday": "Pondělí",
@@ -54,7 +54,7 @@ class EventSystem(commands.Cog):
 
     # Ověřuje databázi jestli něco není starší než dané datum a pak jej pošle.
     @tasks.loop(seconds=5.0)
-    async def poslanieventu(self):
+    async def send_events(self):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
 
             sql = "SELECT * FROM EventPlanner;"
@@ -95,8 +95,8 @@ class EventSystem(commands.Cog):
                 msg = await channel.fetch_message(EventID)
                 await msg.delete()
 
-    @poslanieventu.before_loop
-    async def before_poslanieventu(self):
+    @send_events.before_loop
+    async def before_send_events(self):
         tables = {
             'EventPlanner': ("""
                     CREATE TABLE IF NOT EXISTS `EventPlanner` (

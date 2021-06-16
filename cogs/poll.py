@@ -61,11 +61,14 @@ class Poll(commands.Cog):
     async def anketa(self, ctx, question, *answer: str):
         await ctx.message.delete()
 
+        if question is None:
+            return await ctx.send("Nemáš žádnou otázku!")
+
         if len(answer) > 10:
-            await ctx.send("Zadal jsi příliš mnoho odpovědí, maximum je 10!")
+            return await ctx.send("Zadal jsi příliš mnoho odpovědí, maximum je 10!")
 
         elif len(answer) == 0 or len(answer) == 1:
-            await ctx.send("Nezadal jsi žádnou odpověď nebo příliš málo odpovědí, musíš mít minimálně dvě!")
+            return await ctx.send("Nezadal jsi žádnou odpověď nebo příliš málo odpovědí, musíš mít minimálně dvě!")
 
         elif len(answer) <= 10:
             embed = discord.Embed(
