@@ -20,16 +20,17 @@ class Statictics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+        self.caching = set()
+
     # Prepare the table in database
     @commands.Cog.listener()
     async def on_ready(self):
         sql = """
         CREATE TABLE IF NOT EXISTS `Messages`(
-        ID_Row INT NOT NULL AUTO_INCREMENT,
         GuildID VARCHAR(255) NOT NULL,
         User VARCHAR(255) NOT NULL,
         CountMessages INT NOT NULL,
-        PRIMARY KEY (ID_Row))
+        PRIMARY KEY (User))
         """
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
             db.execute(sql, commit=True)
@@ -39,22 +40,14 @@ class Statictics(commands.Cog):
         if message.author == self.bot.user:
             return
 
-        # Check if user exists in table. If not, create a new row
-        # Not efficient, as it asks database every time user types a new message. Maybe use json for validating?
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
-            sql = "SELECT User FROM Messages;"
+        elif message.guild.id in self.caching:
+            pass
 
-            members = {
-                x
-                for ID in db.query(sql)
-                for x in ID}
+    @commands.group()
+    async def stats(self, ctx):
+        self.caching.add(ctx.guild.id)
 
-            if message.author.id not in members:
-                sql = "INSERT INTO Messages (GuildID, User, CountMessages) VALUES (%s, %s, %s)"
-                db.execute(sql, val=(message.guild.id, message.author.id, 1))
-
-            else:
-                pass
+        await ctx.send("OK")
 
 
 def setup(bot):

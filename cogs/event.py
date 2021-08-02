@@ -24,6 +24,7 @@ class EventSystem(commands.Cog):
         self.cache.start()
         self.send_events.start()
 
+        # Pro pretty-print dnů v týdnu, páč z nějakýho důvodu ten lokální na mašině nejede jak má. Řešeno tímto.
         self.weekdays = {
             "Monday": "Pondělí",
             "Tuesday": "Úterý",
@@ -142,17 +143,18 @@ class EventSystem(commands.Cog):
     async def create(self, ctx, title, description, eventdatetime):
         try:
             datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
-            if datetime.datetime.now() > datetime_formatted:
-                return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
 
         except ValueError:
             return await ctx.send(
                 "Špatně zformátované datum. Napiš to ve formátu **DD.MM.YYYY HH:MM**, pro příklad **04.01.2021 12:01**")
 
-        if title == "":
+        if datetime.datetime.now() > datetime_formatted:
+            return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
+
+        if title == "" or None:
             return await ctx.send("Nemůžeš vytvořit událost beze jména")
 
-        if description == "":
+        if description == "" or None:
             return await ctx.send("Události musíš vytvořit nějaký popis, například co se na ní bude dělat")
 
         embed = discord.Embed(title=title, description=description, colour=discord.Colour.gold())
@@ -196,11 +198,11 @@ class EventSystem(commands.Cog):
             result = db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
-            for title, description, date in result:
-                embed.add_field(
-                    name=title,
-                    value=f"{self.weekdays[date.strftime('%A')]}, {date: %d.%m.%Y %H:%M}\n{description}",
-                    inline=False)
+        for title, description, date in result:
+            embed.add_field(
+                name=title,
+                value=f"{self.weekdays[date.strftime('%A')]}, {date: %d.%m.%Y %H:%M}\n{description}",
+                inline=False)
 
         await ctx.send(embed=embed)
 

@@ -1,7 +1,7 @@
 import mysql.connector
 
 
-class MySQLWrapper(object):
+class MySQLWrapper:
     """
     Small wrapper for mysql.connector, so I can use magic with statement. Because readibility counts!
     """
