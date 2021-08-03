@@ -7,6 +7,7 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 from db_folder.mysqlwrapper import MySQLWrapper
+from error_folder.error_decorators import log_errors
 
 load_dotenv("password.env")
 
@@ -36,6 +37,7 @@ class EventSystem(commands.Cog):
         }
 
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
+    @log_errors
     @tasks.loop(minutes=30)
     async def cache(self):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
@@ -54,6 +56,7 @@ class EventSystem(commands.Cog):
         await self.bot.wait_until_ready()
 
     # Ověřuje databázi jestli něco není starší než dané datum a pak jej pošle.
+    @log_errors
     @tasks.loop(seconds=5.0)
     async def send_events(self):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
@@ -139,6 +142,7 @@ class EventSystem(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @log_errors
     @udalost.command()
     async def create(self, ctx, title, description, eventdatetime):
         try:
@@ -186,6 +190,7 @@ class EventSystem(commands.Cog):
 
         self.caching.add(sent.id)
 
+    @log_errors
     @udalost.command()
     async def vypis(self, ctx):
         sql = """
@@ -207,6 +212,7 @@ class EventSystem(commands.Cog):
         await ctx.send(embed=embed)
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
+    @log_errors
     @udalost.command(aliases=["delete"])
     async def smazat(self, ctx, embed_id: str):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
@@ -223,6 +229,7 @@ class EventSystem(commands.Cog):
                 await ctx.send("Zkontroluj si číslo, páč tento není v mé paměti. Možná jsi to blbě napsal?")
 
     # To stejné, akorát s každou reakcí se dává záznam do databáze. Nějak to vylepšit? Přijít na způsob jak to udělat
+    @log_errors
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         if payload.message_id in self.caching:
@@ -270,6 +277,7 @@ class EventSystem(commands.Cog):
 
                 await reaction.message.edit(embed=edit)
 
+    @log_errors
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         if payload.message_id in self.caching:

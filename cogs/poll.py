@@ -6,10 +6,11 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 from db_folder.mysqlwrapper import MySQLWrapper
+from error_folder.error_decorators import log_errors
 
 load_dotenv("password.env")
 
-USER = getenv("USER")
+USER = getenv("USER_DATABASE")
 PASSWORD = getenv("PASSWORD")
 HOST = getenv("HOST")
 DATABASE = getenv("DATABASE")
@@ -57,6 +58,7 @@ class Poll(commands.Cog):
                 inline=False)
             await reaction.message.edit(embed=edit)
 
+    @log_errors
     @commands.command()
     async def anketa(self, ctx, question, *answer: str):
         await ctx.message.delete()
@@ -110,6 +112,7 @@ class Poll(commands.Cog):
         await self.reaction_add_remove(payload=payload)
 
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
+    @log_errors
     @tasks.loop(minutes=30)
     async def cache(self):
         with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
