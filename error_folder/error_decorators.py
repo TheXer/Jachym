@@ -3,6 +3,7 @@ import functools
 import logging
 
 
+# REPAIR, DOESNT WORK AS INTENDED, NO IDEA WHY WTF
 def log_errors(func):
     """
     A simple logging decorator just for database. For some reason database doesn't work at times, catching the errors

@@ -1,20 +1,10 @@
 import datetime
 import json
-from os import getenv
 
 import discord
 from discord.ext import commands, tasks
-from dotenv import load_dotenv
 
 from db_folder.mysqlwrapper import MySQLWrapper
-from error_folder.error_decorators import log_errors
-
-load_dotenv("password.env")
-
-USER = getenv("USER_DATABASE")
-PASSWORD = getenv("PASSWORD")
-HOST = getenv("HOST")
-DATABASE = getenv("DATABASE")
 
 
 class EventSystem(commands.Cog):
@@ -37,10 +27,9 @@ class EventSystem(commands.Cog):
         }
 
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
-    @log_errors
     @tasks.loop(minutes=30)
     async def cache(self):
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+        with MySQLWrapper() as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
             tuples = db.query(query=query)
 
@@ -56,10 +45,9 @@ class EventSystem(commands.Cog):
         await self.bot.wait_until_ready()
 
     # Ověřuje databázi jestli něco není starší než dané datum a pak jej pošle.
-    @log_errors
     @tasks.loop(seconds=5.0)
     async def send_events(self):
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+        with MySQLWrapper() as db:
 
             sql = "SELECT * FROM EventPlanner;"
             result = db.query(query=sql)
@@ -126,7 +114,7 @@ class EventSystem(commands.Cog):
         for table_name in tables:
             table_description = tables[table_name]
 
-            with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+            with MySQLWrapper() as db:
                 db.execute(query=table_description, commit=True)
 
         await self.bot.wait_until_ready()
@@ -142,7 +130,6 @@ class EventSystem(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @log_errors
     @udalost.command()
     async def create(self, ctx, title, description, eventdatetime):
         try:
@@ -185,12 +172,11 @@ class EventSystem(commands.Cog):
                 ) VALUES (%s, %s, %s, %s, %s, %s)"""
         val = (ctx.guild.id, sent.id, title, description, datetime_formatted, ctx.channel.id)
 
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+        with MySQLWrapper() as db:
             db.execute(sql, val, commit=True)
 
         self.caching.add(sent.id)
 
-    @log_errors
     @udalost.command()
     async def vypis(self, ctx):
         sql = """
@@ -199,7 +185,7 @@ class EventSystem(commands.Cog):
             WHERE GuildID = %s
             ORDER BY EventDate; """
 
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+        with MySQLWrapper() as db:
             result = db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
@@ -212,10 +198,9 @@ class EventSystem(commands.Cog):
         await ctx.send(embed=embed)
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
-    @log_errors
     @udalost.command(aliases=["delete"])
     async def smazat(self, ctx, embed_id: str):
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+        with MySQLWrapper() as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
                 db.execute(sql, (embed_id,), commit=True)
@@ -229,7 +214,6 @@ class EventSystem(commands.Cog):
                 await ctx.send("Zkontroluj si číslo, páč tento není v mé paměti. Možná jsi to blbě napsal?")
 
     # To stejné, akorát s každou reakcí se dává záznam do databáze. Nějak to vylepšit? Přijít na způsob jak to udělat
-    @log_errors
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         if payload.message_id in self.caching:
@@ -258,7 +242,7 @@ class EventSystem(commands.Cog):
                 """
                 val = (payload.message_id, payload.user_id)
 
-                with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+                with MySQLWrapper() as db:
                     db.execute(sql, val, commit=True)
 
             if payload.emoji.name == "❌":
@@ -277,7 +261,6 @@ class EventSystem(commands.Cog):
 
                 await reaction.message.edit(embed=edit)
 
-    @log_errors
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         if payload.message_id in self.caching:
