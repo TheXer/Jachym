@@ -1,4 +1,14 @@
+from os import getenv
+
 import mysql.connector
+from dotenv import load_dotenv
+
+load_dotenv("password.env")
+
+USER = getenv("USER_DATABASE")
+PASSWORD = getenv("PASSWORD")
+HOST = getenv("HOST")
+DATABASE = getenv("DATABASE")
 
 
 class MySQLWrapper:
@@ -7,7 +17,10 @@ class MySQLWrapper:
     """
 
     def __init__(self, **credentials):
-        self.credentials = credentials
+        if not credentials:
+            self.credentials = {"user": USER, "password": PASSWORD, "host": HOST, "database": DATABASE}
+        else:
+            self.credentials = credentials
         self.database = None
         self.cursor = None
 
