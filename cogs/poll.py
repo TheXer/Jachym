@@ -104,8 +104,8 @@ class Poll(commands.Cog):
     @tasks.loop(minutes=30)
     async def cache(self):
         with MySQLWrapper() as db:
-            # Query pro to, aby se každý záznam, který je starší než sedm dní, smazal
-            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 7;"
+            # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
+            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 30;"
             db.execute(query2, commit=True)
 
             query = "SELECT `PollID` FROM `Poll`"
