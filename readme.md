@@ -95,7 +95,6 @@ Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou tř
 - [ ] Napsat dokumentaci jak mít self-hosted bota.
 - [ ] Napsat dokumentaci pro Jáchyma, chybí tam vysvětlení u některých kódů
 
-
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
 </div>
@@ -116,10 +115,9 @@ ___
 
 </div>
 
-
 ### A protože...
 
-...se tento bot jmenuje Jáchym, zanechávám hlášku z filmu! 
+...se tento bot jmenuje Jáchym, zanechávám hlášku z filmu!
 
-Béda: „Hele, já jsem jí včera, to my to ještě myslelo, složil básničku.” (odkašle si a recituje) „Růže - k lásce schůdeček, s úctou Béda Hudeček...”
-František: „Teda, to jsi složil sám? Teda, to jsi hotovej ten... básník...”
+Béda: „Hele, já jsem jí včera, to my to ještě myslelo, složil básničku.” (odkašle si a recituje) „Růže - k lásce
+schůdeček, s úctou Béda Hudeček...” František: „Teda, to jsi složil sám? Teda, to jsi hotovej ten... básník...”
