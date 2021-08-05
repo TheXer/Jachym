@@ -1,6 +1,6 @@
 {
   "help": {
-    "_comment" : "Text of !help, overall help",
+    "_comment": "Text of !help, overall help",
     "fields": [
       {
         "name": "Pomoc",
@@ -33,7 +33,7 @@
     ]
   },
   "rozcestnik": {
-    "_comment" : "Text of !rozcestnik, useful links for czech scouts",
+    "_comment": "Text of !rozcestnik, useful links for czech scouts",
     "title": "Rozcestník",
     "description": "Všechny věci, co skaut potřebuje",
     "fields": [
