@@ -1,6 +1,6 @@
 <h1 align=center>
 <br>
-    <img src="fotky/logo.png" alt="logo">
+    Jáchym
 </h1>
 
 <h2 align=center>
