@@ -1,22 +1,13 @@
 import datetime
-from os import getenv
 
 import discord
 from discord.ext import commands, tasks
-from dotenv import load_dotenv
 
 from db_folder.mysqlwrapper import MySQLWrapper
-from error_folder.error_decorators import log_errors
-
-load_dotenv("password.env")
-
-USER = getenv("USER_DATABASE")
-PASSWORD = getenv("PASSWORD")
-HOST = getenv("HOST")
-DATABASE = getenv("DATABASE")
 
 
 class Poll(commands.Cog):
+    """Class for Poll system"""
     def __init__(self, bot):
         self.bot = bot
 
@@ -58,7 +49,6 @@ class Poll(commands.Cog):
                 inline=False)
             await reaction.message.edit(embed=edit)
 
-    @log_errors
     @commands.command()
     async def anketa(self, ctx, question, *answer: str):
         await ctx.message.delete()
@@ -69,7 +59,7 @@ class Poll(commands.Cog):
         if len(answer) > 10:
             return await ctx.send("Zadal jsi příliš mnoho odpovědí, maximum je 10!")
 
-        elif len(answer) == 0 or len(answer) == 1:
+        elif len(answer) in (0, 1):
             return await ctx.send("Nezadal jsi žádnou odpověď nebo příliš málo odpovědí, musíš mít minimálně dvě!")
 
         elif len(answer) <= 10:
@@ -95,7 +85,7 @@ class Poll(commands.Cog):
             for reaction in reactions[:len(answer)]:
                 await sent.add_reaction(reaction)
 
-            with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+            with MySQLWrapper() as db:
                 sql = "INSERT INTO `Poll`(PollID, DateOfPoll) VALUES (%s, %s)"
                 val = (sent.id, datetime.datetime.now())
 
@@ -112,12 +102,11 @@ class Poll(commands.Cog):
         await self.reaction_add_remove(payload=payload)
 
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
-    @log_errors
     @tasks.loop(minutes=30)
     async def cache(self):
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
-            # Query pro to, aby se každý záznam, který je starší než sedm dní, smazal
-            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 7;"
+        with MySQLWrapper() as db:
+            # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
+            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 30;"
             db.execute(query2, commit=True)
 
             query = "SELECT `PollID` FROM `Poll`"
@@ -133,7 +122,7 @@ class Poll(commands.Cog):
 
     @cache.before_loop
     async def before_cache(self):
-        with MySQLWrapper(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as db:
+        with MySQLWrapper() as db:
             query = """
                 CREATE TABLE IF NOT EXISTS `Poll` (
                 ID_Row INT NOT NULL AUTO_INCREMENT,

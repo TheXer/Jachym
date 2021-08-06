@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import discord
@@ -6,12 +7,19 @@ from discord.ext.commands import has_permissions
 
 
 class Utility(commands.Cog):
+    """Class for fun commands and utilities"""
+
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Jáchym je ready!")
+
+        while True:
+            await self.bot.change_presence(activity=discord.Game(name=f"Jsem na {len(self.bot.guilds)} serverech!"))
+            await asyncio.sleep(30)
+            await self.bot.change_presence(activity=discord.Game(name=f"Pomoc? !pomoc"))
 
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx):

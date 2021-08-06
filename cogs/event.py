@@ -8,6 +8,7 @@ from db_folder.mysqlwrapper import MySQLWrapper
 
 
 class EventSystem(commands.Cog):
+    """Class for event system, creating pools and sending a message on exact day"""
     def __init__(self, bot):
         self.bot = bot
         self.caching = set()

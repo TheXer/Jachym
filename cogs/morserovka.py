@@ -4,6 +4,7 @@ from discord.ext import commands
 # Klasická morseovka
 
 class Morse(commands.Cog):
+    """Class for Morse code"""
     def __init__(self, bot):
         self.bot = bot
         self.MORSE_CODE_DICT = {

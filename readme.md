@@ -1,7 +1,6 @@
 <h1 align=center>
 <br>
-    Jáchym 🤖
-
+    <img src="fotky/logo.png" alt="logo">
 </h1>
 
 <h2 align=center>
@@ -59,7 +58,7 @@ Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 ___
 
-`command_prefix` je klasika `!`
+`command_prefix` je `!` a slouží jako zavolání Jáchyma. Pro nalezení příkazů, které chcete najít, je zde příkaz `!help`
 
 Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komunikaci oddílu.
 
@@ -87,13 +86,10 @@ ___
 
 Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:
 
-- [ ] Komentáře ve kódu, sepsat jak příkazy fungují
 - [ ] Lépe pořešit tabulky v databázi a relace mezi nimi. Vyvarovat se opakování záznamů
 - [ ] Statistiky serveru přes matplot nebo jiný modul
 - [ ] Fun commands?
-- [ ] Vlastní R-Pi server místo toho, který momentálně užívám
 - [ ] Napsat dokumentaci jak mít self-hosted bota.
-- [ ] Napsat dokumentaci pro Jáchyma, chybí tam vysvětlení u některých kódů
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
