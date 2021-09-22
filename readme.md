@@ -1,4 +1,5 @@
 <h1 align=center>
+Zatím pozastaveno! 
 <br>
     Jáchym
 </h1>

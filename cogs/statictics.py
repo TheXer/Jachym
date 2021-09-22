@@ -28,16 +28,8 @@ class Statictics(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author == self.bot.user:
-            return
-
-        elif message.guild.id in self.caching:
             pass
 
-    @commands.group()
-    async def stats(self, ctx):
-        self.caching.add(ctx.guild.id)
-
-        await ctx.send("OK")
 
 
 def setup(bot):

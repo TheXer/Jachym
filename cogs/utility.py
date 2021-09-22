@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 import discord
@@ -16,10 +15,7 @@ class Utility(commands.Cog):
     async def on_ready(self):
         print("Jáchym je ready!")
 
-        while True:
-            await self.bot.change_presence(activity=discord.Game(name=f"Jsem na {len(self.bot.guilds)} serverech!"))
-            await asyncio.sleep(30)
-            await self.bot.change_presence(activity=discord.Game(name=f"Pomoc? !pomoc"))
+        await self.bot.change_presence(activity=discord.Game(name=f"Jsem na {len(self.bot.guilds)} serverech!"))
 
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx):
