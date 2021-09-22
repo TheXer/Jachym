@@ -1,4 +1,5 @@
 <h1 align=center>
+Zatím pozastaveno! 
 <br>
     <img src="fotky/logo.png" alt="logo">
 </h1>

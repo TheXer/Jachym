@@ -85,6 +85,16 @@
         "name": "JunShop",
         "value": "> [Obchod](https://www.junshop.cz/)\n• Obchod se skautským a turistickým vybavením",
         "inline": true
+      },
+      {
+        "name": "Databáze základen",
+        "value": "> [Základny](https://zakladny.skaut.cz)\n• Databáze skautských základen, kluboven a ubytování",
+        "inline": true
+      },
+      {
+        "name": "Potkani",
+        "value": "> [Webové stránky](https://arcuspraha.skauting.cz/oddily/potkani/)\n• Internetové stránky oddílu, který vyvíjí Jáchyma",
+        "inline": true
       }
     ]
   },
