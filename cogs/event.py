@@ -4,11 +4,12 @@ import json
 import discord
 from discord.ext import commands, tasks
 
-from db_folder.mysqlwrapper import MySQLWrapper
+from db_folder.sqldatabase import SQLDatabase
 
 
 class EventSystem(commands.Cog):
     """Class for event system, creating pools and sending a message on exact day"""
+
     def __init__(self, bot):
         self.bot = bot
         self.caching = set()
@@ -30,7 +31,7 @@ class EventSystem(commands.Cog):
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
     async def cache(self):
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
             tuples = db.query(query=query)
 
@@ -45,10 +46,11 @@ class EventSystem(commands.Cog):
     async def before_cache(self):
         await self.bot.wait_until_ready()
 
-    # Ověřuje databázi jestli něco není starší než dané datum a pak jej pošle.
-    @tasks.loop(seconds=5.0)
+    # Ověřuje databázi jestli něco není starší než dané datum a pak jej pošle. Změněno na 1 minutu, něco mi tam shazuje
+    # connection k databázi
+    @tasks.loop(minutes=1)
     async def send_events(self):
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
 
             sql = "SELECT * FROM EventPlanner;"
             result = db.query(query=sql)
@@ -115,7 +117,7 @@ class EventSystem(commands.Cog):
         for table_name in tables:
             table_description = tables[table_name]
 
-            with MySQLWrapper() as db:
+            with SQLDatabase() as db:
                 db.execute(query=table_description, commit=True)
 
         await self.bot.wait_until_ready()
@@ -133,6 +135,8 @@ class EventSystem(commands.Cog):
 
     @udalost.command()
     async def create(self, ctx, title, description, eventdatetime):
+        await ctx.message.delete()
+
         try:
             datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
 
@@ -173,7 +177,7 @@ class EventSystem(commands.Cog):
                 ) VALUES (%s, %s, %s, %s, %s, %s)"""
         val = (ctx.guild.id, sent.id, title, description, datetime_formatted, ctx.channel.id)
 
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
             db.execute(sql, val, commit=True)
 
         self.caching.add(sent.id)
@@ -186,7 +190,7 @@ class EventSystem(commands.Cog):
             WHERE GuildID = %s
             ORDER BY EventDate; """
 
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
             result = db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
@@ -201,7 +205,7 @@ class EventSystem(commands.Cog):
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
     async def smazat(self, ctx, embed_id: str):
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
                 db.execute(sql, (embed_id,), commit=True)
@@ -228,39 +232,41 @@ class EventSystem(commands.Cog):
                            async for user in reaction.users()
                            if not user.id == self.bot.user.id]
 
-            if payload.emoji.name == "✅":
-                edit = embed.set_field_at(
-                    1,
-                    name="Ano, pojedu:",
-                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
-                    inline=False)
-                await reaction.message.edit(embed=edit)
+            match payload.emoji.name:
+                case "✅":
+                    edit = embed.set_field_at(
+                        1,
+                        name="Ano, pojedu:",
+                        value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
+                        inline=False)
 
-                sql = """ INSERT INTO `ReactionUsers` (
-                    EventEmbedID,
-                    ReactionUser) 
-                    VALUES (%s, %s)
-                """
-                val = (payload.message_id, payload.user_id)
+                    await reaction.message.edit(embed=edit)
 
-                with MySQLWrapper() as db:
-                    db.execute(sql, val, commit=True)
+                    sql = """ INSERT INTO `ReactionUsers` (
+                                            EventEmbedID,
+                                            ReactionUser) 
+                                            VALUES (%s, %s)"""
+                    val = (payload.message_id, payload.user_id)
 
-            if payload.emoji.name == "❌":
-                edit = embed.set_field_at(
-                    2,
-                    name="Ne, nejedu:",
-                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                    with SQLDatabase() as db:
+                        db.execute(sql, val, commit=True)
 
-                await reaction.message.edit(embed=edit)
+                case "❌":
+                    edit = embed.set_field_at(
+                        2,
+                        name="Ne, nejedu:",
+                        value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
+                        inline=False)
 
-            if payload.emoji.name == "❓":
-                edit = embed.set_field_at(
-                    3,
-                    name="Ještě nevím:",
-                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                    await reaction.message.edit(embed=edit)
 
-                await reaction.message.edit(embed=edit)
+                case "❓":
+                    edit = embed.set_field_at(
+                        3,
+                        name="Ještě nevím:",
+                        value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
+                    await reaction.message.edit(embed=edit)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -275,29 +281,41 @@ class EventSystem(commands.Cog):
                            async for user in reaction.users()
                            if not user.id == self.bot.user.id]
 
-            if payload.emoji.name == "✅":
-                edit = embed.set_field_at(
-                    1,
-                    name="Ano, pojedu:",
-                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+            match payload.emoji.name:
+                case "✅":
+                    edit = embed.set_field_at(
+                        1,
+                        name="Ano, pojedu:",
+                        value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
+                        inline=False)
 
-                await reaction.message.edit(embed=edit)
+                    await reaction.message.edit(embed=edit)
 
-            if payload.emoji.name == "❌":
-                edit = embed.set_field_at(
-                    2,
-                    name="Ne, nejedu:",
-                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                    sql = """ INSERT INTO `ReactionUsers` (
+                                                        EventEmbedID,
+                                                        ReactionUser) 
+                                                        VALUES (%s, %s)"""
+                    val = (payload.message_id, payload.user_id)
 
-                await reaction.message.edit(embed=edit)
+                    with SQLDatabase() as db:
+                        db.execute(sql, val, commit=True)
 
-            if payload.emoji.name == "❓":
-                edit = embed.set_field_at(
-                    3,
-                    name="Ještě nevím:",
-                    value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+                case "❌":
+                    edit = embed.set_field_at(
+                        2,
+                        name="Ne, nejedu:",
+                        value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
+                        inline=False)
 
-                await reaction.message.edit(embed=edit)
+                    await reaction.message.edit(embed=edit)
+
+                case "❓":
+                    edit = embed.set_field_at(
+                        3,
+                        name="Ještě nevím:",
+                        value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
+
+                    await reaction.message.edit(embed=edit)
 
 
 def setup(bot):

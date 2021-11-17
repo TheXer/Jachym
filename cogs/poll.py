@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import commands, tasks
 
-from db_folder.mysqlwrapper import MySQLWrapper
+from db_folder.sqldatabase import SQLDatabase
 
 
 class Poll(commands.Cog):
@@ -85,7 +85,7 @@ class Poll(commands.Cog):
             for reaction in reactions[:len(answer)]:
                 await sent.add_reaction(reaction)
 
-            with MySQLWrapper() as db:
+            with SQLDatabase() as db:
                 sql = "INSERT INTO `Poll`(PollID, DateOfPoll) VALUES (%s, %s)"
                 val = (sent.id, datetime.datetime.now())
 
@@ -104,7 +104,7 @@ class Poll(commands.Cog):
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
     @tasks.loop(minutes=30)
     async def cache(self):
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
             # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
             query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 30;"
             db.execute(query2, commit=True)
@@ -122,7 +122,7 @@ class Poll(commands.Cog):
 
     @cache.before_loop
     async def before_cache(self):
-        with MySQLWrapper() as db:
+        with SQLDatabase() as db:
             query = """
                 CREATE TABLE IF NOT EXISTS `Poll` (
                 ID_Row INT NOT NULL AUTO_INCREMENT,

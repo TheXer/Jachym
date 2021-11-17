@@ -1,1 +1,1 @@
-from db_folder.mysqlwrapper import MySQLWrapper
+from db_folder.sqldatabase import SQLDatabase

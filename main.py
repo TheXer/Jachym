@@ -20,6 +20,6 @@ for filename in os.listdir("./cogs"):
             print(f"{filename[:-3]} has loaded successfully")
 
         except Exception as e:
-            print(f"{filename[:-3]} load extension error: {e}")
+            raise e
 
 bot.run(DISCORD_TOKEN)

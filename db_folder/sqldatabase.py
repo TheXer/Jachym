@@ -11,7 +11,7 @@ HOST = getenv("HOST")
 DATABASE = getenv("DATABASE")
 
 
-class MySQLWrapper:
+class SQLDatabase:
     """
     Small wrapper for mysql.connector, so I can use magic with statement. Because readibility counts!
     """

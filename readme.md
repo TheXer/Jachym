@@ -1,5 +1,6 @@
+
 <h1 align=center>
-Zatím pozastaveno! 
+<img src="fotky/Jáchym.png" alt="Logo Jáchyma">
 <br>
     Jáchym
 </h1>
@@ -87,10 +88,8 @@ ___
 
 Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:
 
-- [ ] Lépe pořešit tabulky v databázi a relace mezi nimi. Vyvarovat se opakování záznamů
-- [ ] Statistiky serveru přes matplot nebo jiný modul
-- [ ] Fun commands?
-- [ ] Napsat dokumentaci jak mít self-hosted bota.
+- [ ] Slash commands
+- [ ] Úprava všech commandů, použití PyCordu místo discord.py
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
@@ -116,5 +115,5 @@ ___
 
 ...se tento bot jmenuje Jáchym, zanechávám hlášku z filmu!
 
-Béda: „Hele, já jsem jí včera, to my to ještě myslelo, složil básničku.” (odkašle si a recituje) „Růže - k lásce
+Béda: „Hele, já jsem jí včera, to mi to ještě myslelo, složil básničku.” (odkašle si a recituje) „Růže - k lásce
 schůdeček, s úctou Béda Hudeček...” František: „Teda, to jsi složil sám? Teda, to jsi hotovej ten... básník...”
