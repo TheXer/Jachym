@@ -36,13 +36,14 @@ Open-source skautský discord bot postavený na
 
 ___
 
-Jáchym vznikl jako projekt do [odborky](https://odborky.skaut.cz/ajtak/) před cca pěti měsíci. Od té doby je pořád ve
+Jáchym vznikl jako projekt do [odborky](https://odborky.skaut.cz/ajtak/). Od té doby je pořád ve
 vývoji pro potřeby Potkaního skautského oddílu. Nyní ho dávám opensource, protože proč prostě ne. Pro pozvání Jáchyma na
 váš server použijte tento
 [odkaz](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot).
 Samozřejmě taky můžete napsat issues nebo na discordu The Xero#1273, každý názor uvítám a bude jedině dobře pokud se
-tímto zlepší Jáchym. Way to go!
+tímto zlepší Jáchym.
 
+Budoucí plán s Jáchymem je přidat dlouho očekáváné Slash commands, nějaký web dashboard a podobně. Bohužel na to tolik času nemám a momentálně bych ocenil každou pomoc. A taky čekám na Pycord. 
 </div>
 
 #### Proč Jáchyma pozvat na server?
