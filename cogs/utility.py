@@ -11,6 +11,13 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def json_to_embed(self, root_name: str) -> discord.Embed:
+        with open("text_json/package.json") as f:
+            text = json.load(f)
+        embed = discord.Embed.from_dict(text[root_name])
+        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+        return embed
+
     @commands.Cog.listener()
     async def on_ready(self):
         print("Jáchym je ready!")
@@ -19,23 +26,14 @@ class Utility(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx):
-        with open("text_json/package.json") as f:
-            test = json.load(f)
-
-        embed = discord.Embed.from_dict(test["help"])
-
+        embed = self.json_to_embed("help")
         file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
         embed.set_thumbnail(url="attachment://LogoPotkani.png")
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         await ctx.send(file=file, embed=embed)
 
     @commands.command(pass_context=True)
     async def rozcestnik(self, ctx):
-        with open("text_json/package.json") as f:
-            test = json.load(f)
-
-            embed = discord.Embed.from_dict(test["rozcestnik"])
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+        embed = self.json_to_embed("rozcestnik")
         await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
