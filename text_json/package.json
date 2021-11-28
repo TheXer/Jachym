@@ -33,6 +33,12 @@
       {
         "name": "Ono to negungujéééé!",
         "value": "Něco nefunguje jak má? Nezapomeň se o tom zmínit na [githubu](https://github.com/TheXer/Skaut-discord-bot), nebo napiš Elfovi (The Xero#1273), a ten jej co nejdříve vyřeší!"
+      },
+      {
+        "name": "Jáchymovi odkazy",
+        "value": "Stránka na Githubu - [TheXer/Skaut-discord-bot](https://github.com/TheXer/Skaut-discord-bot)",
+        "value": "Invite link - [Pozvánka](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot)",
+        "value": "Top.gg - [Bot page](https://top.gg/bot/784879308288163840), [Vote page](https://top.gg/bot/784879308288163840/vote)"
       }
     ]
   },
