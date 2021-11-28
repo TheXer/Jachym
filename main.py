@@ -10,16 +10,18 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 # Co jsou intents? https://discordpy.readthedocs.io/en/stable/intents.html
 intents = discord.Intents.all()
 
-bot = commands.AutoShardedBot(command_prefix="!", intents=intents)
+bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 bot.remove_command('help')
 
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        try:
-            bot.load_extension(f"cogs.{filename[:-3]}")
-            print(f"{filename[:-3]} has loaded successfully")
+if __name__ == '__main__':
 
-        except Exception as e:
-            raise e
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            try:
+                bot.load_extension(f"cogs.{filename[:-3]}")
+                print(f"{filename[:-3]} has loaded successfully")
 
-bot.run(DISCORD_TOKEN)
+            except Exception as error:
+                raise error
+
+    bot.run(DISCORD_TOKEN)

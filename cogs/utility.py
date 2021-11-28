@@ -40,7 +40,13 @@ class Utility(commands.Cog):
 
     @commands.command(pass_context=True)
     async def ping(self, ctx):
-        await ctx.send('Odezva je takováhle: {} ms'.format(round(self.bot.latency * 1000)))
+        ping = round(self.bot.latency * 1000)
+        if ping < 200:
+            await ctx.send(f'🟢 {ping} milisekund.')
+        elif 200 < ping < 400:
+            await ctx.send(f'🟡 {ping} milisekund.')
+        else:
+            await ctx.send(f'🔴 {ping} milisekund.')
 
     @commands.command(pass_context=True, aliases=["smazat"])
     @has_permissions(administrator=True)

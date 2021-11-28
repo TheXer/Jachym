@@ -68,7 +68,7 @@ class EventSystem(commands.Cog):
                     for x in ID}
 
                 embed = discord.Embed(
-                    title=f"**Pořádá se akce:** {EventTitle}",
+                    title=f"**Pořádá se akce:** \n{EventTitle}",
                     description=f"{EventDescription}",
                     colour=discord.Colour.gold())
 

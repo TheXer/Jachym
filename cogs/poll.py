@@ -8,6 +8,7 @@ from db_folder.sqldatabase import SQLDatabase
 
 class Poll(commands.Cog):
     """Class for Poll system"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -53,14 +54,8 @@ class Poll(commands.Cog):
     async def anketa(self, ctx, question, *answer: str):
         await ctx.message.delete()
 
-        if question is None:
-            return await ctx.send("Nemáš žádnou otázku!")
-
         if len(answer) > 10:
             return await ctx.send("Zadal jsi příliš mnoho odpovědí, maximum je 10!")
-
-        elif len(answer) in (0, 1):
-            return await ctx.send("Nezadal jsi žádnou odpověď nebo příliš málo odpovědí, musíš mít minimálně dvě!")
 
         elif len(answer) <= 10:
             embed = discord.Embed(
