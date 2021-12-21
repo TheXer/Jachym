@@ -77,8 +77,7 @@ class EventSystem(commands.Cog):
 
                 if len(members) == 0:
                     embed.add_field(name="Účastníci", value="Nikdo nejede.")
-
-                elif len(members) > 0:
+                else:
                     embed.add_field(name="Účastníci", value=f"{','.join(user.mention for user in members)}")
 
                 channel = self.bot.get_channel(int(ChannelID))
@@ -125,7 +124,7 @@ class EventSystem(commands.Cog):
     # help systém pro to.
     @commands.group(invoke_without_command=True)
     async def udalost(self, ctx):
-        with open("text_json/package.json") as f:
+        with open("text_json/cz_text.json") as f:
             test = json.load(f)
 
         embed = discord.Embed.from_dict(test["udalost"])
@@ -135,8 +134,6 @@ class EventSystem(commands.Cog):
 
     @udalost.command()
     async def create(self, ctx, title, description, eventdatetime):
-        await ctx.message.delete()
-
         try:
             datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
 
@@ -147,12 +144,7 @@ class EventSystem(commands.Cog):
         if datetime.datetime.now() > datetime_formatted:
             return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
 
-        if title == "" or None:
-            return await ctx.send("Nemůžeš vytvořit událost beze jména")
-
-        if description == "" or None:
-            return await ctx.send("Události musíš vytvořit nějaký popis, například co se na ní bude dělat")
-
+        await ctx.message.delete()
         embed = discord.Embed(title=title, description=description, colour=discord.Colour.gold())
         embed.add_field(name="Datum",
                         value=f"{self.weekdays[datetime_formatted.strftime('%A')]}, "

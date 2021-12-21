@@ -12,22 +12,16 @@ class Utility(commands.Cog):
         self.bot = bot
 
     def json_to_embed(self, root_name: str) -> discord.Embed:
-        with open("text_json/package.json") as f:
+        with open("text_json/cz_text.json") as f:
             text = json.load(f)
         embed = discord.Embed.from_dict(text[root_name])
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         return embed
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print("Jáchym je ready!")
-
-        await self.bot.change_presence(activity=discord.Game(name=f"Jsem na {len(self.bot.guilds)} serverech!"))
-
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx):
-        embed = self.json_to_embed("help")
         file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
+        embed = self.json_to_embed("help")
         embed.set_thumbnail(url="attachment://LogoPotkani.png")
         await ctx.send(file=file, embed=embed)
 

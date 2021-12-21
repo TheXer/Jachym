@@ -1,6 +1,7 @@
 import datetime
 
 import discord
+from discord import PartialEmoji
 from discord.ext import commands, tasks
 
 from db_folder.sqldatabase import SQLDatabase
@@ -15,6 +16,20 @@ class Poll(commands.Cog):
         self.cache.start()
         self.caching = set()
 
+        # emoji na embedu : index v embedu
+        self.emoji = {
+            PartialEmoji(name="1️⃣"): 0,
+            PartialEmoji(name="2️⃣"): 1,
+            PartialEmoji(name="3️⃣"): 2,
+            PartialEmoji(name="4️⃣"): 3,
+            PartialEmoji(name="5️⃣"): 4,
+            PartialEmoji(name="6️⃣"): 5,
+            PartialEmoji(name="7️⃣"): 6,
+            PartialEmoji(name="8️⃣"): 7,
+            PartialEmoji(name="9️⃣"): 8,
+            PartialEmoji(name="🔟"): 9,
+        }
+
     # RawReaction pro pool systém, automaticky rozpozná jestli někdo reaguje a dá tak odpovídající reakci na tu anketu
     async def reaction_add_remove(self, payload: discord.RawReactionActionEvent):
         if payload.message_id in self.caching:
@@ -24,19 +39,8 @@ class Poll(commands.Cog):
             embed = message.embeds[0]
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
-            emoticon_dict = {
-                "1️⃣": 0,
-                "2️⃣": 1,
-                "3️⃣": 2,
-                "4️⃣": 3,
-                "5️⃣": 4,
-                "6️⃣": 5,
-                "7️⃣": 6,
-                "8️⃣": 7,
-                "9️⃣": 8,
-                "🔟": 9
-            }
-            i = emoticon_dict[str(payload.emoji)]
+            # index pro edit specifického řádku v embedu
+            i = self.emoji[payload.emoji]
 
             vypis_hlasu = [
                 user.display_name
@@ -101,7 +105,7 @@ class Poll(commands.Cog):
     async def cache(self):
         with SQLDatabase() as db:
             # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
-            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 30;"
+            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < NOW() - INTERVAL 30 DAY"
             db.execute(query2, commit=True)
 
             query = "SELECT `PollID` FROM `Poll`"
@@ -125,7 +129,6 @@ class Poll(commands.Cog):
                 DateOfPoll DATE NOT NULL,
                 PRIMARY KEY (ID_Row))"""
             db.execute(query)
-            print("Table Poll OK")
 
         await self.bot.wait_until_ready()
 
