@@ -2,6 +2,7 @@ import datetime
 import json
 
 import discord
+from discord import Message
 from discord.ext import commands, tasks
 
 from db_folder.sqldatabase import SQLDatabase
@@ -30,7 +31,7 @@ class EventSystem(commands.Cog):
 
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
-    async def cache(self):
+    async def cache(self) -> set[int, ...]:
         with SQLDatabase() as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
             tuples = db.query(query=query)
@@ -123,17 +124,17 @@ class EventSystem(commands.Cog):
 
     # help systém pro to.
     @commands.group(invoke_without_command=True)
-    async def udalost(self, ctx):
+    async def udalost(self, ctx: commands.Context):
         with open("text_json/cz_text.json") as f:
             test = json.load(f)
 
         embed = discord.Embed.from_dict(test["udalost"])
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
 
-        await ctx.send(embed=embed)
+        return await ctx.send(embed=embed)
 
     @udalost.command()
-    async def create(self, ctx, title, description, eventdatetime):
+    async def create(self, ctx: commands.Context, title: str, description: str, eventdatetime: str) -> Message:
         try:
             datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
 
@@ -175,7 +176,7 @@ class EventSystem(commands.Cog):
         self.caching.add(sent.id)
 
     @udalost.command()
-    async def vypis(self, ctx):
+    async def vypis(self, ctx: commands.Context) -> Message:
         sql = """
             SELECT EventTitle, EventDescription, EventDate 
             FROM EventPlanner 
@@ -192,11 +193,11 @@ class EventSystem(commands.Cog):
                 value=f"{self.weekdays[date.strftime('%A')]}, {date: %d.%m.%Y %H:%M}\n{description}",
                 inline=False)
 
-        await ctx.send(embed=embed)
+        return await ctx.send(embed=embed)
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
-    async def smazat(self, ctx, embed_id: str):
+    async def smazat(self, ctx: commands.Context, embed_id: int):
         with SQLDatabase() as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
@@ -212,7 +213,7 @@ class EventSystem(commands.Cog):
 
     # To stejné, akorát s každou reakcí se dává záznam do databáze. Nějak to vylepšit? Přijít na způsob jak to udělat
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> Message:
         if payload.message_id in self.caching:
 
             channel = self.bot.get_channel(payload.channel_id)
@@ -232,16 +233,15 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
-
-                    sql = """ INSERT INTO `ReactionUsers` (
-                                            EventEmbedID,
-                                            ReactionUser) 
-                                            VALUES (%s, %s)"""
-                    val = (payload.message_id, payload.user_id)
-
                     with SQLDatabase() as db:
+                        sql = """ INSERT INTO `ReactionUsers` (
+                                            EventEmbedID,
+                                            ReactionUser
+                                        ) VALUES (%s, %s)"""
+                        val = (payload.message_id, payload.user_id)
                         db.execute(sql, val, commit=True)
+
+                    return await reaction.message.edit(embed=edit)
 
                 case "❌":
                     edit = embed.set_field_at(
@@ -250,7 +250,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❓":
                     edit = embed.set_field_at(
@@ -258,10 +258,10 @@ class EventSystem(commands.Cog):
                         name="Ještě nevím:",
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent) -> Message:
         if payload.message_id in self.caching:
 
             channel = self.bot.get_channel(payload.channel_id)
@@ -281,16 +281,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
-
-                    sql = """ INSERT INTO `ReactionUsers` (
-                                                        EventEmbedID,
-                                                        ReactionUser) 
-                                                        VALUES (%s, %s)"""
-                    val = (payload.message_id, payload.user_id)
-
-                    with SQLDatabase() as db:
-                        db.execute(sql, val, commit=True)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❌":
                     edit = embed.set_field_at(
@@ -299,7 +290,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❓":
                     edit = embed.set_field_at(
@@ -307,7 +298,7 @@ class EventSystem(commands.Cog):
                         name="Ještě nevím:",
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
 
 def setup(bot):

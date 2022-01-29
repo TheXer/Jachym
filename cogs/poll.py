@@ -31,7 +31,7 @@ class Poll(commands.Cog):
         }
 
     # RawReaction pro pool systém, automaticky rozpozná jestli někdo reaguje a dá tak odpovídající reakci na tu anketu
-    async def reaction_add_remove(self, payload: discord.RawReactionActionEvent):
+    async def reaction_add_remove(self, payload: discord.RawReactionActionEvent) -> discord.Message:
         if payload.message_id in self.caching:
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
@@ -52,10 +52,11 @@ class Poll(commands.Cog):
                 name=embed.fields[i].name,
                 value=f"**{len(vypis_hlasu)}** | {', '.join(vypis_hlasu)}",
                 inline=False)
-            await reaction.message.edit(embed=edit)
+
+            return await reaction.message.edit(embed=edit)
 
     @commands.command()
-    async def anketa(self, ctx, question, *answer: str):
+    async def anketa(self, ctx: commands.Context, question: str, *answer: str) -> discord.Message:
         await ctx.message.delete()
 
         if len(answer) > 10:
@@ -102,7 +103,7 @@ class Poll(commands.Cog):
 
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
     @tasks.loop(minutes=30)
-    async def cache(self):
+    async def cache(self) -> set[int, ...]:
         with SQLDatabase() as db:
             # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
             query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < NOW() - INTERVAL 30 DAY"

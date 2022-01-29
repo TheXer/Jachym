@@ -1,5 +1,6 @@
 import logging
 
+from discord import Message
 from discord.ext import commands
 
 
@@ -16,26 +17,27 @@ class Error(commands.Cog):
         self.logger.addHandler(handler)
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> Message | None:
         if isinstance(error, commands.ExpectedClosingQuoteError):
-            await ctx.send("Pozor! Chybí ti někde uvozovka!")
+            return await ctx.send("Pozor! Chybí ti někde uvozovka!")
 
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send("Chybí ti požadovaná práva!")
+            return await ctx.send("Chybí ti požadovaná práva!")
 
         elif isinstance(error, commands.CommandNotFound):
             pass
 
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("Chybí ti povinný argument, zkontroluj si ho znova!")
+            return await ctx.send("Chybí ti povinný argument, zkontroluj si ho znova!")
 
         else:
-            await ctx.send(
+            self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
+
+            return await ctx.send(
                 f"O této chybě ještě nevím a nebyla zaznamenána. Napiš The Xero#1273 o této chybě.\n"
                 f"Text chyby: `{error}`\n"
                 f"Číslo chyby: `{ctx.message.id}`"
             )
-            self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
