@@ -14,7 +14,7 @@ intents = discord.Intents.all()
 bot = commands.AutoShardedBot(
     command_prefix=commands.when_mentioned_or("!"),
     intents=discord.Intents.all(),
-    help_command=None
+    help_command=None,
 )
 
 for filename in os.listdir("./cogs"):
