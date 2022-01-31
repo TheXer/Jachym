@@ -124,7 +124,7 @@ class EventSystem(commands.Cog):
 
     # help systém pro to.
     @commands.group(invoke_without_command=True)
-    async def udalost(self, ctx: commands.Context):
+    async def udalost(self, ctx: commands.Context) -> Message:
         with open("text_json/cz_text.json") as f:
             test = json.load(f)
 
@@ -135,12 +135,8 @@ class EventSystem(commands.Cog):
 
     @udalost.command()
     async def create(self, ctx: commands.Context, title: str, description: str, eventdatetime: str) -> Message:
-        try:
-            datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
 
-        except ValueError:
-            return await ctx.send(
-                "Špatně zformátované datum. Napiš to ve formátu **DD.MM.YYYY HH:MM**, pro příklad **04.01.2021 12:01**")
+        datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
 
         if datetime.datetime.now() > datetime_formatted:
             return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
@@ -197,13 +193,13 @@ class EventSystem(commands.Cog):
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
-    async def smazat(self, ctx: commands.Context, embed_id: int):
+    async def smazat(self, ctx: commands.Context, embed: Message):
         with SQLDatabase() as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                db.execute(sql, (embed_id,), commit=True)
+                db.execute(sql, (embed.id,), commit=True)
 
-                msg = await ctx.fetch_message(embed_id)
+                msg = await ctx.fetch_message(embed.id)
                 await msg.delete()
 
                 await ctx.send("Úspěšně smazán event")
@@ -221,9 +217,11 @@ class EventSystem(commands.Cog):
             embed = message.embeds[0]
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
-            vypis_hlasu = [user.display_name
-                           async for user in reaction.users()
-                           if not user.id == self.bot.user.id]
+            vypis_hlasu = [
+                user.display_name
+                async for user in reaction.users()
+                if not user.id == self.bot.user.id
+            ]
 
             match payload.emoji.name:
                 case "✅":
