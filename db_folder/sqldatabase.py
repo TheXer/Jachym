@@ -1,9 +1,9 @@
 from os import getenv
 
-import mysql.connector
+import aiomysql
 from dotenv import load_dotenv
 
-load_dotenv("password.env")
+load_dotenv("../password.env")
 
 USER = getenv("USER_DATABASE")
 PASSWORD = getenv("PASSWORD")
@@ -11,40 +11,29 @@ HOST = getenv("HOST")
 DATABASE = getenv("DATABASE")
 
 
-# TODO: ASYNCIO
-
-class SQLDatabase:
-    """
-    Small wrapper for mysql.connector, so I can use magic with statement. Because readibility counts!
-    """
+class AioSQL:
+    """Async context manager for aiomysql, this produces minimal reproducible results."""
 
     def __init__(self, **credentials):
         if not credentials:
-            self.credentials = {"user": USER, "password": PASSWORD, "host": HOST, "database": DATABASE}
+            self.credentials = {"user": USER, "password": PASSWORD, "host": HOST, "db": DATABASE}
         else:
             self.credentials = credentials
         self.database = None
         self.cursor = None
 
-    def __enter__(self):
-        self.database = mysql.connector.connect(**self.credentials)
-        self.cursor = self.database.cursor()
-        return self
+    async def __aenter__(self):
+        self.database = await aiomysql.connect(**self.credentials)
+        self.cursor = await self.database.cursor()
 
-    def __exit__(self, exception_type, exception_val, trace):
+        return self.cursor
+
+    async def __aexit__(self, exc_type, exc_value, exc_traceback):
         try:
-            self.cursor.close()
+            await self.cursor.close()
             self.database.close()
 
-        except AttributeError:
-            print('Not closable.')
+        except aiomysql.Error:
+            # use logging
+            self.database.rollback()
             return True
-
-    def query(self, query: str, val=None):
-        self.cursor.execute(query, val or ())
-        return self.cursor.fetchall()
-
-    def execute(self, query, val=None, commit=False):
-        self.cursor.execute(query, val or ())
-        if commit:
-            self.database.commit()
