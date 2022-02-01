@@ -26,7 +26,7 @@ class AioSQL:
         self.database = await aiomysql.connect(**self.credentials)
         self.cursor = await self.database.cursor()
 
-        return self.cursor
+        return self
 
     async def __aexit__(self, exc_type, exc_value, exc_traceback):
         try:
@@ -37,3 +37,14 @@ class AioSQL:
             # use logging
             self.database.rollback()
             return True
+
+    async def query(self, query: str, val=None):
+        await self.cursor.execute(query, val or ())
+
+        return await self.cursor.fetchall()
+
+    async def execute(self, query: str, val=None, commit=True):
+        await self.cursor.execute(query, val or ())
+
+        if commit:
+            await self.database.commit()

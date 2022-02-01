@@ -4,7 +4,7 @@ import discord
 from discord import PartialEmoji
 from discord.ext import commands, tasks
 
-from db_folder.sqldatabase import SQLDatabase
+from db_folder.sqldatabase import AioSQL
 
 
 class Poll(commands.Cog):
@@ -85,11 +85,11 @@ class Poll(commands.Cog):
             for reaction in reactions[:len(answer)]:
                 await sent.add_reaction(reaction)
 
-            with SQLDatabase() as db:
+            async with AioSQL() as db:
                 sql = "INSERT INTO `Poll`(PollID, DateOfPoll) VALUES (%s, %s)"
-                val = (sent.id, datetime.datetime.now())
+                val = (sent.id, datetime.date.today())
 
-                db.execute(sql, val, commit=True)
+                await db.execute(sql, val, commit=True)
 
             self.caching.add(sent.id)
 
@@ -104,13 +104,13 @@ class Poll(commands.Cog):
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
     @tasks.loop(minutes=30)
     async def cache(self) -> set[int, ...]:
-        with SQLDatabase() as db:
+        async with AioSQL() as db:
             # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
             query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < NOW() - INTERVAL 30 DAY"
-            db.execute(query2, commit=True)
+            await db.execute(query2, commit=True)
 
             query = "SELECT `PollID` FROM `Poll`"
-            tuples = db.query(query=query)
+            tuples = await db.query(query=query)
 
             # ořezání všeho co tam je, předtím to bylo ve tvaru [('987234', ''..)]
             self.caching = {
@@ -122,15 +122,6 @@ class Poll(commands.Cog):
 
     @cache.before_loop
     async def before_cache(self):
-        with SQLDatabase() as db:
-            query = """
-                CREATE TABLE IF NOT EXISTS `Poll` (
-                ID_Row INT NOT NULL AUTO_INCREMENT,
-                PollID VARCHAR(255) NOT NULL,
-                DateOfPoll DATE NOT NULL,
-                PRIMARY KEY (ID_Row))"""
-            db.execute(query)
-
         await self.bot.wait_until_ready()
 
 

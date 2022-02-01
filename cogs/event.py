@@ -5,7 +5,7 @@ import discord
 from discord import Message
 from discord.ext import commands, tasks
 
-from db_folder.sqldatabase import SQLDatabase
+from db_folder.sqldatabase import AioSQL
 
 
 class EventSystem(commands.Cog):
@@ -32,9 +32,9 @@ class EventSystem(commands.Cog):
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
     async def cache(self) -> set[int, ...]:
-        with SQLDatabase() as db:
+        async with AioSQL() as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
-            tuples = db.query(query=query)
+            tuples = await db.query(query=query)
 
             self.caching = {
                 int(clean_variable)
@@ -51,17 +51,17 @@ class EventSystem(commands.Cog):
     # connection k databázi
     @tasks.loop(minutes=1)
     async def send_events(self):
-        with SQLDatabase() as db:
+        async with AioSQL() as db:
 
             sql = "SELECT * FROM EventPlanner;"
-            result = db.query(query=sql)
+            result = await db.query(query=sql)
 
             for GuildID, EventID, EventTitle, EventDescription, EventDate, ChannelID in result:
-                if datetime.datetime.now() < EventDate:
+                if EventDate > datetime.datetime.now():
                     continue
 
                 sql = "SELECT ReactionUser FROM ReactionUsers WHERE EventEmbedID = %s;"
-                result = db.query(query=sql, val=(EventID,))
+                result = await db.query(query=sql, val=(EventID,))
 
                 members = {
                     await self.bot.fetch_user(int(x))
@@ -85,41 +85,13 @@ class EventSystem(commands.Cog):
                 await channel.send(file=file, embed=embed)
 
                 sql2 = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                db.execute(sql2, (EventID,), commit=True)
+                await db.execute(sql2, (EventID,), commit=True)
 
                 msg = await channel.fetch_message(EventID)
                 await msg.delete()
 
     @send_events.before_loop
     async def before_send_events(self):
-        tables = {
-            'EventPlanner': ("""
-                    CREATE TABLE IF NOT EXISTS `EventPlanner` (
-                    GuildID VARCHAR(255) NOT NULL,
-                    EventEmbedID VARCHAR(255) NOT NULL,
-                    EventTitle VARCHAR(255) NOT NULL,
-                    EventDescription VARCHAR(255) NOT NULL,
-                    EventDate DATETIME NOT NULL,
-                    ChannelID VARCHAR(255) NOT NULL,
-                    PRIMARY KEY (EventEmbedID))
-                """),
-            'ReactionUsers': ("""
-                    CREATE TABLE IF NOT EXISTS `ReactionUsers` (
-                        ID_row INT NOT NULL AUTO_INCREMENT,
-                        EventEmbedID VARCHAR(255) NOT NULL,
-                        ReactionUser VARCHAR(255) NOT NULL,
-                        PRIMARY KEY (ID_row),
-                        FOREIGN KEY (EventEmbedID) 
-                            REFERENCES EventPlanner(EventEmbedID)
-                            ON DELETE CASCADE)
-                """)}
-
-        for table_name in tables:
-            table_description = tables[table_name]
-
-            with SQLDatabase() as db:
-                db.execute(query=table_description, commit=True)
-
         await self.bot.wait_until_ready()
 
     # help systém pro to.
@@ -166,8 +138,8 @@ class EventSystem(commands.Cog):
                 ) VALUES (%s, %s, %s, %s, %s, %s)"""
         val = (ctx.guild.id, sent.id, title, description, datetime_formatted, ctx.channel.id)
 
-        with SQLDatabase() as db:
-            db.execute(sql, val, commit=True)
+        async with AioSQL() as db:
+            await db.execute(sql, val, commit=True)
 
         self.caching.add(sent.id)
 
@@ -179,8 +151,8 @@ class EventSystem(commands.Cog):
             WHERE GuildID = %s
             ORDER BY EventDate; """
 
-        with SQLDatabase() as db:
-            result = db.query(query=sql, val=(ctx.guild.id,))
+        async with AioSQL() as db:
+            result = await db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
         for title, description, date in result:
@@ -194,10 +166,10 @@ class EventSystem(commands.Cog):
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
     async def smazat(self, ctx: commands.Context, embed: Message):
-        with SQLDatabase() as db:
+        async with AioSQL() as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                db.execute(sql, (embed.id,), commit=True)
+                await db.execute(sql, (embed.id,), commit=True)
 
                 msg = await ctx.fetch_message(embed.id)
                 await msg.delete()
@@ -231,13 +203,13 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    with SQLDatabase() as db:
+                    async with AioSQL() as db:
                         sql = """ INSERT INTO `ReactionUsers` (
                                             EventEmbedID,
                                             ReactionUser
                                         ) VALUES (%s, %s)"""
                         val = (payload.message_id, payload.user_id)
-                        db.execute(sql, val, commit=True)
+                        await db.execute(sql, val, commit=True)
 
                     return await reaction.message.edit(embed=edit)
 
