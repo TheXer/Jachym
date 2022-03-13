@@ -13,6 +13,7 @@ class EventSystem(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.pool = self.bot.pool
         self.caching = set()
 
         self.cache.start()
@@ -32,7 +33,7 @@ class EventSystem(commands.Cog):
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
     async def cache(self) -> set[int, ...]:
-        async with AioSQL() as db:
+        async with AioSQL(self.pool) as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
             tuples = await db.query(query=query)
 
@@ -51,7 +52,7 @@ class EventSystem(commands.Cog):
     # connection k databázi
     @tasks.loop(minutes=1)
     async def send_events(self):
-        async with AioSQL() as db:
+        async with AioSQL(self.pool) as db:
 
             sql = "SELECT * FROM EventPlanner;"
             result = await db.query(query=sql)
@@ -138,7 +139,7 @@ class EventSystem(commands.Cog):
                 ) VALUES (%s, %s, %s, %s, %s, %s)"""
         val = (ctx.guild.id, sent.id, title, description, datetime_formatted, ctx.channel.id)
 
-        async with AioSQL() as db:
+        async with AioSQL(self.pool) as db:
             await db.execute(sql, val, commit=True)
 
         self.caching.add(sent.id)
@@ -151,7 +152,7 @@ class EventSystem(commands.Cog):
             WHERE GuildID = %s
             ORDER BY EventDate; """
 
-        async with AioSQL() as db:
+        async with AioSQL(self.pool) as db:
             result = await db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
@@ -166,7 +167,7 @@ class EventSystem(commands.Cog):
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
     async def smazat(self, ctx: commands.Context, embed: Message):
-        async with AioSQL() as db:
+        async with AioSQL(self.pool) as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
                 await db.execute(sql, (embed.id,), commit=True)
@@ -203,7 +204,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    async with AioSQL() as db:
+                    async with AioSQL(self.pool) as db:
                         sql = """ INSERT INTO `ReactionUsers` (
                                             EventEmbedID,
                                             ReactionUser

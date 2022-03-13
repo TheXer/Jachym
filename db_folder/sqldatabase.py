@@ -1,40 +1,28 @@
-from os import getenv
-
 import aiomysql
-from dotenv import load_dotenv
-
-load_dotenv("../password.env")
-
-USER = getenv("USER_DATABASE")
-PASSWORD = getenv("PASSWORD")
-HOST = getenv("HOST")
-DATABASE = getenv("DATABASE")
 
 
 class AioSQL:
     """Async context manager for aiomysql, this produces minimal reproducible results."""
 
-    def __init__(self, **credentials):
-        if not credentials:
-            self.credentials = {"user": USER, "password": PASSWORD, "host": HOST, "db": DATABASE}
-        else:
-            self.credentials = credentials
-        self.database = None
+    def __init__(self, bot_pool):
+
+        self.database = bot_pool
+        self.connection = None
         self.cursor = None
 
     async def __aenter__(self):
-        self.database = await aiomysql.connect(**self.credentials)
-        self.cursor = await self.database.cursor()
+        self.connection = await self.database.acquire()
+        self.cursor = await self.connection.cursor()
 
         return self
 
     async def __aexit__(self, exc_type, exc_value, exc_traceback):
         try:
             await self.cursor.close()
-            self.database.close()
 
         except aiomysql.Error:
-            # use logging
+            # TODO: use logging
+            # TODO: test connection closing
             self.database.rollback()
             return True
 
@@ -47,4 +35,4 @@ class AioSQL:
         await self.cursor.execute(query, val or ())
 
         if commit:
-            await self.database.commit()
+            await self.connection.commit()

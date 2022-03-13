@@ -12,6 +12,7 @@ class Poll(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.pool = self.bot.pool
 
         self.cache.start()
         self.caching = set()
@@ -85,7 +86,7 @@ class Poll(commands.Cog):
             for reaction in reactions[:len(answer)]:
                 await sent.add_reaction(reaction)
 
-            async with AioSQL() as db:
+            async with AioSQL(self.pool) as db:
                 sql = "INSERT INTO `Poll`(PollID, DateOfPoll) VALUES (%s, %s)"
                 val = (sent.id, datetime.date.today())
 
@@ -104,7 +105,7 @@ class Poll(commands.Cog):
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
     @tasks.loop(minutes=30)
     async def cache(self) -> set[int, ...]:
-        async with AioSQL() as db:
+        async with AioSQL(self.pool) as db:
             # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
             query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < NOW() - INTERVAL 30 DAY"
             await db.execute(query2, commit=True)

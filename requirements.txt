@@ -1,4 +1,3 @@
-mysql-connector-python==8.0.27
 python-dotenv==0.17.1
 
 aiomysql>=0.0.22
