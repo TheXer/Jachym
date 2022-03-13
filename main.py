@@ -21,6 +21,7 @@ bot = commands.AutoShardedBot(
     help_command=None)
 
 
+# This is important for adding new variable (database) to Bot instance so I can use it in cogs. 
 @bot.event
 async def on_ready():
     bot.pool = await create_pool(user=USER, password=PASSWORD, host=HOST, db=DATABASE)
