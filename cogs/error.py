@@ -11,7 +11,7 @@ class Error(commands.Cog):
         self.bot = bot
 
         self.logger = logging.getLogger('discord')
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
         handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
         handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
         self.logger.addHandler(handler)
@@ -19,7 +19,7 @@ class Error(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> Message | None:
         if isinstance(error, commands.ExpectedClosingQuoteError):
-            return await ctx.send("Pozor! Chybí ti někde uvozovka!")
+            return await ctx.send(f"Pozor! Chybí tady: {error.close_quote} uvozovka!")
 
         elif isinstance(error, commands.MissingPermissions):
             return await ctx.send("Chybí ti požadovaná práva!")
@@ -40,7 +40,7 @@ class Error(commands.Cog):
             )
 
     @commands.Cog.listener()
-    async def on_command(self, ctx):
+    async def on_command(self, ctx: commands.Context):
         self.logger.info(f"{ctx.message.id} {ctx.message.content}")
 
 
