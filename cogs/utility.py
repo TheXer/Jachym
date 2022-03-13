@@ -1,6 +1,7 @@
 import json
 
 import discord
+from discord import Message
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 
@@ -11,46 +12,46 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print("Jáchym je ready!")
-
-        await self.bot.change_presence(activity=discord.Game(name=f"Jsem na {len(self.bot.guilds)} serverech!"))
+    def json_to_embed(self, root_name: str) -> discord.Embed:
+        with open("text_json/cz_text.json") as f:
+            text = json.load(f)
+        embed = discord.Embed.from_dict(text[root_name])
+        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+        return embed
 
     @commands.command(pass_context=True, aliases=['help'])
-    async def pomoc(self, ctx):
-        with open("text_json/package.json") as f:
-            test = json.load(f)
-
-        embed = discord.Embed.from_dict(test["help"])
-
+    async def pomoc(self, ctx: commands.Context) -> Message:
         file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
+        embed = self.json_to_embed("help")
         embed.set_thumbnail(url="attachment://LogoPotkani.png")
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-        await ctx.send(file=file, embed=embed)
+        return await ctx.send(file=file, embed=embed)
 
     @commands.command(pass_context=True)
-    async def rozcestnik(self, ctx):
-        with open("text_json/package.json") as f:
-            test = json.load(f)
-
-            embed = discord.Embed.from_dict(test["rozcestnik"])
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-        await ctx.send(embed=embed)
+    async def rozcestnik(self, ctx: commands.Context) -> Message:
+        embed = self.json_to_embed("rozcestnik")
+        return await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
-    async def ping(self, ctx):
-        await ctx.send('Odezva je takováhle: {} ms'.format(round(self.bot.latency * 1000)))
+    async def ping(self, ctx: commands.Context) -> Message:
+        ping = round(self.bot.latency * 1000)
+        if ping < 200:
+            message = f'🟢 {ping} milisekund.'
+        elif 200 < ping < 400:
+            message = f'🟡 {ping} milisekund.'
+        else:
+            message = f'🔴 {ping} milisekund.'
+
+        return await ctx.send(message)
 
     @commands.command(pass_context=True, aliases=["smazat"])
     @has_permissions(administrator=True)
-    async def clear(self, ctx, limit: int):
+    async def clear(self, ctx: commands.Context, limit: int) -> Message:
         await ctx.message.delete()
         if 1 < limit < 100:
             deleted = await ctx.channel.purge(limit=limit)
-            await ctx.send("Smazáno {deleted} zpráv.".format(deleted=len(deleted)))
+            return await ctx.send("Smazáno {deleted} zpráv.".format(deleted=len(deleted)))
         else:
-            await ctx.send("Limit musí být někde mezi 1 nebo 99!")
+            return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
 
 
 def setup(bot):

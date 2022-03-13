@@ -1,3 +1,4 @@
+from discord import Message
 from discord.ext import commands
 
 
@@ -5,6 +6,7 @@ from discord.ext import commands
 
 class Morse(commands.Cog):
     """Class for Morse code"""
+
     def __init__(self, bot):
         self.bot = bot
         self.MORSE_CODE_DICT = {
@@ -31,23 +33,23 @@ class Morse(commands.Cog):
         self.REVERSED_MORSE_CODE_DICT = {value: key for key, value in self.MORSE_CODE_DICT.items()}
 
     @commands.command(aliases=["encrypt"])
-    async def zasifruj(self, ctx, message):
+    async def zasifruj(self, ctx: commands.Context, message: str) -> Message:
         await ctx.message.delete()
         try:
             cipher = '/'.join(self.MORSE_CODE_DICT.get(x.upper()) for x in message)
-            await ctx.send(cipher)
+            return await ctx.send(cipher)
         except TypeError:
-            await ctx.send("Asi jsi nezadal správný text. Text musí být bez speciálních znaků!")
+            return await ctx.send("Asi jsi nezadal správný text. Text musí být bez speciálních znaků!")
 
     @commands.command(aliases=["decrypt"])
-    async def desifruj(self, ctx, message):
+    async def desifruj(self, ctx: commands.Context, message: str) -> Message:
         await ctx.message.delete()
         try:
             decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(x) for x in message.split("/"))
-            await ctx.send(decipher)
+            return await ctx.send(decipher)
         except TypeError:
             decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(x) for x in message.split("|"))
-            await ctx.send(decipher)
+            return await ctx.send(decipher)
 
 
 def setup(bot):

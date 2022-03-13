@@ -1,61 +1,38 @@
-from os import getenv
-
-import mysql.connector
-from dotenv import load_dotenv
-
-load_dotenv("password.env")
-
-USER = getenv("USER_DATABASE")
-PASSWORD = getenv("PASSWORD")
-HOST = getenv("HOST")
-DATABASE = getenv("DATABASE")
+import aiomysql
 
 
-class SQLDatabase:
-    """
-    Small wrapper for mysql.connector, so I can use magic with statement. Because readibility counts!
-    """
+class AioSQL:
+    """Async context manager for aiomysql, this produces minimal reproducible results."""
 
-    def __init__(self, **credentials):
-        if not credentials:
-            self.credentials = {"user": USER, "password": PASSWORD, "host": HOST, "database": DATABASE}
-        else:
-            self.credentials = credentials
-        self.database = None
+    def __init__(self, bot_pool):
+        self.database = bot_pool
+        self.connection = None
         self.cursor = None
 
-    def __enter__(self):
-        self.database = mysql.connector.connect(**self.credentials)
-        self.cursor = self.database.cursor()
+    async def __aenter__(self):
+        self.connection = await self.database.acquire()
+        self.cursor = await self.connection.cursor()
+
         return self
 
-    def __exit__(self, exception_type, exception_val, trace):
+    async def __aexit__(self, exc_type, exc_value, exc_traceback):
         try:
-            self.cursor.close()
-            self.database.close()
+            await self.cursor.close()
+            await self.database.release(self.connection)
 
-        except AttributeError:
-            print('Not closable.')
+        except aiomysql.Error:
+            # TODO: use logging
+            # TODO: test connection closing
+            self.database.rollback()
             return True
 
-    def query(self, query: str, val=None):
-        """
-        Query of database. Returns list tuples from database.
-        :param query: str
-        :param val: Optional
-        :return: list of tuples
-        """
-        self.cursor.execute(query, val or ())
-        return self.cursor.fetchall()
+    async def query(self, query: str, val=None):
+        await self.cursor.execute(query, val or ())
 
-    def execute(self, query, val=None, commit=False):
-        """
-        Execute your values and commit them. Or not. Your decision.
-        :param query: str
-        :param val: Optional
-        :param commit: bool
-        :return: None
-        """
-        self.cursor.execute(query, val or ())
+        return await self.cursor.fetchall()
+
+    async def execute(self, query: str, val=None, commit=True):
+        await self.cursor.execute(query, val or ())
+
         if commit:
-            self.database.commit()
+            await self.connection.commit()

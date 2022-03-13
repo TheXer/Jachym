@@ -2,9 +2,10 @@ import datetime
 import json
 
 import discord
+from discord import Message
 from discord.ext import commands, tasks
 
-from db_folder.sqldatabase import SQLDatabase
+from db_folder.sqldatabase import AioSQL
 
 
 class EventSystem(commands.Cog):
@@ -12,6 +13,7 @@ class EventSystem(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.pool = self.bot.pool
         self.caching = set()
 
         self.cache.start()
@@ -30,10 +32,10 @@ class EventSystem(commands.Cog):
 
     # Caching systém, oproti caching systému ve poll.py se tento vždy smaže pokud je event odeslán a zpracován.
     @tasks.loop(minutes=30)
-    async def cache(self):
-        with SQLDatabase() as db:
+    async def cache(self) -> set[int, ...]:
+        async with AioSQL(self.pool) as db:
             query = "SELECT `EventEmbedID` FROM `EventPlanner`"
-            tuples = db.query(query=query)
+            tuples = await db.query(query=query)
 
             self.caching = {
                 int(clean_variable)
@@ -50,17 +52,17 @@ class EventSystem(commands.Cog):
     # connection k databázi
     @tasks.loop(minutes=1)
     async def send_events(self):
-        with SQLDatabase() as db:
+        async with AioSQL(self.pool) as db:
 
             sql = "SELECT * FROM EventPlanner;"
-            result = db.query(query=sql)
+            result = await db.query(query=sql)
 
             for GuildID, EventID, EventTitle, EventDescription, EventDate, ChannelID in result:
-                if datetime.datetime.now() < EventDate:
+                if EventDate > datetime.datetime.now():
                     continue
 
                 sql = "SELECT ReactionUser FROM ReactionUsers WHERE EventEmbedID = %s;"
-                result = db.query(query=sql, val=(EventID,))
+                result = await db.query(query=sql, val=(EventID,))
 
                 members = {
                     await self.bot.fetch_user(int(x))
@@ -68,7 +70,7 @@ class EventSystem(commands.Cog):
                     for x in ID}
 
                 embed = discord.Embed(
-                    title=f"**Pořádá se akce:** {EventTitle}",
+                    title=f"**Pořádá se akce:** \n{EventTitle}",
                     description=f"{EventDescription}",
                     colour=discord.Colour.gold())
 
@@ -77,82 +79,42 @@ class EventSystem(commands.Cog):
 
                 if len(members) == 0:
                     embed.add_field(name="Účastníci", value="Nikdo nejede.")
-
-                elif len(members) > 0:
+                else:
                     embed.add_field(name="Účastníci", value=f"{','.join(user.mention for user in members)}")
 
                 channel = self.bot.get_channel(int(ChannelID))
                 await channel.send(file=file, embed=embed)
 
                 sql2 = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                db.execute(sql2, (EventID,), commit=True)
+                await db.execute(sql2, (EventID,), commit=True)
 
                 msg = await channel.fetch_message(EventID)
                 await msg.delete()
 
     @send_events.before_loop
     async def before_send_events(self):
-        tables = {
-            'EventPlanner': ("""
-                    CREATE TABLE IF NOT EXISTS `EventPlanner` (
-                    GuildID VARCHAR(255) NOT NULL,
-                    EventEmbedID VARCHAR(255) NOT NULL,
-                    EventTitle VARCHAR(255) NOT NULL,
-                    EventDescription VARCHAR(255) NOT NULL,
-                    EventDate DATETIME NOT NULL,
-                    ChannelID VARCHAR(255) NOT NULL,
-                    PRIMARY KEY (EventEmbedID))
-                """),
-            'ReactionUsers': ("""
-                    CREATE TABLE IF NOT EXISTS `ReactionUsers` (
-                        ID_row INT NOT NULL AUTO_INCREMENT,
-                        EventEmbedID VARCHAR(255) NOT NULL,
-                        ReactionUser VARCHAR(255) NOT NULL,
-                        PRIMARY KEY (ID_row),
-                        FOREIGN KEY (EventEmbedID) 
-                            REFERENCES EventPlanner(EventEmbedID)
-                            ON DELETE CASCADE)
-                """)}
-
-        for table_name in tables:
-            table_description = tables[table_name]
-
-            with SQLDatabase() as db:
-                db.execute(query=table_description, commit=True)
-
         await self.bot.wait_until_ready()
 
     # help systém pro to.
     @commands.group(invoke_without_command=True)
-    async def udalost(self, ctx):
-        with open("text_json/package.json") as f:
+    async def udalost(self, ctx: commands.Context) -> Message:
+        with open("text_json/cz_text.json") as f:
             test = json.load(f)
 
         embed = discord.Embed.from_dict(test["udalost"])
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
 
-        await ctx.send(embed=embed)
+        return await ctx.send(embed=embed)
 
     @udalost.command()
-    async def create(self, ctx, title, description, eventdatetime):
-        await ctx.message.delete()
+    async def create(self, ctx: commands.Context, title: str, description: str, eventdatetime: str) -> Message:
 
-        try:
-            datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
-
-        except ValueError:
-            return await ctx.send(
-                "Špatně zformátované datum. Napiš to ve formátu **DD.MM.YYYY HH:MM**, pro příklad **04.01.2021 12:01**")
+        datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
 
         if datetime.datetime.now() > datetime_formatted:
             return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
 
-        if title == "" or None:
-            return await ctx.send("Nemůžeš vytvořit událost beze jména")
-
-        if description == "" or None:
-            return await ctx.send("Události musíš vytvořit nějaký popis, například co se na ní bude dělat")
-
+        await ctx.message.delete()
         embed = discord.Embed(title=title, description=description, colour=discord.Colour.gold())
         embed.add_field(name="Datum",
                         value=f"{self.weekdays[datetime_formatted.strftime('%A')]}, "
@@ -177,21 +139,21 @@ class EventSystem(commands.Cog):
                 ) VALUES (%s, %s, %s, %s, %s, %s)"""
         val = (ctx.guild.id, sent.id, title, description, datetime_formatted, ctx.channel.id)
 
-        with SQLDatabase() as db:
-            db.execute(sql, val, commit=True)
+        async with AioSQL(self.pool) as db:
+            await db.execute(sql, val, commit=True)
 
         self.caching.add(sent.id)
 
     @udalost.command()
-    async def vypis(self, ctx):
+    async def vypis(self, ctx: commands.Context) -> Message:
         sql = """
             SELECT EventTitle, EventDescription, EventDate 
             FROM EventPlanner 
             WHERE GuildID = %s
             ORDER BY EventDate; """
 
-        with SQLDatabase() as db:
-            result = db.query(query=sql, val=(ctx.guild.id,))
+        async with AioSQL(self.pool) as db:
+            result = await db.query(query=sql, val=(ctx.guild.id,))
             embed = discord.Embed(title="Výpis všech událostí", colour=discord.Colour.gold())
 
         for title, description, date in result:
@@ -200,17 +162,17 @@ class EventSystem(commands.Cog):
                 value=f"{self.weekdays[date.strftime('%A')]}, {date: %d.%m.%Y %H:%M}\n{description}",
                 inline=False)
 
-        await ctx.send(embed=embed)
+        return await ctx.send(embed=embed)
 
     # Smaže event z databáze pomocí ID embedu. Přijít na lepší způsob?
     @udalost.command(aliases=["delete"])
-    async def smazat(self, ctx, embed_id: str):
-        with SQLDatabase() as db:
+    async def smazat(self, ctx: commands.Context, embed: Message):
+        async with AioSQL(self.pool) as db:
             try:
                 sql = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                db.execute(sql, (embed_id,), commit=True)
+                await db.execute(sql, (embed.id,), commit=True)
 
-                msg = await ctx.fetch_message(embed_id)
+                msg = await ctx.fetch_message(embed.id)
                 await msg.delete()
 
                 await ctx.send("Úspěšně smazán event")
@@ -220,7 +182,7 @@ class EventSystem(commands.Cog):
 
     # To stejné, akorát s každou reakcí se dává záznam do databáze. Nějak to vylepšit? Přijít na způsob jak to udělat
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> Message:
         if payload.message_id in self.caching:
 
             channel = self.bot.get_channel(payload.channel_id)
@@ -228,9 +190,11 @@ class EventSystem(commands.Cog):
             embed = message.embeds[0]
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
-            vypis_hlasu = [user.display_name
-                           async for user in reaction.users()
-                           if not user.id == self.bot.user.id]
+            vypis_hlasu = [
+                user.display_name
+                async for user in reaction.users()
+                if not user.id == self.bot.user.id
+            ]
 
             match payload.emoji.name:
                 case "✅":
@@ -240,16 +204,15 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
-
-                    sql = """ INSERT INTO `ReactionUsers` (
+                    async with AioSQL(self.pool) as db:
+                        sql = """ INSERT INTO `ReactionUsers` (
                                             EventEmbedID,
-                                            ReactionUser) 
-                                            VALUES (%s, %s)"""
-                    val = (payload.message_id, payload.user_id)
+                                            ReactionUser
+                                        ) VALUES (%s, %s)"""
+                        val = (payload.message_id, payload.user_id)
+                        await db.execute(sql, val, commit=True)
 
-                    with SQLDatabase() as db:
-                        db.execute(sql, val, commit=True)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❌":
                     edit = embed.set_field_at(
@@ -258,7 +221,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❓":
                     edit = embed.set_field_at(
@@ -266,10 +229,10 @@ class EventSystem(commands.Cog):
                         name="Ještě nevím:",
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent) -> Message:
         if payload.message_id in self.caching:
 
             channel = self.bot.get_channel(payload.channel_id)
@@ -289,16 +252,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
-
-                    sql = """ INSERT INTO `ReactionUsers` (
-                                                        EventEmbedID,
-                                                        ReactionUser) 
-                                                        VALUES (%s, %s)"""
-                    val = (payload.message_id, payload.user_id)
-
-                    with SQLDatabase() as db:
-                        db.execute(sql, val, commit=True)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❌":
                     edit = embed.set_field_at(
@@ -307,7 +261,7 @@ class EventSystem(commands.Cog):
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}",
                         inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
                 case "❓":
                     edit = embed.set_field_at(
@@ -315,7 +269,7 @@ class EventSystem(commands.Cog):
                         name="Ještě nevím:",
                         value=f"{len(vypis_hlasu)} | {', '.join(vypis_hlasu)}", inline=False)
 
-                    await reaction.message.edit(embed=edit)
+                    return await reaction.message.edit(embed=edit)
 
 
 def setup(bot):

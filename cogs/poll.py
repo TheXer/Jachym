@@ -1,21 +1,38 @@
 import datetime
 
 import discord
+from discord import PartialEmoji
 from discord.ext import commands, tasks
 
-from db_folder.sqldatabase import SQLDatabase
+from db_folder.sqldatabase import AioSQL
 
 
 class Poll(commands.Cog):
     """Class for Poll system"""
+
     def __init__(self, bot):
         self.bot = bot
+        self.pool = self.bot.pool
 
         self.cache.start()
         self.caching = set()
 
+        # emoji na embedu : index v embedu
+        self.emoji = {
+            PartialEmoji(name="1️⃣"): 0,
+            PartialEmoji(name="2️⃣"): 1,
+            PartialEmoji(name="3️⃣"): 2,
+            PartialEmoji(name="4️⃣"): 3,
+            PartialEmoji(name="5️⃣"): 4,
+            PartialEmoji(name="6️⃣"): 5,
+            PartialEmoji(name="7️⃣"): 6,
+            PartialEmoji(name="8️⃣"): 7,
+            PartialEmoji(name="9️⃣"): 8,
+            PartialEmoji(name="🔟"): 9,
+        }
+
     # RawReaction pro pool systém, automaticky rozpozná jestli někdo reaguje a dá tak odpovídající reakci na tu anketu
-    async def reaction_add_remove(self, payload: discord.RawReactionActionEvent):
+    async def reaction_add_remove(self, payload: discord.RawReactionActionEvent) -> discord.Message:
         if payload.message_id in self.caching:
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
@@ -23,19 +40,8 @@ class Poll(commands.Cog):
             embed = message.embeds[0]
             reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
 
-            emoticon_dict = {
-                "1️⃣": 0,
-                "2️⃣": 1,
-                "3️⃣": 2,
-                "4️⃣": 3,
-                "5️⃣": 4,
-                "6️⃣": 5,
-                "7️⃣": 6,
-                "8️⃣": 7,
-                "9️⃣": 8,
-                "🔟": 9
-            }
-            i = emoticon_dict[str(payload.emoji)]
+            # index pro edit specifického řádku v embedu
+            i = self.emoji[payload.emoji]
 
             vypis_hlasu = [
                 user.display_name
@@ -47,20 +53,15 @@ class Poll(commands.Cog):
                 name=embed.fields[i].name,
                 value=f"**{len(vypis_hlasu)}** | {', '.join(vypis_hlasu)}",
                 inline=False)
-            await reaction.message.edit(embed=edit)
+
+            return await reaction.message.edit(embed=edit)
 
     @commands.command()
-    async def anketa(self, ctx, question, *answer: str):
+    async def anketa(self, ctx: commands.Context, question: str, *answer: str) -> discord.Message:
         await ctx.message.delete()
-
-        if question is None:
-            return await ctx.send("Nemáš žádnou otázku!")
 
         if len(answer) > 10:
             return await ctx.send("Zadal jsi příliš mnoho odpovědí, maximum je 10!")
-
-        elif len(answer) in (0, 1):
-            return await ctx.send("Nezadal jsi žádnou odpověď nebo příliš málo odpovědí, musíš mít minimálně dvě!")
 
         elif len(answer) <= 10:
             embed = discord.Embed(
@@ -85,11 +86,11 @@ class Poll(commands.Cog):
             for reaction in reactions[:len(answer)]:
                 await sent.add_reaction(reaction)
 
-            with SQLDatabase() as db:
+            async with AioSQL(self.pool) as db:
                 sql = "INSERT INTO `Poll`(PollID, DateOfPoll) VALUES (%s, %s)"
-                val = (sent.id, datetime.datetime.now())
+                val = (sent.id, datetime.date.today())
 
-                db.execute(sql, val, commit=True)
+                await db.execute(sql, val, commit=True)
 
             self.caching.add(sent.id)
 
@@ -103,14 +104,14 @@ class Poll(commands.Cog):
 
     # Caching systém pro databázi, ať discord bot nebombarduje furt databázi a vše udržuje ve své paměti
     @tasks.loop(minutes=30)
-    async def cache(self):
-        with SQLDatabase() as db:
+    async def cache(self) -> set[int, ...]:
+        async with AioSQL(self.pool) as db:
             # Query pro to, aby se každý záznam, který je starší než měsíc, smazal
-            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < CURRENT_DATE - 30;"
-            db.execute(query2, commit=True)
+            query2 = "DELETE FROM `Poll` WHERE `DateOfPoll` < NOW() - INTERVAL 30 DAY"
+            await db.execute(query2, commit=True)
 
             query = "SELECT `PollID` FROM `Poll`"
-            tuples = db.query(query=query)
+            tuples = await db.query(query=query)
 
             # ořezání všeho co tam je, předtím to bylo ve tvaru [('987234', ''..)]
             self.caching = {
@@ -122,16 +123,6 @@ class Poll(commands.Cog):
 
     @cache.before_loop
     async def before_cache(self):
-        with SQLDatabase() as db:
-            query = """
-                CREATE TABLE IF NOT EXISTS `Poll` (
-                ID_Row INT NOT NULL AUTO_INCREMENT,
-                PollID VARCHAR(255) NOT NULL,
-                DateOfPoll DATE NOT NULL,
-                PRIMARY KEY (ID_Row))"""
-            db.execute(query)
-            print("Table Poll OK")
-
         await self.bot.wait_until_ready()
 
 
