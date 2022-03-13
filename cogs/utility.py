@@ -62,7 +62,7 @@ class Utility(commands.Cog):
         else:
             return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
 
-    @tasks.loop(seconds=5)
+    @tasks.loop(seconds=10)
     async def pressence(self):
         # proč tady? https://stackoverflow.com/questions/59126137/how-to-change-discord-py-bot-activity
 
