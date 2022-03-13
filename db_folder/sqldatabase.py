@@ -5,7 +5,6 @@ class AioSQL:
     """Async context manager for aiomysql, this produces minimal reproducible results."""
 
     def __init__(self, bot_pool):
-
         self.database = bot_pool
         self.connection = None
         self.cursor = None
@@ -19,6 +18,7 @@ class AioSQL:
     async def __aexit__(self, exc_type, exc_value, exc_traceback):
         try:
             await self.cursor.close()
+            await self.database.release(self.connection)
 
         except aiomysql.Error:
             # TODO: use logging
