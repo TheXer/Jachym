@@ -1,8 +1,9 @@
 import json
+from itertools import cycle
 
 import discord
 from discord import Message
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions
 
 
@@ -11,6 +12,14 @@ class Utility(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+        # TODO: BUG: Cycle z nějakého důvodu nezobrazuje správně self.bot.guilds, vždy se ukáže 0. Pořešit.
+        self.news = cycle([
+            f"Jsem na {len(self.bot.guilds)} serverech!",
+            "Pomoc? !help",
+        ])
+
+        self.pressence.start()
 
     def json_to_embed(self, root_name: str) -> discord.Embed:
         with open("text_json/cz_text.json") as f:
@@ -52,6 +61,20 @@ class Utility(commands.Cog):
             return await ctx.send("Smazáno {deleted} zpráv.".format(deleted=len(deleted)))
         else:
             return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
+
+    @tasks.loop(seconds=10)
+    async def pressence(self):
+        # proč tady? https://stackoverflow.com/questions/59126137/how-to-change-discord-py-bot-activity
+
+        await self.bot.change_presence(
+            activity=discord.Game(
+                name=next(self.news)
+            )
+        )
+
+    @pressence.before_loop
+    async def before_cache(self):
+        await self.bot.wait_until_ready()
 
 
 def setup(bot):

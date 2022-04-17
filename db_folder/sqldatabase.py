@@ -22,7 +22,6 @@ class AioSQL:
 
         except aiomysql.Error:
             # TODO: use logging
-            # TODO: test connection closing
             self.database.rollback()
             return True
 
