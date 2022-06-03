@@ -60,36 +60,39 @@ class EventSystem(commands.Cog):
             for GuildID, EventID, EventTitle, EventDescription, EventDate, ChannelID in result:
                 if EventDate > datetime.datetime.now():
                     continue
+                try:
+                    sql = "SELECT ReactionUser FROM ReactionUsers WHERE EventEmbedID = %s;"
+                    result = await db.query(query=sql, val=(EventID,))
 
-                sql = "SELECT ReactionUser FROM ReactionUsers WHERE EventEmbedID = %s;"
-                result = await db.query(query=sql, val=(EventID,))
+                    members = {
+                        await self.bot.fetch_user(int(x))
+                        for ID in result
+                        for x in ID}
 
-                members = {
-                    await self.bot.fetch_user(int(x))
-                    for ID in result
-                    for x in ID}
+                    embed = discord.Embed(
+                        title=f"**Pořádá se akce:** \n{EventTitle}",
+                        description=f"{EventDescription}",
+                        colour=discord.Colour.gold())
 
-                embed = discord.Embed(
-                    title=f"**Pořádá se akce:** \n{EventTitle}",
-                    description=f"{EventDescription}",
-                    colour=discord.Colour.gold())
+                    file = discord.File("fotky/trojuhelnik.png", filename="trojuhelnik.png")
+                    embed.set_thumbnail(url="attachment://trojuhelnik.png")
 
-                file = discord.File("fotky/trojuhelnik.png", filename="trojuhelnik.png")
-                embed.set_thumbnail(url="attachment://trojuhelnik.png")
+                    if len(members) == 0:
+                        embed.add_field(name="Účastníci", value="Nikdo nejede.")
+                    else:
+                        embed.add_field(name="Účastníci", value=f"{','.join(user.mention for user in members)}")
 
-                if len(members) == 0:
-                    embed.add_field(name="Účastníci", value="Nikdo nejede.")
-                else:
-                    embed.add_field(name="Účastníci", value=f"{','.join(user.mention for user in members)}")
+                    channel = self.bot.get_channel(int(ChannelID))
+                    await channel.send(file=file, embed=embed)
 
-                channel = self.bot.get_channel(int(ChannelID))
-                await channel.send(file=file, embed=embed)
+                    sql2 = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
+                    await db.execute(sql2, (EventID,), commit=True)
 
-                sql2 = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
-                await db.execute(sql2, (EventID,), commit=True)
-
-                msg = await channel.fetch_message(EventID)
-                await msg.delete()
+                    msg = await channel.fetch_message(EventID)
+                    await msg.delete()
+                except discord.errors.NotFound:
+                    sql2 = "DELETE FROM EventPlanner WHERE EventEmbedID = %s;"
+                    await db.execute(sql2, (EventID,), commit=True)
 
     @send_events.before_loop
     async def before_send_events(self):
