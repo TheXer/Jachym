@@ -1,4 +1,4 @@
-import logging
+# import logging
 
 from discord import Message
 from discord.ext import commands
@@ -10,11 +10,13 @@ class Error(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        self.logger = logging.getLogger('discord')
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-        handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-        self.logger.addHandler(handler)
+        # TODO: spravit logger
+
+        # self.logger = logging.getLogger('discord')
+        # self.logger.setLevel(logging.WARN)
+        # handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+        # handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+        # self.logger.addHandler(handler)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> Message | None:
@@ -31,7 +33,7 @@ class Error(commands.Cog):
             return await ctx.send("Chybí ti povinný argument, zkontroluj si ho znova!")
 
         else:
-            self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
+            # self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
 
             return await ctx.send(
                 f"O této chybě ještě nevím a nebyla zaznamenána. Napiš The Xero#1273 o této chybě.\n"
@@ -39,9 +41,9 @@ class Error(commands.Cog):
                 f"Číslo chyby: `{ctx.message.id}`"
             )
 
-    @commands.Cog.listener()
-    async def on_command(self, ctx: commands.Context):
-        self.logger.info(f"{ctx.message.id} {ctx.message.content}")
+    # @commands.Cog.listener()
+    # async def on_command(self, ctx: commands.Context):
+    #     self.logger.info(f"{ctx.message.id} {ctx.message.content}")
 
 
 def setup(bot):
