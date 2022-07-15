@@ -1,3 +1,4 @@
+import datetime
 import json
 from itertools import cycle
 
@@ -13,7 +14,6 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        # TODO: BUG: Cycle z nějakého důvodu nezobrazuje správně self.bot.guilds, vždy se ukáže 0. Pořešit.
         self.news = cycle([
             f"Jsem na {len(self.bot.guilds)} serverech!",
             "Pomoc? !help",
@@ -75,6 +75,10 @@ class Utility(commands.Cog):
     @pressence.before_loop
     async def before_cache(self):
         await self.bot.wait_until_ready()
+
+    @commands.command()
+    async def time(self, ctx: commands.Context):
+        return await ctx.send(str(datetime.datetime.now()))
 
 
 def setup(bot):

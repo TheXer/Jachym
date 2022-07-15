@@ -1,3 +1,7 @@
+"""
+Moje narozeniny? Jojo, 27. prosince 2020
+"""
+
 import os
 
 import discord
@@ -15,7 +19,7 @@ DATABASE = os.getenv("DATABASE")
 # Co jsou intents? https://discordpy.readthedocs.io/en/stable/intents.html
 intents = discord.Intents.all()
 
-bot = commands.AutoShardedBot(
+bot = commands.Bot(
     command_prefix=commands.when_mentioned_or("!"),
     intents=intents,
     help_command=None)
