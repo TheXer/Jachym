@@ -272,5 +272,5 @@ class EventSystem(commands.Cog):
                     return await reaction.message.edit(embed=edit)
 
 
-def setup(bot):
-    bot.add_cog(EventSystem(bot))
+async def setup(bot):
+    await bot.add_cog(EventSystem(bot))
