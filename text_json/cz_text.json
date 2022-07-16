@@ -4,7 +4,7 @@
     "fields": [
       {
         "name": "Pomoc",
-        "value": "> `!pomoc, !help`\nKdyž potřebuješ pomoct s příkazy"
+        "value": "> `!pomoc, !help`\nKdyž potřebuješ pomoct s příkazy (tento příkaz)"
       },
       {
         "name": "Anketa",
@@ -16,11 +16,11 @@
       },
       {
         "name": "Skautský rozcestník",
-        "value": "> `!rozcestnik`\nVýpis všech odkazů. co skaut potřebuje"
+        "value": "> `!rozcestnik`\nVýpis všech odkazů co skaut potřebuje"
       },
       {
-        "name": "Šifrovačka",
-        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný test přeloží do něj."
+        "name": "Šifrovačka", 
+        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný text přeloží do něj."
       },
       {
         "name": "Latence bota",
