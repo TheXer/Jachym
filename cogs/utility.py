@@ -1,8 +1,10 @@
+import datetime
 import json
 from itertools import cycle
 
 import discord
 from discord import Message
+from discord import app_commands
 from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions
 
@@ -24,8 +26,16 @@ class Utility(commands.Cog):
         with open("text_json/cz_text.json") as f:
             text = json.load(f)
         embed = discord.Embed.from_dict(text[root_name])
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         return embed
+
+    # zkouška, funguje to, pokračovat v tom
+    @app_commands.command(name="pomoc")
+    async def my_private_command(self, interaction: discord.Interaction) -> None:
+        """ Pomocníček na vše  """
+        file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
+        embed = self.json_to_embed("help")
+        embed.set_thumbnail(url="attachment://LogoPotkani.png")
+        await interaction.response.send_message(file=file, embed=embed, ephemeral=True)
 
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx: commands.Context) -> Message:
@@ -75,6 +85,10 @@ class Utility(commands.Cog):
     async def before_cache(self):
         await self.bot.wait_until_ready()
 
+    @commands.command()
+    async def time(self, ctx: commands.Context):
+        return await ctx.send(str(datetime.datetime.now()))
 
-def setup(bot):
-    bot.add_cog(Utility(bot))
+
+async def setup(bot):
+    await bot.add_cog(Utility(bot))
