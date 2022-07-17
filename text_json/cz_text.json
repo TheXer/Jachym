@@ -20,7 +20,7 @@
       },
       {
         "name": "Šifrovačka", 
-        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný text přeloží do něj."
+        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný text přeloží do ní."
       },
       {
         "name": "Latence bota",
@@ -36,7 +36,7 @@
       },
       {
         "name": "Jáchymovy odkazy",
-        "value": "Stránka na Githubu - [TheXer/Skaut-discord-bot](https://github.com/TheXer/Skaut-discord-bot)\n Invite link - [Pozvánka](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot)\n Top.gg - [Bot page](https://top.gg/bot/784879308288163840), [Vote page](https://top.gg/bot/784879308288163840/vote)"
+        "value": "Stránka na Githubu - [TheXer/Skaut-discord-bot](https://github.com/TheXer/Skaut-discord-bot)\n Invite link - [Pozvánka](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot)\n Top.gg - [Bot page](https://top.gg/bot/784879308288163840), [Vote page](https://top.gg/bot/784879308288163840/vote)\n [Discord support server](https://discord.gg/gT6K2FqDE2)"
       }
     ]
   },
