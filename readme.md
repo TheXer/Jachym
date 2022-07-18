@@ -75,7 +75,7 @@ Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komuni
 <img src="https://media.giphy.com/media/tjUKo4lkVVk52OA2CW/giphy.gif" alt="gif eventu" width="50%">
 <img src="fotky/event_pic.png" alt="fotka eventu" width="40%">
 
-* 🎉 Pak jsou další fun commandy jako `zasifruj` a `desifruj`, který přeloží daný text do morseovky. Další commandy
+* 🎉 Pak jsou další fun commandy jako `!zasifruj` a `!desifruj`, který přeloží daný text do morseovky. Další commandy
   najdete v `!help`, který se snažím udržovat co nejaktuálnější.
 
 </div>
@@ -93,7 +93,7 @@ Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou tř
 - [ ] Najít všechny chyby v textech
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
-potřeba upravit, neváhejte napsat do issues.
+potřeba upravit, neváhejte napsat do [issues](https://github.com/TheXer/Jachym/issues).
 </div>
 
 ### Licence
