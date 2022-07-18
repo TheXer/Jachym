@@ -24,6 +24,7 @@ Open-source skautský discord bot postavený na
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Code Climate](https://codeclimate.com/github/cloudfoundry/membrane.png)](https://codeclimate.com/github/TheXer/Skaut-discord-bot)
+[![Discord Bots](https://top.gg/api/widget/servers/784879308288163840.svg)](https://top.gg/bot/784879308288163840)
 
 </div>
 
