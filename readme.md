@@ -53,7 +53,7 @@ podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném 
 opensource. Jeden z důvodů, proč jsem také dělal Jáchyma byl ten, že čím dál tím víc oddílů přechází na discord jakožto
 hlavní komunikační platformu. Discord jako takový je skvělý, jen na něm nám scházelo pár věcí, které dělá právě Jáchym.
 
-Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
+Pokud se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 <div id="feat">
 
