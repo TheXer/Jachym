@@ -24,7 +24,7 @@ Open-source skautský discord bot postavený na
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Code Climate](https://codeclimate.com/github/cloudfoundry/membrane.png)](https://codeclimate.com/github/TheXer/Skaut-discord-bot)
-[![Discord Bots](https://top.gg/api/widget/servers/784879308288163840.svg)](https://top.gg/bot/784879308288163840)
+[![Number of Servers](https://top.gg/api/widget/servers/784879308288163840.svg)](https://top.gg/bot/784879308288163840)
 
 </div>
 
@@ -40,17 +40,17 @@ Jáchym vznikl jako projekt do [odborky](https://odborky.skaut.cz/ajtak/). Od t�
 vývoji pro potřeby Potkaního skautského oddílu. Nyní ho dávám opensource, protože proč prostě ne. Pro pozvání Jáchyma na
 váš server použijte tento
 [odkaz](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot).
-Samozřejmě taky můžete napsat issues nebo na discordu The Xero#1273, každý názor uvítám a bude jedině dobře pokud se
+Samozřejmě taky můžete napsat [issues](https://github.com/TheXer/Jachym/issues) nebo na discordu The Xero#1273, každý názor uvítám a bude jedině dobře pokud se
 tímto zlepší Jáchym.
 
-Budoucí plán s Jáchymem je přidat dlouho očekáváné Slash commands, nějaký web dashboard a podobně. Bohužel na to tolik času nemám a momentálně bych ocenil každou pomoc. A taky čekám na Pycord. 
+Budoucí plán s Jáchymem je přidat dlouho očekáváné Slash commands, nějaký web dashboard a podobně. Bohužel na to tolik času nemám a momentálně bych ocenil každou pomoc. A taky čekám na [Pycord](https://pycord.dev/). 
 </div>
 
 #### Proč Jáchyma pozvat na server?
 
 Podpoříte tím mně jakožto developera, který se dlouho snažil o nějaký opensource projekt. Za každou zpětnou vazbu,
 podporu a návrhy budu velice vděčný. Tento projekt dělám ve svém volném čase a myslím si, že má význam ho dávat
-opensource. Jeden z důvodů, proč jsem také dělal Jáchyma byl ten, že čím dál tím víc oddílu přechází na discord jakožto
+opensource. Jeden z důvodů, proč jsem také dělal Jáchyma byl ten, že čím dál tím víc oddílů přechází na discord jakožto
 hlavní komunikační platformu. Discord jako takový je skvělý, jen na něm nám scházelo pár věcí, které dělá právě Jáchym.
 
 Když se Vám líbí toto repo, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
@@ -91,6 +91,7 @@ Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou tř
 
 - [ ] Slash commands
 - [ ] Úprava všech commandů, použití PyCordu místo discord.py
+- [ ] Najít všechny chyby v textech
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do issues.
