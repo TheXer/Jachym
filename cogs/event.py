@@ -112,7 +112,7 @@ class EventSystem(commands.Cog):
     @udalost.command()
     async def create(self, ctx: commands.Context, title: str, description: str, eventdatetime: str) -> Message:
 
-        datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y %H:%M')
+        datetime_formatted = datetime.datetime.strptime(eventdatetime, '%d.%m.%Y=2022 %H:%M')
 
         if datetime.datetime.now() > datetime_formatted:
             return await ctx.send("Nemůžeš zakládat událost, která se stala v minulosti!")
