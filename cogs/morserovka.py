@@ -52,5 +52,5 @@ class Morse(commands.Cog):
             return await ctx.send(decipher)
 
 
-def setup(bot):
-    bot.add_cog(Morse(bot))
+async def setup(bot):
+    await bot.add_cog(Morse(bot))
