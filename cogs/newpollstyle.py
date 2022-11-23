@@ -2,29 +2,43 @@ import discord
 from discord.ext import commands
 
 
-class PollView(discord.ui.View):
-    def __init__(self, embed: discord.Embed):
-        super().__init__()
+class PersistentView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+
+class Buttons(discord.ui.Button):
+    def __init__(self, custom_id, embed: discord.Embed, index: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.custom_id = custom_id
         self.embed = embed
+        self.index = index
+
         self.users = set()
 
-    @discord.ui.button(label="jedna", style=discord.ButtonStyle.gray)
-    async def button_one(self, interaction: discord.Interaction, button: discord.ui.Button):
+    def get_users_from_embed(self, embed: discord.Embed):
+        dict1 = embed.to_dict()
 
+        return set(
+            x.rsplit("|", 1)
+            for x in dict1["fields"][self.index].values())
+
+    async def callback(self, interaction: discord.Interaction):
         if interaction.user.name not in self.users:
             self.users.add(interaction.user.name)
-            button.style = discord.ButtonStyle.green
 
         else:
             self.users.remove(interaction.user.name)
-            button.style = discord.ButtonStyle.red
 
         edit = self.embed.set_field_at(
-            index=0,
-            name=self.embed.fields[0].name,
+            index=self.index,
+            name=self.embed.fields[self.index].name,
             value=f"**{len(self.users)}** | {', '.join(self.users)}",
             inline=False)
-        await interaction.response.edit_message(embed=edit, view=self)
+
+        print(self.get_users_from_embed(embed=self.embed))
+        print(self.users)
+        await interaction.response.edit_message(embed=edit)
 
 
 class PollCreate(commands.Cog):
@@ -43,13 +57,18 @@ class PollCreate(commands.Cog):
                 title="📊 " + question,
                 color=0xff0000)
 
+            view = PersistentView()
+
             for x, option in enumerate(answer):
                 embed.add_field(
                     name=f"{self.reactions[x]} {option}",
                     value="**0** |",
                     inline=False)
 
-            await ctx.send(embed=embed, view=PollView(embed=embed))
+                view.add_item(Buttons(label=str(x + 1), custom_id="button_no" + str(x), index=x, embed=embed))
+
+            print(embed.to_dict())
+            await ctx.send(embed=embed, view=view)
 
 
 async def setup(bot):
