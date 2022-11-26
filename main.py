@@ -31,7 +31,7 @@ class Potkan_Jachym(commands.Bot):
         )
 
     async def setup_hook(self) -> None:
-        self.add_view(view=PersistentView())
+        self.add_view(view=PersistentView(), message_id=1045319606266515546)
 
 
 bot = Potkan_Jachym()
@@ -58,6 +58,17 @@ async def main():
 @bot.event
 async def on_ready():
     print("ready!")
+
+
+@bot.command()
+@commands.is_owner()
+async def prepare(ctx: commands.Context):
+    """Starts a persistent view."""
+    # In order for a persistent view to be listened to, it needs to be sent to an actual message.
+    # Call this method once just to store it somewhere.
+    # In a more complicated program you might fetch the message_id from a database for use later.
+    # However this is outside of the scope of this simple example.
+    await ctx.send("What's your favourite colour?", view=PersistentView())
 
 
 asyncio.run(main())

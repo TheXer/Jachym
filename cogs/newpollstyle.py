@@ -8,20 +8,13 @@ class PersistentView(discord.ui.View):
 
 
 class Buttons(discord.ui.Button):
-    def __init__(self, custom_id, embed: discord.Embed, index: int, *args, **kwargs):
+    def __init__(self, custom_id: str, embed: discord.Embed, index: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.custom_id = custom_id
         self.embed = embed
         self.index = index
 
         self.users = set()
-
-    def get_users_from_embed(self, embed: discord.Embed):
-        dict1 = embed.to_dict()
-
-        return set(
-            x.rsplit("|", 1)
-            for x in dict1["fields"][self.index].values())
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.name not in self.users:
@@ -33,11 +26,9 @@ class Buttons(discord.ui.Button):
         edit = self.embed.set_field_at(
             index=self.index,
             name=self.embed.fields[self.index].name,
-            value=f"**{len(self.users)}** | {', '.join(self.users)}",
+            value=f"**blyat** | kurwa",
             inline=False)
 
-        print(self.get_users_from_embed(embed=self.embed))
-        print(self.users)
         await interaction.response.edit_message(embed=edit)
 
 
@@ -65,9 +56,12 @@ class PollCreate(commands.Cog):
                     value="**0** |",
                     inline=False)
 
-                view.add_item(Buttons(label=str(x + 1), custom_id="button_no" + str(x), index=x, embed=embed))
+                view.add_item(
+                    Buttons(label=f"{x + 1}",
+                            custom_id=f"{ctx.message.id}:{x}",
+                            index=x,
+                            embed=embed))
 
-            print(embed.to_dict())
             await ctx.send(embed=embed, view=view)
 
 
