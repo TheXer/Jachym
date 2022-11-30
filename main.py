@@ -2,6 +2,8 @@
 Moje narozeniny? Jojo, 27. prosince 2020
 """
 
+import asyncio
+
 import os
 
 import discord
@@ -25,19 +27,30 @@ bot = commands.Bot(
     help_command=None)
 
 
-# This is important for adding new variable (database) to Bot instance so I can use it in cogs. 
-@bot.event
-async def on_ready():
-    bot.pool = await create_pool(user=USER, password=PASSWORD, host=HOST, db=DATABASE)
-
+async def load_extensions():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
             try:
-                bot.load_extension(f"cogs.{filename[:-3]}")
-                print(f"{filename[:-3]} has loaded successfully")
+                await bot.load_extension(f"cogs.{filename[:-3]}")
 
+                print(f"{filename[:-3]} has loaded successfully")
             except Exception as error:
                 raise error
 
 
-bot.run(DISCORD_TOKEN)
+async def main():
+    bot.pool = await create_pool(user=USER, password=PASSWORD, host=HOST, db=DATABASE)
+    async with bot:
+        await load_extensions()
+        await bot.start(DISCORD_TOKEN)
+
+
+@bot.event
+async def on_ready():
+    guild = discord.Object(id=765657737001828393)
+    bot.tree.copy_global_to(guild=guild)
+    await bot.tree.sync(guild=discord.Object(id=765657737001828393))
+    print("ready!")
+
+
+asyncio.run(main())

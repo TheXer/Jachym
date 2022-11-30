@@ -46,5 +46,5 @@ class Error(commands.Cog):
     #     self.logger.info(f"{ctx.message.id} {ctx.message.content}")
 
 
-def setup(bot):
-    bot.add_cog(Error(bot))
+async def setup(bot):
+    await bot.add_cog(Error(bot))
