@@ -30,9 +30,6 @@ class Potkan_Jachym(commands.Bot):
             help_command=None
         )
 
-    async def setup_hook(self) -> None:
-        self.add_view(view=PersistentView(), message_id=1045319606266515546)
-
 
 bot = Potkan_Jachym()
 

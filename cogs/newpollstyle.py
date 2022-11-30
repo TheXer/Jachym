@@ -2,11 +2,6 @@ import discord
 from discord.ext import commands
 
 
-class PersistentView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-
 class Buttons(discord.ui.Button):
     def __init__(self, custom_id: str, embed: discord.Embed, index: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,6 +27,14 @@ class Buttons(discord.ui.Button):
         await interaction.response.edit_message(embed=edit)
 
 
+class PersistentView(discord.ui.View):
+    def __init__(self, index, button: Buttons):
+        super().__init__(timeout=None)
+
+        for x in range(index):
+            self.add_item(button)
+
+
 class PollCreate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -48,19 +51,22 @@ class PollCreate(commands.Cog):
                 title="📊 " + question,
                 color=0xff0000)
 
-            view = PersistentView()
-
             for x, option in enumerate(answer):
                 embed.add_field(
                     name=f"{self.reactions[x]} {option}",
                     value="**0** |",
                     inline=False)
 
-                view.add_item(
-                    Buttons(label=f"{x + 1}",
-                            custom_id=f"{ctx.message.id}:{x}",
-                            index=x,
-                            embed=embed))
+                print(x)
+
+            view = PersistentView(
+                Buttons(
+                    label=f"{x + 1}",
+                    custom_id=f"{ctx.message.id}:{x}",
+                    index=x,
+                    embed=embed
+                )
+            )
 
             await ctx.send(embed=embed, view=view)
 
