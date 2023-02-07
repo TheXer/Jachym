@@ -1,6 +1,9 @@
+from typing import Optional
+
 import discord
 
 from poll_design.poll import Poll
+from ui.poll_embed import PollEmbed
 
 """
 TODO: 
@@ -30,19 +33,31 @@ SEŠ BLÍZKO, TAK TO DOTÁHNI AAAA
 class ButtonBackend(discord.ui.Button):
     def __init__(self,
                  custom_id: str,
-                 message_id: Poll.message_id,
+                 message_id: Optional[Poll.message_id],
+                 channel_id: Optional[Poll.channel_id],
+                 embed: PollEmbed,
                  index: int,
                  label: str) -> None:
 
         super().__init__(label=label)
         self.custom_id = custom_id
         self.message_id = message_id
+        self.channel_id = channel_id
+        self.embed = embed
         self.index = index
 
         self.users = set()
 
     def id(self):
         return self.custom_id
+
+    def edit_embed(self) -> discord.Embed:
+        edit = self.embed.set_field_at(
+            index=self.index,
+            name=self.embed.fields[self.index].name,
+            value=f"**{len(self.users)}** | {','.join(user.name for user in self.users)}",
+            inline=False)
+        return edit
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user not in self.users:
@@ -51,13 +66,7 @@ class ButtonBackend(discord.ui.Button):
         else:
             self.users.remove(interaction.user)
 
-        edit = self.message_id.set_field_at(
-            index=self.index,
-            name=self.message_id.fields[self.index].name,
-            value=f"**{len(self.users)}** | {','.join(user.name for user in self.users)}",
-            inline=False)
-
-        await interaction.response.edit_message(embed=edit)
+        await interaction.response.edit_message(embed=self.edit_embed())
 
     def _load_users(self):
         # fetch from database

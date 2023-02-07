@@ -1,37 +1,56 @@
 import aiomysql
 
+from poll_design.poll import Poll
 
-class AioSQL:
-    """Async context manager for aiomysql, this produces minimal reproducible results."""
 
-    def __init__(self, bot_pool: aiomysql.pool):
-        self.database = bot_pool
-        self.connection = None
-        self.cursor = None
+class Crud:
+    def __init__(self, poll: aiomysql.pool.Pool):
+        self.poll = poll
 
-    async def __aenter__(self):
-        self.connection = await self.database.acquire()
-        self.cursor = await self.connection.cursor()
 
-        return self
+class PollDatabase(Crud):
+    def __init__(self, database_poll: aiomysql.pool.Pool):
+        super().__init__(database_poll)
 
-    async def __aexit__(self, exc_type, exc_value, exc_traceback):
-        try:
-            await self.cursor.close()
-            await self.database.release(self.connection)
+    async def add(self, discord_poll: Poll):
+        sql = """
+        INSERT INTO `Poll`(message_id, channel_id, question, date_created_at, creator_user) 
+        VALUES (%s, %s, %s, %s, %s)"""
+        values = (
+            discord_poll.message_id,
+            discord_poll.channel_id,
+            discord_poll.question,
+            discord_poll.date_created_at,
+            discord_poll.user_id
+        )
 
-        except aiomysql.Error:
-            # TODO: use logging
-            self.database.rollback()
-            return True
+        async with self.poll.acquire() as conn:
+            cursor = await conn.cursor()
+            await cursor.execute(sql, values)
+            await conn.commit()
 
-    async def query(self, query: str, val=None):
-        await self.cursor.execute(query, val or ())
+    async def remove(self, discord_poll: Poll):
+        sql = """
+        DELETE FROM `Poll` WHERE message_id = %s;
+        """
+        value = discord_poll.message_id
 
-        return await self.cursor.fetchall()
+        async with self.poll.acquire() as conn:
+            cursor = await conn.cursor()
+            await cursor.execute(sql, value)
+            await conn.commit()
 
-    async def execute(self, query: str, val=None, commit=True):
-        await self.cursor.execute(query, val or ())
+    async def fetch_all_polls(self):
+        sql = """SELECT * FROM `Poll`"""
 
-        if commit:
-            await self.connection.commit()
+        async with self.poll.acquire() as conn:
+            cursor = await conn.cursor()
+            await cursor.execute(sql)
+            polls = await cursor.fetchall()
+
+        return polls
+
+
+class VoteButtonDatabase(Crud):
+    def __init__(self, pool: aiomysql.pool.Pool):
+        super().__init__(pool)

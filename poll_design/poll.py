@@ -12,13 +12,15 @@ class Poll:
             message_id: Message.id,
             channel_id: int,
             question: str,
-            options: tuple[str, ...]
+            options: tuple[str, ...],
+            user_id: int
     ):
         self.message_id = message_id
         self.channel_id = channel_id
         self.question = question
         self.options = options
-        self.date_created_at = datetime.now().strftime("%d.%m.%Y.")
+        self.date_created_at = datetime.now().strftime("%Y-%m-%d")
+        self.user_id = user_id
 
     def message_id(self) -> int:
         return self.message_id
@@ -34,6 +36,9 @@ class Poll:
 
     def created_at(self) -> str:
         return self.date_created_at
+
+    def user_id(self) -> int:
+        return self.user_id
 
     def delete(self):
         # connection to database, make new tables and view

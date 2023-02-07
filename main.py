@@ -44,7 +44,15 @@ async def load_extensions():
 
 
 async def main():
-    bot.pool = await create_pool(user=USER, password=PASSWORD, host=HOST, db=DATABASE)
+    bot.pool = await create_pool(
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
+        db=DATABASE,
+        minsize=1,
+        maxsize=10
+    )
+
     async with bot:
         await load_extensions()
         await bot.start(DISCORD_TOKEN)
