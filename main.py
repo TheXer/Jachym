@@ -9,8 +9,6 @@ from aiomysql import create_pool
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from cogs.newpollstyle import PersistentView
-
 load_dotenv("password.env")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 USER = os.getenv("USER_DATABASE")
@@ -55,17 +53,6 @@ async def main():
 @bot.event
 async def on_ready():
     print("ready!")
-
-
-@bot.command()
-@commands.is_owner()
-async def prepare(ctx: commands.Context):
-    """Starts a persistent view."""
-    # In order for a persistent view to be listened to, it needs to be sent to an actual message.
-    # Call this method once just to store it somewhere.
-    # In a more complicated program you might fetch the message_id from a database for use later.
-    # However this is outside of the scope of this simple example.
-    await ctx.send("What's your favourite colour?", view=PersistentView())
 
 
 asyncio.run(main())

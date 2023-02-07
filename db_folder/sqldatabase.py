@@ -4,7 +4,7 @@ import aiomysql
 class AioSQL:
     """Async context manager for aiomysql, this produces minimal reproducible results."""
 
-    def __init__(self, bot_pool):
+    def __init__(self, bot_pool: aiomysql.pool):
         self.database = bot_pool
         self.connection = None
         self.cursor = None
