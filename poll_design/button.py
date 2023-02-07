@@ -1,7 +1,7 @@
-from typing import Optional
-
+import aiomysql.pool
 import discord
 
+from db_folder.sqldatabase import VoteButtonDatabase
 from poll_design.poll import Poll
 from ui.poll_embed import PollEmbed
 
@@ -33,23 +33,29 @@ SEŠ BLÍZKO, TAK TO DOTÁHNI AAAA
 class ButtonBackend(discord.ui.Button):
     def __init__(self,
                  custom_id: str,
-                 message_id: Optional[Poll.message_id],
-                 channel_id: Optional[Poll.channel_id],
+                 poll: Poll,
                  embed: PollEmbed,
                  index: int,
-                 label: str) -> None:
+                 label: str,
+                 db_poll: aiomysql.pool.Pool) -> None:
 
         super().__init__(label=label)
         self.custom_id = custom_id
-        self.message_id = message_id
-        self.channel_id = channel_id
+        self.poll = poll
         self.embed = embed
         self.index = index
+        self.db_poll = db_poll
 
         self.users = set()
 
-    def id(self):
+    def button_id(self):
         return self.custom_id
+
+    def message_id(self):
+        return self.message_id
+
+    def index(self):
+        return self.index
 
     def edit_embed(self) -> discord.Embed:
         edit = self.embed.set_field_at(
@@ -62,12 +68,16 @@ class ButtonBackend(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         if interaction.user not in self.users:
             self.users.add(interaction.user)
+            await VoteButtonDatabase(self.db_poll) \
+                .add_users(self.poll.message_id, interaction.user.id, self.index)
 
         else:
             self.users.remove(interaction.user)
+            await VoteButtonDatabase(self.db_poll) \
+                .remove_users(self.poll.message_id, interaction.user.id, self.index)
 
         await interaction.response.edit_message(embed=self.edit_embed())
 
     def _load_users(self):
-        # fetch from database
+
         pass

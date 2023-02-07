@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from db_folder.sqldatabase import PollDatabase
+from db_folder.sqldatabase import PollDatabase, VoteButtonDatabase
 from poll_design.poll import Poll
 from poll_design.poll_view import PollView
 from ui.poll_embed import PollEmbed, PollEmbedBase
@@ -18,11 +18,13 @@ class PollCreate(commands.Cog):
         self.bot = bot
         # self.cache_polls: set[Poll] = set()
 
-    # Fetching z databáze
-
     # async def fetch_poll(self):
-    #     channel = self.bot.get_channel(channel_id)
-    #     message = await channel.fetch_message(message_id)
+    #     pools_in_db = await PollDatabase(self.bot.pool).fetch_all_polls()
+    #
+    #     for message_id, channel_id, question,  in pools_in_db:
+    #
+    #         channel = self.bot.get_channel(channel_id)
+    #         message = await channel.fetch_message(message_id)
     #
     #     poll = Poll(
     #         message_id=message.id,
@@ -46,9 +48,12 @@ class PollCreate(commands.Cog):
             options=answer,
             user_id=ctx.message.author.id
         )
+
         embed = PollEmbed(poll)
-        view = PollView(poll, embed)
-        await PollDatabase(database_poll=self.bot.pool).add(poll)
+        view = PollView(poll, embed, db_poll=self.bot.pool)
+        await PollDatabase(self.bot.pool).add(poll)
+        await VoteButtonDatabase(self.bot.pool).add_options(poll)
+
         await message.edit(embed=embed, view=view)
 
 
