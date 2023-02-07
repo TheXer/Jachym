@@ -27,7 +27,7 @@ class Morse(commands.Cog):
 
             ',': '--..--', '.': '.-.-.-', '?': '..--..',
             '/': '-..-.', '-': '-....-', '(': '-.--.',
-            ')': '-.--.-', '!': '––...–',
+            ')': '-.--.-', '!': '--...-',
             " ": ""}
 
         self.REVERSED_MORSE_CODE_DICT = {value: key for key, value in self.MORSE_CODE_DICT.items()}

@@ -8,7 +8,7 @@
       },
       {
         "name": "Anketa",
-        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset odpovědí."
+        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset možností."
       },
       {
         "name": "Událost (event)",
@@ -16,11 +16,11 @@
       },
       {
         "name": "Skautský rozcestník",
-        "value": "> `!rozcestnik`\nVýpis všech odkazů co skaut potřebuje"
+        "value": "> `!rozcestnik`\nVýpis všech odkazů, co skaut potřebuje"
       },
       {
         "name": "Šifrovačka", 
-        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný text přeloží do ní."
+        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/--...-\"`\nMorseova abeceda, daný text přeloží do ní."
       },
       {
         "name": "Latence bota",
@@ -43,7 +43,7 @@
   "rozcestnik": {
     "_comment": "Text of !rozcestnik, useful links for czech scouts",
     "title": "Rozcestník",
-    "description": "Všechny věci, co skaut potřebuje",
+    "description": "Všechny odkazy, co skaut potřebuje",
     "fields": [
       {
         "name": "Skautská křížovatka",
