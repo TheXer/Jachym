@@ -1,7 +1,9 @@
 """
 Moje narozeniny? Jojo, 27. prosince 2020
 """
+
 import asyncio
+
 import os
 from typing import Optional
 

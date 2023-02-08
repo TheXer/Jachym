@@ -4,11 +4,11 @@
     "fields": [
       {
         "name": "Pomoc",
-        "value": "> `!pomoc, !help`\nKdyž potřebuješ pomoct s příkazy"
+        "value": "> `!pomoc, !help`\nKdyž potřebuješ pomoct s příkazy (tento příkaz)"
       },
       {
         "name": "Anketa",
-        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset odpovědí."
+        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset možností."
       },
       {
         "name": "Událost (event)",
@@ -16,11 +16,11 @@
       },
       {
         "name": "Skautský rozcestník",
-        "value": "> `!rozcestnik`\nVýpis všech odkazů. co skaut potřebuje"
+        "value": "> `!rozcestnik`\nVýpis všech odkazů, co skaut potřebuje"
       },
       {
-        "name": "Šifrovačka",
-        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/––...–\"`\nMorseova abeceda, daný test přeloží do něj."
+        "name": "Šifrovačka", 
+        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/--...-\"`\nMorseova abeceda, daný text přeloží do ní."
       },
       {
         "name": "Latence bota",
@@ -36,14 +36,14 @@
       },
       {
         "name": "Jáchymovy odkazy",
-        "value": "Stránka na Githubu - [TheXer/Skaut-discord-bot](https://github.com/TheXer/Skaut-discord-bot)\n Invite link - [Pozvánka](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot)\n Top.gg - [Bot page](https://top.gg/bot/784879308288163840), [Vote page](https://top.gg/bot/784879308288163840/vote)"
+        "value": "Stránka na Githubu - [TheXer/Skaut-discord-bot](https://github.com/TheXer/Skaut-discord-bot)\n Invite link - [Pozvánka](https://discord.com/api/oauth2/authorize?client_id=784879308288163840&permissions=2147743808&scope=bot)\n Top.gg - [Bot page](https://top.gg/bot/784879308288163840), [Vote page](https://top.gg/bot/784879308288163840/vote)\n [Discord support server](https://discord.gg/gT6K2FqDE2)"
       }
     ]
   },
   "rozcestnik": {
     "_comment": "Text of !rozcestnik, useful links for czech scouts",
     "title": "Rozcestník",
-    "description": "Všechny věci, co skaut potřebuje",
+    "description": "Všechny odkazy, co skaut potřebuje",
     "fields": [
       {
         "name": "Skautská křížovatka",
