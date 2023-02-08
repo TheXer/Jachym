@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from discord import Message
 
@@ -13,7 +14,7 @@ class Poll:
             channel_id: int,
             question: str,
             options: tuple[str, ...],
-            user_id: int
+            user_id: Optional[int] = None
     ):
         self.message_id = message_id
         self.channel_id = channel_id

@@ -3,11 +3,10 @@ import discord
 
 from poll_design.button import ButtonBackend
 from poll_design.poll import Poll
-from ui.poll_embed import PollEmbed
 
 
 class PollView(discord.ui.View):
-    def __init__(self, poll: Poll, embed: PollEmbed, db_poll: aiomysql.pool.Pool):
+    def __init__(self, poll: Poll, embed, db_poll: aiomysql.pool.Pool):
         super().__init__(timeout=None)
         self.poll = poll
         self.embed = embed

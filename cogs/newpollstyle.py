@@ -16,24 +16,6 @@ def error_handling(answer: tuple[str]) -> str:
 class PollCreate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # self.cache_polls: set[Poll] = set()
-
-    # async def fetch_poll(self):
-    #     pools_in_db = await PollDatabase(self.bot.pool).fetch_all_polls()
-    #
-    #     for message_id, channel_id, question,  in pools_in_db:
-    #
-    #         channel = self.bot.get_channel(channel_id)
-    #         message = await channel.fetch_message(message_id)
-    #
-    #     poll = Poll(
-    #         message_id=message.id,
-    #         channel_id=channel.id,
-    #         question=question,
-    #         options=answer
-    #     )
-    #
-    #     view = PollView(poll=poll, embed=message)
 
     @commands.command()
     async def poll(self, ctx: commands.Context, question: str, *answer: str):

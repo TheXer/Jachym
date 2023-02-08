@@ -71,7 +71,7 @@ class VoteButtonDatabase(Crud):
             await cursor.executemany(sql, values)
             await conn.commit()
 
-    async def add_users(self, message_id, user, index):
+    async def add_user(self, message_id, user, index):
         sql = """
             INSERT INTO `Answers`(message_id, vote_user, iter_index) VALUES (%s, %s, %s)
         """
@@ -82,7 +82,7 @@ class VoteButtonDatabase(Crud):
             await cursor.execute(sql, values)
             await conn.commit()
 
-    async def remove_users(self, message_id, user, index):
+    async def remove_user(self, message_id, user, index):
         sql = "DELETE FROM `Answers` WHERE message_id = %s AND vote_user = %s AND iter_index = %s"
         value = (message_id, user, index)
 
@@ -91,9 +91,9 @@ class VoteButtonDatabase(Crud):
             await cursor.execute(sql, value)
             await conn.commit()
 
-    async def fetch_all_users(self, message_id, index):
+    async def fetch_all_users(self, message_id, index) -> set:
         sql = """
-            SELECT * FROM `Answers` WHERE message_id = %s AND iter_index = %s
+            SELECT vote_user FROM `Answers` WHERE message_id = %s AND iter_index = %s
         """
         values = (message_id, index)
 
@@ -102,4 +102,42 @@ class VoteButtonDatabase(Crud):
             await cursor.execute(sql, values)
             users_voted_for = await cursor.fetchall()
 
-        return users_voted_for
+        clean_users_voted_for = set(
+            user
+            for user_tuple in users_voted_for
+            for user in user_tuple
+        )
+
+        return clean_users_voted_for
+
+    async def toggle_vote(self, message_id, user, index):
+        users = await self.fetch_all_users(message_id, index)
+
+        if user not in users:
+            await self.add_user(message_id, user, index)
+        else:
+            await self.remove_user(message_id, user, index)
+
+
+class AnswersDatabase(Crud):
+    def __init__(self, pool: aiomysql.pool.Pool):
+        super().__init__(pool)
+
+    async def collect_all_answers(self, message_id):
+        sql = """
+            SELECT answers FROM `VoteButtons` WHERE message_id = %s
+        """
+        value = (message_id,)
+
+        async with self.poll.acquire() as conn:
+            cursor = await conn.cursor()
+            await cursor.execute(sql, value)
+            tuple_of_tuples_db = await cursor.fetchall()
+
+        answers = tuple(
+            answer
+            for tupl in tuple_of_tuples_db
+            for answer in tupl
+        )
+
+        return answers
