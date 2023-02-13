@@ -16,10 +16,12 @@ class ButtonBackend(discord.ui.Button):
                  label: str,
                  db_poll: aiomysql.pool.Pool) -> None:
 
-        super().__init__(label=label)
+        super().__init__(
+            label=label if len(label) <= 30 else "",
+            emoji=emoji
+        )
         self.custom_id = custom_id
         self.poll = poll
-        self.emoji = emoji
         self.embed = embed
         self._index = index
         self.db_poll = db_poll
