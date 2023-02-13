@@ -40,12 +40,21 @@ class Potkan_Jachym(commands.Bot):
 
     async def _fetch_polls(self):
         start = datetime.now()
-        pools_in_db = await PollDatabase(self.pool).fetch_all_polls()
+        poll_database = PollDatabase(self.pool)
+        answers_database = AnswersDatabase(self.pool)
+
+        pools_in_db = await poll_database.fetch_all_polls()
 
         for message_id, channel_id, question, _, _ in pools_in_db:
-            channel = self.get_channel(channel_id)
-            message = await channel.fetch_message(message_id)
-            answer = await AnswersDatabase(self.pool).collect_all_answers(message_id)
+            try:
+                channel = self.get_channel(channel_id)
+                message = await channel.fetch_message(message_id)
+                answer = await answers_database.collect_all_answers(message_id)
+
+            except discord.errors.NotFound:
+                await poll_database.remove(message_id)
+                print(f"Removed a Pool: {message_id, question}")
+                continue
 
             poll = Poll(
                 message_id=message_id,
@@ -53,12 +62,8 @@ class Potkan_Jachym(commands.Bot):
                 question=question,
                 options=answer)
 
-            try:
-                self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
-                self.active_discord_polls.add(poll)
-
-            except discord.errors.NotFound:
-                continue
+            self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
+            self.active_discord_polls.add(poll)
 
         print(f"Finished loading {len(self.active_discord_polls)} polls. ({(datetime.now() - start).seconds}s)")
 

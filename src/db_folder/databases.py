@@ -48,9 +48,9 @@ class PollDatabase(Crud):
 
         await self.commit_value(sql, values)
 
-    async def remove(self, discord_poll: Poll):
+    async def remove(self, message_id: int):
         sql = "DELETE FROM `Poll` WHERE message_id = %s"
-        value = (discord_poll.message_id,)
+        value = (message_id,)
 
         await self.commit_value(sql, value)
 
