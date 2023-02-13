@@ -89,8 +89,6 @@ ___
 Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:
 
 - [ ] Slash commands
-- [ ] Úprava všech commandů, použití PyCordu místo discord.py
-- [ ] Najít všechny chyby v textech
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do [issues](https://github.com/TheXer/Jachym/issues).

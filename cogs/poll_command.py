@@ -1,9 +1,9 @@
 from discord.ext import commands
 
-from db_folder.sqldatabase import PollDatabase, VoteButtonDatabase
-from poll_design.poll import Poll
-from poll_design.poll_view import PollView
-from ui.poll_embed import PollEmbed, PollEmbedBase
+from src.db_folder.databases import PollDatabase, VoteButtonDatabase
+from src.ui.poll import Poll
+from src.ui.poll_embed import PollEmbed, PollEmbedBase
+from src.ui.poll_view import PollView
 
 
 def error_handling(answer: tuple[str]) -> str:
@@ -17,8 +17,10 @@ class PollCreate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def poll(self, ctx: commands.Context, question: str, *answer: str):
+    @commands.command(aliases=["anketa"])
+    async def pool(self, ctx: commands.Context, question: str, *answer: str):
+        await ctx.message.delete()
+
         message = await ctx.send(embed=PollEmbedBase("Dělám na tom, vydrž!"))
         if error_handling(answer):
             return await message.edit(embed=PollEmbedBase(error_handling(answer)))

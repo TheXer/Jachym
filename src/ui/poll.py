@@ -10,40 +10,42 @@ class Poll:
 
     def __init__(
             self,
-            message_id: Message.id,
+            message_id: int,
             channel_id: int,
             question: str,
             options: tuple[str, ...],
             user_id: Optional[int] = None
     ):
-        self.message_id = message_id
-        self.channel_id = channel_id
-        self.question = question
-        self.options = options
-        self.date_created_at = datetime.now().strftime("%Y-%m-%d")
-        self.user_id = user_id
+        self._message_id = message_id
+        self._channel_id = channel_id
+        self._question = question
+        self._options = options
+        self._date_created_at = datetime.now().strftime("%Y-%m-%d")
+        self._user_id = user_id
 
-    def message_id(self) -> int:
-        return self.message_id
+    @property
+    def message_id(self):
+        return self._message_id
 
+    @property
     def channel_id(self) -> int:
-        return self.channel_id
+        return self._channel_id
 
+    @property
     def question(self) -> str:
-        return self.question
+        return self._question
 
+    @property
     def options(self) -> tuple[str, ...]:
-        return self.options
+        return self._options
 
+    @property
     def created_at(self) -> str:
-        return self.date_created_at
+        return self._date_created_at
 
+    @property
     def user_id(self) -> int:
-        return self.user_id
-
-    def delete(self):
-        # connection to database, make new tables and view
-        pass
+        return self._user_id
 
     @classmethod
     async def create_poll(cls, message: Message, question: str, *answers) -> "Poll":

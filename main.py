@@ -3,8 +3,8 @@ Moje narozeniny? Jojo, 27. prosince 2020
 """
 
 import asyncio
-
 import os
+from datetime import datetime
 from typing import Optional
 
 import aiomysql.pool
@@ -13,9 +13,9 @@ from aiomysql import create_pool
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from db_folder.sqldatabase import PollDatabase, AnswersDatabase
-from poll_design.poll import Poll
-from poll_design.poll_view import PollView
+from src.db_folder.databases import PollDatabase, AnswersDatabase
+from src.ui.poll import Poll
+from src.ui.poll_view import PollView
 
 load_dotenv("password.env")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -30,6 +30,7 @@ class Potkan_Jachym(commands.Bot):
         # Co jsou intents? https://discordpy.readthedocs.io/en/stable/intents.html
         intents = discord.Intents.all()
         self.pool: Optional[aiomysql.pool.Pool] = None
+        self.active_discord_polls: set[Poll] = set()
 
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
@@ -38,6 +39,7 @@ class Potkan_Jachym(commands.Bot):
         )
 
     async def _fetch_polls(self):
+        start = datetime.now()
         pools_in_db = await PollDatabase(self.pool).fetch_all_polls()
 
         for message_id, channel_id, question, _, _ in pools_in_db:
@@ -52,6 +54,13 @@ class Potkan_Jachym(commands.Bot):
                 options=answer)
 
             self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
+            self.active_discord_polls.add(poll)
+
+        print(f"Finished loading {len(self.active_discord_polls)} polls. ({(datetime.now() - start).seconds}s)")
+
+    async def set_presence(self):
+        activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {len(self.active_discord_polls)} anket!"
+        await self.change_presence(activity=discord.Game(name=activity_name))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -60,30 +69,31 @@ class Potkan_Jachym(commands.Bot):
             password=PASSWORD,
             host=HOST,
             db=DATABASE,
+            pool_recycle=30,
+            maxsize=20
         )
         await self._fetch_polls()
+        await self.set_presence()
 
         print("ready!")
 
+    async def load_extensions(self):
+        for filename in os.listdir("cogs/"):
+            if filename.endswith(".py"):
+                try:
+                    await self.load_extension(f"cogs.{filename[:-3]}")
 
-bot = Potkan_Jachym()
-
-
-async def load_extensions():
-    for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
-            try:
-                await bot.load_extension(f"cogs.{filename[:-3]}")
-
-                print(f"{filename[:-3]} has loaded successfully")
-            except Exception as error:
-                raise error
+                    print(f"{filename[:-3]} has loaded successfully")
+                except Exception as error:
+                    raise error
 
 
 async def main():
+    bot = Potkan_Jachym()
     async with bot:
-        await load_extensions()
+        await bot.load_extensions()
         await bot.start(DISCORD_TOKEN)
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

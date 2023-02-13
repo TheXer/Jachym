@@ -1,7 +1,7 @@
 import discord
 from discord.colour import Color
 
-from poll_design.poll import Poll
+from src.ui.poll import Poll
 
 
 class PollEmbedBase(discord.Embed):

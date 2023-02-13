@@ -1,8 +1,8 @@
 import aiomysql.pool
 import discord
 
-from poll_design.button import ButtonBackend
-from poll_design.poll import Poll
+from src.ui.button import ButtonBackend
+from src.ui.poll import Poll
 
 
 class PollView(discord.ui.View):
@@ -11,20 +11,17 @@ class PollView(discord.ui.View):
         self.poll = poll
         self.embed = embed
         self.db_poll = db_poll
+        self.reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
         self._add_vote_buttons()
 
     def _add_vote_buttons(self):
         for index, option in enumerate(self.poll.options):
             self.add_item(ButtonBackend(
                 custom_id=f"{index}:{self.poll.message_id}",
-                label=f"{index + 1}",
+                label=f"{option}",
+                emoji=self.reactions[index],
                 poll=self.poll,
                 embed=self.embed,
                 index=index,
                 db_poll=self.db_poll
             ))
-
-
-class PollInitialization(discord.ui.View):
-    # this class should handle initialization of all polls
-    pass
