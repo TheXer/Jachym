@@ -53,8 +53,12 @@ class Potkan_Jachym(commands.Bot):
                 question=question,
                 options=answer)
 
-            self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
-            self.active_discord_polls.add(poll)
+            try:
+                self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
+                self.active_discord_polls.add(poll)
+
+            except discord.errors.NotFound:
+                continue
 
         print(f"Finished loading {len(self.active_discord_polls)} polls. ({(datetime.now() - start).seconds}s)")
 
