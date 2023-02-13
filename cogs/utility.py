@@ -16,7 +16,7 @@ class Utility(commands.Cog):
 
     @staticmethod
     def json_to_embed(root_name: str) -> discord.Embed:
-        with open("text_json/cz_text.json") as f:
+        with open("/src/text_json/cz_text.json") as f:
             text = json.load(f)
         embed = discord.Embed.from_dict(text[root_name])
         return embed
