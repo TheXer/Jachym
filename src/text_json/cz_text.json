@@ -1,6 +1,7 @@
 {
   "help": {
-    "_comment": "Text of !help, overall help",
+    "title": "Pomocníček",
+    "description": "Jak na to?",
     "fields": [
       {
         "name": "Pomoc",

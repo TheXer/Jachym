@@ -1,8 +1,8 @@
 from discord.ext import commands
 
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
+from src.ui.embeds import PollEmbed, PollEmbedBase
 from src.ui.poll import Poll
-from src.ui.poll_embed import PollEmbed, PollEmbedBase
 from src.ui.poll_view import PollView
 
 

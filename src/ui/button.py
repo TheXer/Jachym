@@ -2,8 +2,8 @@ import aiomysql.pool
 import discord
 
 from src.db_folder.databases import VoteButtonDatabase
+from src.ui.embeds import PollEmbed
 from src.ui.poll import Poll
-from src.ui.poll_embed import PollEmbed
 
 
 class ButtonBackend(discord.ui.Button):
@@ -18,9 +18,9 @@ class ButtonBackend(discord.ui.Button):
 
         super().__init__(
             label=label if len(label) <= 30 else "",
-            emoji=emoji
+            emoji=emoji,
+            custom_id=custom_id
         )
-        self.custom_id = custom_id
         self.poll = poll
         self.embed = embed
         self._index = index

@@ -1,11 +1,10 @@
 import datetime
-import json
 
-import discord
 from discord import Message
-from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import has_permissions
+
+from src.ui.embeds import EmbedFromJSON
 
 
 class Utility(commands.Cog):
@@ -14,32 +13,14 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @staticmethod
-    def json_to_embed(root_name: str) -> discord.Embed:
-        with open("/src/text_json/cz_text.json") as f:
-            text = json.load(f)
-        embed = discord.Embed.from_dict(text[root_name])
-        return embed
-
-    # zkouška, funguje to, pokračovat v tom
-    @app_commands.command(name="pomoc")
-    async def my_private_command(self, interaction: discord.Interaction) -> None:
-        """ Pomocníček na vše  """
-        file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
-        embed = self.json_to_embed("help")
-        embed.set_thumbnail(url="attachment://LogoPotkani.png")
-        await interaction.response.send_message(file=file, embed=embed, ephemeral=True)
-
     @commands.command(pass_context=True, aliases=['help'])
     async def pomoc(self, ctx: commands.Context) -> Message:
-        file = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
-        embed = self.json_to_embed("help")
-        embed.set_thumbnail(url="attachment://LogoPotkani.png")
-        return await ctx.send(file=file, embed=embed)
+        embed = EmbedFromJSON().add_fields_from_json("help")
+        return await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
     async def rozcestnik(self, ctx: commands.Context) -> Message:
-        embed = self.json_to_embed("rozcestnik")
+        embed = EmbedFromJSON().add_fields_from_json("rozcestnik")
         return await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)

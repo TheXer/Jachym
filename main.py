@@ -4,7 +4,6 @@ Moje narozeniny? Jojo, 27. prosince 2020
 
 import asyncio
 import os
-from datetime import datetime
 from typing import Optional
 
 import aiomysql.pool
@@ -14,6 +13,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from src.db_folder.databases import PollDatabase, AnswersDatabase
+from src.helpers import timeit
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
@@ -38,14 +38,14 @@ class Potkan_Jachym(commands.Bot):
             help_command=None
         )
 
+    @timeit
     async def _fetch_polls(self):
-        start = datetime.now()
         poll_database = PollDatabase(self.pool)
         answers_database = AnswersDatabase(self.pool)
 
         pools_in_db = await poll_database.fetch_all_polls()
 
-        for message_id, channel_id, question, _, _ in pools_in_db:
+        for message_id, channel_id, question, date, _ in pools_in_db:
             try:
                 channel = self.get_channel(channel_id)
                 message = await channel.fetch_message(message_id)
@@ -60,12 +60,12 @@ class Potkan_Jachym(commands.Bot):
                 message_id=message_id,
                 channel_id=channel_id,
                 question=question,
-                options=answer)
+                options=answer,
+                date_created=date
+            )
 
             self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
             self.active_discord_polls.add(poll)
-
-        print(f"Finished loading {len(self.active_discord_polls)} polls. ({(datetime.now() - start).seconds}s)")
 
     async def set_presence(self):
         activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {len(self.active_discord_polls)} anket!"

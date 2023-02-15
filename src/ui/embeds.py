@@ -1,3 +1,6 @@
+import datetime
+import json
+
 import discord
 from discord.colour import Color
 
@@ -26,3 +29,19 @@ class PollEmbed(PollEmbedBase):
                 value="**0** |",
                 inline=False
             )
+
+
+class EmbedFromJSON(discord.Embed):
+    PATH = "src/text_json/cz_text.json"
+    PICTURE = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
+
+    def __init__(self):
+        super().__init__(
+            colour=Color.blue(),
+            timestamp=datetime.datetime.now())
+
+    @classmethod
+    def add_fields_from_json(cls, root_path):
+        with open(cls.PATH, "r") as f:
+            text = json.load(f)[root_path]
+        return EmbedFromJSON.from_dict(text)
