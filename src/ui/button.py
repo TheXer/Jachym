@@ -51,13 +51,11 @@ class ButtonBackend(discord.ui.Button):
         return members
 
     async def edit_embed(self, members: set[str]) -> discord.Embed:
-        edit = self.embed.set_field_at(
+        return self.embed.set_field_at(
             index=self.index,
             name=self.embed.fields[self.index].name,
             value=f"**{len(members)}** | {', '.join(members)}",
             inline=False)
-
-        return edit
 
     async def callback(self, interaction: discord.Interaction):
         members = await self.toggle_vote(interaction)

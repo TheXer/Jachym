@@ -5,11 +5,11 @@ from functools import wraps
 def timeit(func):
     @wraps(func)
     async def async_wrapper(*args, **kwargs):
+        print(f"{func.__name__} starting...")
         start = time.time()
         result = await func(*args, **kwargs)
         duration = time.time() - start
-
-        print(f'{func.__name__} took {round(duration, 1)} seconds')
+        print(f'{func.__name__} took {duration:.2f} seconds')
 
         return result
 

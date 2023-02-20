@@ -15,22 +15,21 @@ class PollView(discord.ui.View):
         self.poll = poll
         self.embed = embed
         self.db_poll = db_poll
-        self._add_vote_buttons()
+        self.add_buttons()
 
-    def _add_vote_buttons(self):
+    def add_buttons(self):
         for index, option in enumerate(self.poll.options):
-            self.add_item(ButtonBackend(
+            button = ButtonBackend(
                 custom_id=f"{index}:{self.poll.message_id}",
                 label=f"{option}",
                 emoji=self.REACTIONS[index],
                 poll=self.poll,
                 embed=self.embed,
                 index=index,
-                db_poll=self.db_poll,
-            ))
+                db_poll=self.db_poll)
 
-    def _check_date_difference(self) -> bool:
+            self.add_item(button)
+
+    def check_date_difference(self) -> bool:
         date_deletion = self.poll.created_at + datetime.timedelta(days=25)
-        if datetime.date.today() > date_deletion:
-            return True
-        return False
+        return datetime.date.today() > date_deletion

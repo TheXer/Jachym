@@ -49,6 +49,14 @@ class Utility(commands.Cog):
     async def time(self, ctx: commands.Context):
         return await ctx.send(str(datetime.datetime.now()))
 
+    @commands.command(aliases=["narozeniny"])
+    async def birthday(self, ctx):
+        today = datetime.date.today()
+        bot_birthday = datetime.datetime.strptime(self.bot.MY_BIRTHDAY, "%d.%m.%Y").replace(year=today.year)
+        days_until_birthday = (bot_birthday.date() - today).days
+        await ctx.send(
+            f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!")
+
 
 async def setup(bot):
     await bot.add_cog(Utility(bot))
