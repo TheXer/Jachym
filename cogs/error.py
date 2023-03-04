@@ -4,7 +4,6 @@ from discord.ext import commands
 
 
 # for finding errors with the code.
-# TODO: SPRAV TO UŽ!!!!!
 
 class Error(commands.Cog):
     """Basic class for catching errors and sending a message"""
@@ -33,8 +32,7 @@ class Error(commands.Cog):
             return await ctx.send("Chybí ti povinný argument, zkontroluj si ho znova!")
 
         else:
-            # self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
-
+            self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
             print(error)
 
     @commands.Cog.listener()

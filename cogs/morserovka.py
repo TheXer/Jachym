@@ -36,7 +36,7 @@ class Morse(commands.Cog):
     async def zasifruj(self, ctx: commands.Context, message: str) -> Message:
         await ctx.message.delete()
         try:
-            cipher = '/'.join(self.MORSE_CODE_DICT.get(x.upper()) for x in message)
+            cipher = '/'.join(self.MORSE_CODE_DICT.get(letter.upper()) for letter in message)
             return await ctx.send(cipher)
         except TypeError:
             return await ctx.send("Asi jsi nezadal správný text. Text musí být bez speciálních znaků!")
@@ -45,7 +45,7 @@ class Morse(commands.Cog):
     async def desifruj(self, ctx: commands.Context, message: str) -> Message:
         await ctx.message.delete()
         try:
-            decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(x) for x in message.split("/"))
+            decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(letter) for letter in message.split("/"))
             return await ctx.send(decipher)
         except TypeError:
             decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(x) for x in message.split("|"))

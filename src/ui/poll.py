@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Optional
 
-from discord import Message
-
 
 class Poll:
     MAX_OPTIONS = 10
@@ -52,20 +50,9 @@ class Poll:
     @property
     def created_at(self) -> datetime.date:
         if isinstance(self._date_created_at, str):
-            datetime_object = datetime.strptime(self._date_created_at, '%Y-%m-%d')
-            return datetime_object.date()
+            return datetime.fromisoformat(self._date_created_at).date()
         return self._date_created_at
 
     @property
     def user_id(self) -> int:
         return self._user_id
-
-    @classmethod
-    async def create_poll(cls, message: Message, question: str, *answers) -> "Poll":
-        poll = Poll(
-            message_id=message.id,
-            channel_id=message.channel.id,
-            question=question,
-            options=answers)
-
-        return poll

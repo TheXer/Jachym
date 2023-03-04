@@ -1,7 +1,11 @@
 from discord.ext import commands
 
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
-from src.ui.embeds import PollEmbed, PollEmbedBase
+from src.ui.embeds import (
+    PollEmbed,
+    PollEmbedBase,
+    CooldownErrorEmbed
+)
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
@@ -18,6 +22,7 @@ class PollCreate(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["anketa"])
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def pool(self, ctx: commands.Context, question: str, *answer: str):
         await ctx.message.delete()
 
@@ -39,6 +44,11 @@ class PollCreate(commands.Cog):
         await VoteButtonDatabase(self.bot.pool).add_options(poll)
 
         await message.edit(embed=embed, view=view)
+
+    @pool.error
+    async def pool_error(self, ctx: commands.Context, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(embed=CooldownErrorEmbed(error.retry_after))
 
 
 async def setup(bot):

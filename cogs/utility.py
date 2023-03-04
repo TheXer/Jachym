@@ -2,7 +2,6 @@ import datetime
 
 from discord import Message
 from discord.ext import commands
-from discord.ext.commands import has_permissions
 
 from src.ui.embeds import EmbedFromJSON
 
@@ -36,7 +35,7 @@ class Utility(commands.Cog):
         return await ctx.send(message)
 
     @commands.command(pass_context=True, aliases=["smazat"])
-    @has_permissions(administrator=True)
+    @commands.has_permissions(administrator=True)
     async def clear(self, ctx: commands.Context, limit: int) -> Message:
         await ctx.message.delete()
         if 1 < limit < 100:
