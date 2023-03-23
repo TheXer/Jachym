@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 
 class Poll:
@@ -22,7 +22,7 @@ class Poll:
             question: str,
             options: tuple[str, ...],
             user_id: Optional[int] = None,
-            date_created: Optional[datetime] = datetime.now().strftime("%Y-%m-%d")
+            date_created: Optional[Union[datetime, str]] = datetime.now().strftime("%Y-%m-%d")
     ):
         self._message_id = message_id
         self._channel_id = channel_id
@@ -51,6 +51,8 @@ class Poll:
     def created_at(self) -> datetime.date:
         if isinstance(self._date_created_at, str):
             return datetime.fromisoformat(self._date_created_at).date()
+        if isinstance(self._date_created_at, datetime):
+            return self._date_created_at.date()
         return self._date_created_at
 
     @property

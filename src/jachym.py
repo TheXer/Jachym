@@ -31,7 +31,7 @@ class Jachym(commands.Bot):
         )
 
     @timeit
-    async def _fetch_pools_from_database(self):
+    async def _fetch_pools_from_database(self) -> None:
         poll_database = PollDatabase(self.pool)
         answers_database = AnswersDatabase(self.pool)
 
