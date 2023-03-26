@@ -7,7 +7,7 @@ from aiomysql import create_pool
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.db_folder.databases import PollDatabase, AnswersDatabase
+from src.db_folder.databases import PollDatabase
 from src.helpers import timeit
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
@@ -31,31 +31,10 @@ class Jachym(commands.Bot):
         )
 
     @timeit
-    async def _fetch_pools_from_database(self):
+    async def _fetch_pools_from_database(self) -> None:
         poll_database = PollDatabase(self.pool)
-        answers_database = AnswersDatabase(self.pool)
 
-        pools_in_db = await poll_database.fetch_all_polls()
-
-        for message_id, channel_id, question, date, _ in pools_in_db:
-            try:
-                message = await self.get_channel(channel_id).fetch_message(message_id)
-
-            except discord.errors.NotFound:
-                await poll_database.remove(message_id)
-                print(f"Removed a Pool: {message_id, question}")
-                continue
-
-            answer = await answers_database.collect_all_answers(message_id)
-
-            poll = Poll(
-                message_id=message_id,
-                channel_id=channel_id,
-                question=question,
-                options=answer,
-                date_created=date
-            )
-
+        async for poll, message in poll_database.fetch_all_polls(self):
             self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
             self.active_discord_polls.add(poll)
 

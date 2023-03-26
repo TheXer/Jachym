@@ -2,6 +2,8 @@ from abc import ABC
 from typing import Optional
 
 import aiomysql
+import discord.errors
+from discord import Message
 
 from src.ui.poll import Poll
 
@@ -54,11 +56,43 @@ class PollDatabase(Crud):
 
         await self.commit_value(sql, value)
 
-    async def fetch_all_polls(self):
+    async def fetch_all_answers(self, message_id) -> tuple[str, ...]:
+        sql = "SELECT answers FROM `VoteButtons` WHERE message_id = %s"
+        value = (message_id,)
+
+        tuple_of_tuples_db = await self.fetch_all_values(sql, value)
+
+        answers = tuple(
+            answer
+            for tupl in tuple_of_tuples_db
+            for answer in tupl
+        )
+
+        return answers
+
+    async def fetch_all_polls(self, bot) -> Poll and Message:
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 
-        return polls
+        for message_id, channel_id, question, date, _ in polls:
+            try:
+                message = await bot.get_partial_messageable(channel_id).fetch_message(message_id)
+
+            except discord.errors.NotFound:
+                await self.remove(message_id)
+                print(f"Removed a Pool: {message_id, question}")
+                continue
+
+            options = await self.fetch_all_answers(message_id)
+
+            pool = Poll(
+                message_id=message_id,
+                channel_id=channel_id,
+                question=question,
+                date_created=date,
+                options=options)
+
+            yield pool, message
 
 
 class VoteButtonDatabase(Crud):
@@ -99,22 +133,3 @@ class VoteButtonDatabase(Crud):
         )
 
         return clean_users_voted_for
-
-
-class AnswersDatabase(Crud):
-    def __init__(self, pool: aiomysql.pool.Pool):
-        super().__init__(pool)
-
-    async def collect_all_answers(self, message_id) -> tuple[str, ...]:
-        sql = "SELECT answers FROM `VoteButtons` WHERE message_id = %s"
-        value = (message_id,)
-
-        tuple_of_tuples_db = await self.fetch_all_values(sql, value)
-
-        answers = tuple(
-            answer
-            for tupl in tuple_of_tuples_db
-            for answer in tupl
-        )
-
-        return answers
