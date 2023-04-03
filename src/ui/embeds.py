@@ -1,5 +1,6 @@
 import json
-from datetime import datetime
+import pathlib
+from datetime import datetime, timedelta
 
 import discord
 from discord.colour import Color
@@ -10,9 +11,10 @@ from src.ui.poll import Poll
 class CooldownErrorEmbed(discord.Embed):
     def __init__(self, seconds: float):
         self.seconds = round(seconds)
+        formatted_date = discord.utils.format_dt(datetime.now() + timedelta(seconds=10), 'R')
 
         super().__init__(
-            title=f"⚠️ Vydrž! Další anketu můžeš založit za {self.correct_czech_writing()}! ⚠️",
+            title=f"⚠️ Vydrž! Další anketu můžeš založit {formatted_date}! ⚠️",
             colour=Color.red()
         )
 
@@ -59,7 +61,7 @@ class PollEmbed(PollEmbedBase):
 
 
 class EmbedFromJSON(discord.Embed):
-    PATH = "src/text_json/cz_text.json"
+    PATH = pathlib.Path("src/text_json/cz_text.json")
     PICTURE = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
 
     def __init__(self):

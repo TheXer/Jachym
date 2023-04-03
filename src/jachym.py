@@ -20,13 +20,12 @@ class Jachym(commands.Bot):
 
     def __init__(self):
         # https://discordpy.readthedocs.io/en/stable/intents.html
-        intents = discord.Intents.all()
         self.pool: Optional[aiomysql.pool.Pool] = None
         self.active_discord_polls: set[Poll] = set()
 
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
-            intents=intents,
+            intents=discord.Intents.all(),
             help_command=None
         )
 
