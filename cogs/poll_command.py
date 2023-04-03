@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
+from src.jachym import Jachym
 from src.ui.embeds import (
     PollEmbed,
     PollEmbedBase,
@@ -18,11 +19,13 @@ def error_handling(answer: tuple[str]) -> str:
 
 
 class PollCreate(commands.Cog):
-    def __init__(self, bot):
+    COOLDOWN = 10
+
+    def __init__(self, bot: Jachym):
         self.bot = bot
 
     @commands.command(aliases=["anketa"])
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, COOLDOWN, commands.BucketType.user)
     async def pool(self, ctx: commands.Context, question: str, *answer: str):
         await ctx.message.delete()
 
@@ -42,6 +45,9 @@ class PollCreate(commands.Cog):
         view = PollView(poll, embed, db_poll=self.bot.pool)
         await PollDatabase(self.bot.pool).add(poll)
         await VoteButtonDatabase(self.bot.pool).add_options(poll)
+
+        self.bot.active_discord_polls.add(poll)
+        await self.bot.set_presence()
 
         await message.edit(embed=embed, view=view)
 
