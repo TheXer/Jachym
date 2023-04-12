@@ -43,8 +43,17 @@ class Jachym(commands.Bot):
         activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {len(self.active_discord_polls)} anket!"
         await self.change_presence(activity=discord.Game(name=activity_name))
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def load_extensions(self):
+        for filename in listdir("cogs/"):
+            if filename.endswith(".py"):
+                try:
+                    await self.load_extension(f"cogs.{filename[:-3]}")
+
+                    print(f"{filename[:-3]} has loaded successfully")
+                except Exception as error:
+                    raise error
+
+    async def setup_hook(self):
         self.pool = await create_pool(
             user=getenv("USER_DATABASE"),
             password=getenv("PASSWORD"),
@@ -56,14 +65,8 @@ class Jachym(commands.Bot):
         await self._fetch_pools_from_database()
         await self.set_presence()
 
-        print("Ready!")
+        print("Setup ready!")
 
-    async def load_extensions(self):
-        for filename in listdir("cogs/"):
-            if filename.endswith(".py"):
-                try:
-                    await self.load_extension(f"cogs.{filename[:-3]}")
-
-                    print(f"{filename[:-3]} has loaded successfully")
-                except Exception as error:
-                    raise error
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print("Bot online!")
