@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional, Union, AsyncIterator
+from typing import Optional, AsyncIterator
 
 import aiomysql
 import discord.errors
@@ -70,7 +70,7 @@ class PollDatabase(Crud):
 
         return answers
 
-    async def fetch_all_polls(self, bot) -> AsyncIterator[Union[Poll, Message]]:
+    async def fetch_all_polls(self, bot) -> AsyncIterator[Poll | Message]:
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 
