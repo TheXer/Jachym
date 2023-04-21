@@ -54,6 +54,7 @@ class Jachym(commands.Bot):
                     raise error
 
     async def setup_hook(self):
+        print("Getting setup ready...")
         self.pool = await create_pool(
             user=getenv("USER_DATABASE"),
             password=getenv("PASSWORD"),
@@ -63,10 +64,10 @@ class Jachym(commands.Bot):
             maxsize=20)
 
         await self._fetch_pools_from_database()
-        await self.set_presence()
 
         print("Setup ready!")
 
     @commands.Cog.listener()
     async def on_ready(self):
+        await self.set_presence()
         print("Bot online!")

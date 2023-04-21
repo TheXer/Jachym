@@ -2,7 +2,7 @@ import time
 from functools import wraps
 
 
-def timeit(func):
+def timeit(func: callable):
     @wraps(func)
     async def async_wrapper(*args, **kwargs):
         print(f"{func.__name__} starting...")

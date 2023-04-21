@@ -1,6 +1,8 @@
-from src.ui.poll import Poll
 import datetime
+
 import pytest
+
+from src.ui.poll import Poll
 
 MESSAGE_ID = 123456789
 CHANNEL_ID = 123456789
