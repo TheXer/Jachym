@@ -26,7 +26,8 @@ class Jachym(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
             intents=discord.Intents.all(),
-            help_command=None
+            help_command=None,
+            owner_id=337971071485607936
         )
 
     @timeit
