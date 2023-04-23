@@ -19,7 +19,7 @@ class Error(commands.Cog):
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         match error:
             case commands.ExpectedClosingQuoteError():
-                return await ctx.send(f"Pozor! Chybí tady: {error.close_quote} uvozovka!")
+                return await ctx.send(f"Pozor! Chybí tady: {error} uvozovka!")
 
             case commands.MissingPermissions():
                 return await ctx.send("Chybí ti požadovaná práva!")
