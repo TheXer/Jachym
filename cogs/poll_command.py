@@ -4,11 +4,7 @@ from discord.ext import commands
 
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
-from src.ui.embeds import (
-    PollEmbed,
-    PollEmbedBase,
-    CooldownErrorEmbed
-)
+from src.ui.embeds import PollEmbed, PollEmbedBase, CooldownErrorEmbed
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
@@ -26,13 +22,18 @@ class PollCreate(commands.Cog):
 
     @app_commands.command(
         name="anketa",
-        description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.")
+        description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
+    )
     @app_commands.describe(
         question="Otázka, na kterou potřebuješ vědět odpověď",
-        answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností')
-    async def pool(self, interaction: discord.Interaction, question: str, answer: str) -> discord.Message:
-
-        await interaction.response.send_message(embed=PollEmbedBase("Dělám na tom, vydrž!"))
+        answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
+    )
+    async def pool(
+        self, interaction: discord.Interaction, question: str, answer: str
+    ) -> discord.Message:
+        await interaction.response.send_message(
+            embed=PollEmbedBase("Dělám na tom, vydrž!")
+        )
         message = await interaction.original_response()
 
         answers = answer.split(sep='"')
@@ -44,7 +45,7 @@ class PollCreate(commands.Cog):
             channel_id=message.channel.id,
             question=question,
             options=answers,
-            user_id=interaction.user.id
+            user_id=interaction.user.id,
         )
 
         embed = PollEmbed(poll)

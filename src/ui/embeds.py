@@ -11,11 +11,13 @@ from src.ui.poll import Poll
 class CooldownErrorEmbed(discord.Embed):
     def __init__(self, seconds: float):
         self.seconds = round(seconds)
-        formatted_date = discord.utils.format_dt(datetime.now() + timedelta(seconds=10), 'R')
+        formatted_date = discord.utils.format_dt(
+            datetime.now() + timedelta(seconds=10), "R"
+        )
 
         super().__init__(
             title=f"⚠️ Vydrž! Další anketu můžeš založit {formatted_date}! ⚠️",
-            colour=Color.red()
+            colour=Color.red(),
         )
 
     def correct_czech_writing(self) -> str:
@@ -29,14 +31,11 @@ class CooldownErrorEmbed(discord.Embed):
 
 class PollEmbedBase(discord.Embed):
     def __init__(self, question) -> None:
-        super().__init__(
-            title=f"📊 {question}",
-            colour=Color.blue()
-        )
+        super().__init__(title=f"📊 {question}", colour=Color.blue())
 
 
 class PollEmbed(PollEmbedBase):
-    REACTIONS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+    REACTIONS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
     def __init__(self, poll: Poll):
         super().__init__(poll.question)
@@ -47,16 +46,14 @@ class PollEmbed(PollEmbedBase):
     def _add_options(self):
         for index, option in enumerate(self.answers):
             self.add_field(
-                name=f"{self.REACTIONS[index]} {option}",
-                value="**0** |",
-                inline=False
+                name=f"{self.REACTIONS[index]} {option}", value="**0** |", inline=False
             )
 
     def _add_timestamp(self):
         self.add_field(
             name="",
             value=f"Anketa byla vytvořena {discord.utils.format_dt(datetime.now(), 'R')}",
-            inline=False
+            inline=False,
         )
 
 
@@ -65,8 +62,7 @@ class EmbedFromJSON(discord.Embed):
     PICTURE = discord.File("fotky/LogoPotkani.png", filename="LogoPotkani.png")
 
     def __init__(self):
-        super().__init__(
-            colour=Color.blue())
+        super().__init__(colour=Color.blue())
 
     @classmethod
     def add_fields_from_json(cls, root_path):

@@ -6,6 +6,7 @@ class Poll:
     """
     Slot class for each Pool object.
     """
+
     MAX_OPTIONS = 10
     MIN_OPTIONS = 2
 
@@ -15,17 +16,19 @@ class Poll:
         "_question",
         "_options",
         "_date_created_at",
-        "_user_id"
+        "_user_id",
     ]
 
     def __init__(
-            self,
-            message_id: int,
-            channel_id: int,
-            question: str,
-            options: list[str, ...],
-            user_id: Optional[int] = None,
-            date_created: Optional[Union[datetime, str]] = datetime.now().strftime("%Y-%m-%d")
+        self,
+        message_id: int,
+        channel_id: int,
+        question: str,
+        options: list[str],
+        user_id: Optional[int] = None,
+        date_created: Optional[Union[datetime, str]] = datetime.now().strftime(
+            "%Y-%m-%d"
+        ),
     ):
         self._message_id = message_id
         self._channel_id = channel_id
@@ -47,7 +50,7 @@ class Poll:
         return self._question
 
     @property
-    def options(self) -> list[str, ...]:
+    def options(self) -> list[str]:
         return self._options
 
     @property

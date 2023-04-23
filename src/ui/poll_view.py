@@ -8,7 +8,7 @@ from src.ui.poll import Poll
 
 
 class PollView(discord.ui.View):
-    REACTIONS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+    REACTIONS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
     def __init__(self, poll: Poll, embed, db_poll: aiomysql.pool.Pool):
         super().__init__(timeout=None)
@@ -26,7 +26,8 @@ class PollView(discord.ui.View):
                 poll=self.poll,
                 embed=self.embed,
                 index=index,
-                db_poll=self.db_poll)
+                db_poll=self.db_poll,
+            )
 
             self.add_item(button)
 

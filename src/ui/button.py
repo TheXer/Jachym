@@ -11,19 +11,18 @@ class ButtonBackend(discord.ui.Button):
     Button class to edit a poll embed with
     """
 
-    def __init__(self,
-                 custom_id: str,
-                 poll: Poll,
-                 emoji: str,
-                 embed: PollEmbed,
-                 index: int,
-                 label: str,
-                 db_poll: aiomysql.pool.Pool) -> None:
-
+    def __init__(
+        self,
+        custom_id: str,
+        poll: Poll,
+        emoji: str,
+        embed: PollEmbed,
+        index: int,
+        label: str,
+        db_poll: aiomysql.pool.Pool,
+    ) -> None:
         super().__init__(
-            label=label if len(label) <= 30 else "",
-            emoji=emoji,
-            custom_id=custom_id
+            label=label if len(label) <= 30 else "", emoji=emoji, custom_id=custom_id
         )
         self.poll = poll
         self.embed = embed
@@ -38,7 +37,9 @@ class ButtonBackend(discord.ui.Button):
         vote_button_db = VoteButtonDatabase(self.db_poll)
         user = interaction.user.id
 
-        users_ID = await vote_button_db.fetch_all_users(self.poll.message_id, self.index)
+        users_ID = await vote_button_db.fetch_all_users(
+            self.poll.message_id, self.index
+        )
 
         if user not in users_ID:
             await vote_button_db.add_user(self.poll.message_id, user, self.index)
@@ -48,8 +49,7 @@ class ButtonBackend(discord.ui.Button):
             users_ID.remove(user)
 
         members = set(
-            interaction.guild.get_member(user_id).display_name
-            for user_id in users_ID
+            interaction.guild.get_member(user_id).display_name for user_id in users_ID
         )
 
         return members
@@ -59,7 +59,8 @@ class ButtonBackend(discord.ui.Button):
             index=self.index,
             name=self.embed.fields[self.index].name,
             value=f"**{len(members)}** | {', '.join(members)}",
-            inline=False)
+            inline=False,
+        )
 
     async def callback(self, interaction: discord.Interaction):
         members = await self.toggle_vote(interaction)

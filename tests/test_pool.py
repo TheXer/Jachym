@@ -17,15 +17,8 @@ USER_ID = 123456789
         datetime.datetime.now(),
         datetime.date.today(),
         datetime.datetime.now().strftime("%Y-%m-%d"),
-    ]
+    ],
 )
 def test_datetime(date_test):
-    pool = Poll(
-        MESSAGE_ID,
-        CHANNEL_ID,
-        QUESTION,
-        OPTIONS,
-        USER_ID,
-        date_test
-    )
+    pool = Poll(MESSAGE_ID, CHANNEL_ID, QUESTION, OPTIONS, USER_ID, date_test)
     assert pool.created_at == datetime.date.today()

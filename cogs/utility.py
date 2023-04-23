@@ -14,30 +14,32 @@ class Utility(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        name="pomoc",
-        description="Pomocníček, který ti pomůže s různými věcmi.")
+        name="pomoc", description="Pomocníček, který ti pomůže s různými věcmi."
+    )
     async def pomoc(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("help")
         return await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="rozcestnik",
-        description="Všechny věci, co skaut potřebuje. Odkazy na webové stránky.")
+        description="Všechny věci, co skaut potřebuje. Odkazy na webové stránky.",
+    )
     async def rozcestnik(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("rozcestnik")
         return await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="ping",
-        description="Něco trvá dlouho? Koukni se, jestli není vysoká latence")
+        description="Něco trvá dlouho? Koukni se, jestli není vysoká latence",
+    )
     async def ping(self, interaction: discord.Interaction) -> Message:
         ping = round(self.bot.latency * 1000)
         if ping < 200:
-            message = f'🟢 {ping} milisekund.'
+            message = f"🟢 {ping} milisekund."
         elif 200 < ping < 400:
-            message = f'🟡 {ping} milisekund.'
+            message = f"🟡 {ping} milisekund."
         else:
-            message = f'🔴 {ping} milisekund.'
+            message = f"🔴 {ping} milisekund."
 
         return await interaction.response.send_message(message, ephemeral=True)
 
@@ -47,7 +49,9 @@ class Utility(commands.Cog):
         await ctx.message.delete()
         if 1 < limit < 100:
             deleted = await ctx.channel.purge(limit=limit)
-            return await ctx.send("Smazáno {deleted} zpráv.".format(deleted=len(deleted)))
+            return await ctx.send(
+                "Smazáno {deleted} zpráv.".format(deleted=len(deleted))
+            )
         else:
             return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
 
@@ -58,10 +62,13 @@ class Utility(commands.Cog):
     @commands.command(aliases=["narozeniny"])
     async def birthday(self, ctx):
         today = datetime.date.today()
-        bot_birthday = datetime.datetime.strptime(self.bot.MY_BIRTHDAY, "%d.%m.%Y").replace(year=today.year)
+        bot_birthday = datetime.datetime.strptime(
+            self.bot.MY_BIRTHDAY, "%d.%m.%Y"
+        ).replace(year=today.year)
         days_until_birthday = (bot_birthday.date() - today).days
         await ctx.send(
-            f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!")
+            f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!"
+        )
 
 
 async def setup(bot):

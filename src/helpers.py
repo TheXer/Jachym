@@ -9,7 +9,7 @@ def timeit(func: callable):
         start = time.time()
         result = await func(*args, **kwargs)
         duration = time.time() - start
-        print(f'{func.__name__} took {duration:.2f} seconds')
+        print(f"{func.__name__} took {duration:.2f} seconds")
 
         return result
 
