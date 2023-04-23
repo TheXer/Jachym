@@ -17,6 +17,7 @@ load_dotenv("password.env")
 
 class Jachym(commands.Bot):
     MY_BIRTHDAY = "27.12.2020"
+    OWNER_ID = 337971071485607936
 
     def __init__(self):
         # https://discordpy.readthedocs.io/en/stable/intents.html
@@ -27,7 +28,7 @@ class Jachym(commands.Bot):
             command_prefix=commands.when_mentioned_or("!"),
             intents=discord.Intents.all(),
             help_command=None,
-            owner_id=337971071485607936
+            owner_id=self.OWNER_ID
         )
 
     @timeit

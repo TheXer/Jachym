@@ -7,6 +7,10 @@ from src.ui.poll import Poll
 
 
 class ButtonBackend(discord.ui.Button):
+    """
+    Button class to edit a poll embed with
+    """
+
     def __init__(self,
                  custom_id: str,
                  poll: Poll,

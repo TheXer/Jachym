@@ -1,6 +1,7 @@
 import datetime
 
-from discord import Message
+import discord
+from discord import Message, app_commands
 from discord.ext import commands
 
 from src.ui.embeds import EmbedFromJSON
@@ -12,18 +13,24 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True, aliases=['help'])
-    async def pomoc(self, ctx: commands.Context) -> Message:
+    @app_commands.command(
+        name="pomoc",
+        description="Pomocníček, který ti pomůže s různými věcmi.")
+    async def pomoc(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("help")
-        return await ctx.send(embed=embed)
+        return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @commands.command(pass_context=True)
-    async def rozcestnik(self, ctx: commands.Context) -> Message:
+    @app_commands.command(
+        name="rozcestnik",
+        description="Všechny věci, co skaut potřebuje. Odkazy na webové stránky.")
+    async def rozcestnik(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("rozcestnik")
-        return await ctx.send(embed=embed)
+        return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @commands.command(pass_context=True)
-    async def ping(self, ctx: commands.Context) -> Message:
+    @app_commands.command(
+        name="ping",
+        description="Něco trvá dlouho? Koukni se, jestli není vysoká latence")
+    async def ping(self, interaction: discord.Interaction) -> Message:
         ping = round(self.bot.latency * 1000)
         if ping < 200:
             message = f'🟢 {ping} milisekund.'
@@ -32,7 +39,7 @@ class Utility(commands.Cog):
         else:
             message = f'🔴 {ping} milisekund.'
 
-        return await ctx.send(message)
+        return await interaction.response.send_message(message, ephemeral=True)
 
     @commands.command(pass_context=True, aliases=["smazat"])
     @commands.has_permissions(administrator=True)
