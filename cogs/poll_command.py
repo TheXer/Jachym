@@ -1,6 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+from loguru import logger
 
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
@@ -54,13 +55,22 @@ class PollCreate(commands.Cog):
 
         self.bot.active_discord_polls.add(poll)
         await self.bot.set_presence()
-
+        logger.info(f"Successfully added Pool - {message.id}")
         return await message.edit(embed=embed, view=view)
 
     @pool.error
     async def pool_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(embed=CooldownErrorEmbed(error.retry_after))
+
+    @commands.command()
+    async def anketa(self, ctx):
+        return await ctx.send(
+            "Ahoj! Tahle funkce teď už bohužel nebude fungovat :(\n"
+            "Ale neboj se! Do Jáchyma jsou už teď implementovány slash commands, takže místo vykříčníku teď dej /, "
+            "kde najdeš všechny funkce co teď Jáchym má! :)\n"
+            "Ještě jedna maličká věc - já jsem vyvíjený už pomalu třetí rok a můj autor by po mně chtěl, abych Ti poslal odkaz na formulář, kde by rád zpětnou vazbu na mě, jestli odvádím dobrou práci: https://forms.gle/1dFq84Ng39vdkxVQ7\n"
+            "Moc ti děkuji! A díky, že mě používáš! :)")
 
 
 async def setup(bot):

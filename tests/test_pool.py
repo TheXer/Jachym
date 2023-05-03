@@ -7,7 +7,7 @@ from src.ui.poll import Poll
 MESSAGE_ID = 123456789
 CHANNEL_ID = 123456789
 QUESTION = "Test No. 1"
-OPTIONS = ("1", "2", "3")
+OPTIONS = ["1", "2", "3"]
 USER_ID = 123456789
 
 
