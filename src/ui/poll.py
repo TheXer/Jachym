@@ -3,6 +3,9 @@ from typing import Optional, Union
 
 
 class Poll:
+    """
+    Slot class for each Pool object.
+    """
     MAX_OPTIONS = 10
     MIN_OPTIONS = 2
 
@@ -20,7 +23,7 @@ class Poll:
             message_id: int,
             channel_id: int,
             question: str,
-            options: tuple[str, ...],
+            options: list[str, ...],
             user_id: Optional[int] = None,
             date_created: Optional[Union[datetime, str]] = datetime.now().strftime("%Y-%m-%d")
     ):
@@ -44,7 +47,7 @@ class Poll:
         return self._question
 
     @property
-    def options(self) -> tuple[str, ...]:
+    def options(self) -> list[str, ...]:
         return self._options
 
     @property

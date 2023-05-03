@@ -6,6 +6,7 @@ import discord
 from aiomysql import create_pool
 from discord.ext import commands
 from dotenv import load_dotenv
+from loguru import logger
 
 from src.db_folder.databases import PollDatabase
 from src.helpers import timeit
@@ -17,6 +18,7 @@ load_dotenv("password.env")
 
 class Jachym(commands.Bot):
     MY_BIRTHDAY = "27.12.2020"
+    OWNER_ID = 337971071485607936
 
     def __init__(self):
         # https://discordpy.readthedocs.io/en/stable/intents.html
@@ -26,7 +28,8 @@ class Jachym(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
             intents=discord.Intents.all(),
-            help_command=None
+            help_command=None,
+            owner_id=self.OWNER_ID
         )
 
     @timeit
@@ -37,14 +40,23 @@ class Jachym(commands.Bot):
             self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
             self.active_discord_polls.add(poll)
 
-        print(f"There are now {len(self.active_discord_polls)} active pools!")
+        logger.success(f"There are now {len(self.active_discord_polls)} active pools!")
 
     async def set_presence(self):
         activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {len(self.active_discord_polls)} anket!"
         await self.change_presence(activity=discord.Game(name=activity_name))
 
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def load_extensions(self):
+        for filename in listdir("cogs/"):
+            if filename.endswith(".py"):
+                try:
+                    await self.load_extension(f"cogs.{filename[:-3]}")
+                    logger.success(f"{filename[:-3]} has loaded successfully")
+                except Exception as error:
+                    logger.error(error)
+
+    async def setup_hook(self):
+        logger.info("Getting setup ready...")
         self.pool = await create_pool(
             user=getenv("USER_DATABASE"),
             password=getenv("PASSWORD"),
@@ -54,16 +66,10 @@ class Jachym(commands.Bot):
             maxsize=20)
 
         await self._fetch_pools_from_database()
+
+        logger.success("Setup ready!")
+
+    @commands.Cog.listener()
+    async def on_ready(self):
         await self.set_presence()
-
-        print("Ready!")
-
-    async def load_extensions(self):
-        for filename in listdir("cogs/"):
-            if filename.endswith(".py"):
-                try:
-                    await self.load_extension(f"cogs.{filename[:-3]}")
-
-                    print(f"{filename[:-3]} has loaded successfully")
-                except Exception as error:
-                    raise error
+        logger.success("Bot online!")

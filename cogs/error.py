@@ -3,8 +3,6 @@ import logging
 from discord.ext import commands
 
 
-# for finding errors with the code.
-
 class Error(commands.Cog):
     """Basic class for catching errors and sending a message"""
 
@@ -19,21 +17,19 @@ class Error(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.ExpectedClosingQuoteError):
-            return await ctx.send(f"Pozor! Chybí tady: {error.close_quote} uvozovka!")
+        match error:
+            case commands.ExpectedClosingQuoteError():
+                return await ctx.send(f"Pozor! Chybí tady: {error} uvozovka!")
 
-        elif isinstance(error, commands.MissingPermissions):
-            return await ctx.send("Chybí ti požadovaná práva!")
+            case commands.MissingPermissions():
+                return await ctx.send("Chybí ti požadovaná práva!")
 
-        elif isinstance(error, commands.CommandNotFound):
-            pass
+            case commands.CommandNotFound():
+                pass
 
-        elif isinstance(error, commands.MissingRequiredArgument):
-            return await ctx.send("Chybí ti povinný argument, zkontroluj si ho znova!")
-
-        else:
-            self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
-            print(error)
+            case _:
+                self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
+                print(error)
 
     @commands.Cog.listener()
     async def on_command(self, ctx: commands.Context):
