@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional, Union, AsyncIterator
+from typing import Optional, AsyncIterator, TYPE_CHECKING
 
 import aiomysql
 import discord.errors
@@ -7,24 +7,27 @@ from discord import Message
 
 from src.ui.poll import Poll
 
+if TYPE_CHECKING:
+    from ..jachym import Jachym
+
 
 class Crud(ABC):
     def __init__(self, poll: aiomysql.pool.Pool):
         self.poll = poll
 
-    async def commit_value(self, sql: str, value: tuple):
+    async def commit_value(self, sql: str, value: tuple) -> None:
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.execute(sql, value)
             await conn.commit()
 
-    async def commit_many_values(self, sql: str, values: list[tuple]):
+    async def commit_many_values(self, sql: str, values: list[tuple]) -> None:
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.executemany(sql, values)
             await conn.commit()
 
-    async def fetch_all_values(self, sql: str, value: Optional[tuple] = None):
+    async def fetch_all_values(self, sql: str, value: Optional[tuple] = None) -> list[tuple]:
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.execute(sql, value)
@@ -37,7 +40,7 @@ class PollDatabase(Crud):
     def __init__(self, database_poll: aiomysql.pool.Pool):
         super().__init__(database_poll)
 
-    async def add(self, discord_poll: Poll):
+    async def add(self, discord_poll: Poll) -> None:
         sql = "INSERT INTO `Poll`(message_id, channel_id, question, date_created_at, creator_user) " \
               "VALUES (%s, %s, %s, %s, %s)"
         values = (
@@ -50,7 +53,7 @@ class PollDatabase(Crud):
 
         await self.commit_value(sql, values)
 
-    async def remove(self, message_id: int):
+    async def remove(self, message_id: int) -> None:
         sql = "DELETE FROM `Poll` WHERE message_id = %s"
         value = (message_id,)
 
@@ -70,7 +73,7 @@ class PollDatabase(Crud):
 
         return answers
 
-    async def fetch_all_polls(self, bot) -> AsyncIterator[Union[Poll, Message]]:
+    async def fetch_all_polls(self, bot: "Jachym") -> AsyncIterator[Poll | Message]:
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 

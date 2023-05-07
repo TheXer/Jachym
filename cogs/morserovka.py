@@ -1,4 +1,5 @@
-from discord import Message
+import discord
+from discord import Message, app_commands
 from discord.ext import commands
 
 
@@ -34,24 +35,31 @@ class Morse(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["encrypt"])
-    async def zasifruj(self, ctx: commands.Context, message: str) -> Message:
-        await ctx.message.delete()
+    @app_commands.command(
+        name="zasifruj",
+        description="Zašifruj text do morserovky!")
+    @app_commands.describe(
+        message="Věta nebo slovo pro zašifrování")
+    async def zasifruj(self, interaction: discord.Interaction, message: str) -> Message:
         try:
             cipher = "/".join(self.MORSE_CODE_DICT.get(letter.upper()) for letter in message)
-            return await ctx.send(cipher)
+            return await interaction.response.send_message(cipher)
         except TypeError:
-            return await ctx.send("Asi jsi nezadal správný text. Text musí být bez speciálních znaků!")
+            return await interaction.response.send_message(
+                "Asi jsi nezadal správný text. Text musí být bez speciálních znaků!")
 
-    @commands.command(aliases=["decrypt"])
-    async def desifruj(self, ctx: commands.Context, message: str) -> Message:
-        await ctx.message.delete()
+    @app_commands.command(
+        name="desifruj",
+        description="Dešifruj text z morserovky!")
+    @app_commands.describe(
+        message="Věta nebo slovo pro dešifrování")
+    async def desifruj(self, interaction: discord.Interaction, message: str) -> Message:
         try:
             decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(letter) for letter in message.split("/"))
-            return await ctx.send(decipher)
+            return await interaction.response.send_message(decipher)
         except TypeError:
             decipher = ''.join(self.REVERSED_MORSE_CODE_DICT.get(x) for x in message.split("|"))
-            return await ctx.send(decipher)
+            return await interaction.response.send_message(decipher)
 
 
 async def setup(bot):
