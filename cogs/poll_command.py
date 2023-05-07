@@ -64,7 +64,7 @@ class PollCreate(commands.Cog):
             await ctx.send(embed=CooldownErrorEmbed(error.retry_after))
 
     @commands.command()
-    async def anketa(self, ctx, question, *answers):
+    async def anketa(self, ctx: commands.Context, question, *answers):
         message = await ctx.send(embed=PollEmbedBase("Dělám na tom, vydrž!"))
 
         if error_handling(answers):
@@ -75,7 +75,7 @@ class PollCreate(commands.Cog):
             channel_id=message.channel.id,
             question=question,
             options=answers,
-            user_id=ctx.user.id
+            user_id=ctx.message.author.id
         )
 
         embed = PollEmbed(poll)
