@@ -1,8 +1,6 @@
 import asyncio
 from os import getenv
-
 from dotenv import load_dotenv
-
 from src.jachym import Jachym
 
 load_dotenv("password.env")

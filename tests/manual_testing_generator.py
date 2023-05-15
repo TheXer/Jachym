@@ -3,7 +3,7 @@ from datetime import timedelta
 
 """
 I'd like to test using the pytest, unfortunately I have to use manual testing through discord to check the correct
-behaviour of the bot. This is to ease the writing of tests, as I can generate them and use them for testing. 
+behaviour of the bot. This is to ease the writing of tests, as I can generate them and use them for testing.
 """
 
 

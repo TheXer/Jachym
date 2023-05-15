@@ -69,11 +69,7 @@ class PollDatabase(Crud):
 
         tuple_of_tuples_db = await self.fetch_all_values(sql, value)
 
-        answers = [
-            answer
-            for tupl in tuple_of_tuples_db
-            for answer in tupl
-        ]
+        answers = [answer for tupl in tuple_of_tuples_db for answer in tupl]
 
         return answers
 
