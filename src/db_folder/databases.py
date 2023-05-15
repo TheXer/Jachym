@@ -63,7 +63,7 @@ class PollDatabase(Crud):
 
         await self.commit_value(sql, value)
 
-    async def fetch_all_answers(self, message_id) -> list[str, ...]:
+    async def fetch_all_answers(self, message_id) -> list[str]:
         sql = "SELECT answers FROM `VoteButtons` WHERE message_id = %s"
         value = (message_id,)
 
