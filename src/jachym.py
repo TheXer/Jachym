@@ -6,6 +6,7 @@ import discord
 from aiomysql import create_pool
 from discord.ext import commands
 from dotenv import load_dotenv
+from loguru import logger
 
 from src.db_folder.databases import PollDatabase
 from src.helpers import timeit
@@ -41,7 +42,7 @@ class Jachym(commands.Bot):
             )
             self.active_discord_polls.add(poll)
 
-        print(f"There are now {len(self.active_discord_polls)} active pools!")
+        logger.success(f"There are now {len(self.active_discord_polls)} active pools!")
 
     async def set_presence(self) -> None:
         activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {len(self.active_discord_polls)} anket!"
@@ -52,14 +53,12 @@ class Jachym(commands.Bot):
             if filename.endswith(".py"):
                 try:
                     await self.load_extension(f"cogs.{filename[:-3]}")
-
-                    print(f"{filename[:-3]} has loaded successfully")
+                    logger.success(f"{filename[:-3]} has loaded successfully")
                 except Exception as error:
-                    raise error
+                    logger.error(error)
 
     async def setup_hook(self):
-        print("Getting setup ready...")
-
+        logger.info("Getting setup ready...")
         self.pool = await create_pool(
             user=getenv("USER_DATABASE"),
             password=getenv("PASSWORD"),
@@ -71,9 +70,9 @@ class Jachym(commands.Bot):
 
         await self._fetch_pools_from_database()
 
-        print("Setup ready!")
+        logger.success("Setup ready!")
 
     @commands.Cog.listener()
     async def on_ready(self):
         await self.set_presence()
-        print("Bot online!")
+        logger.success("Bot online!")

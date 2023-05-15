@@ -63,13 +63,17 @@ class PollDatabase(Crud):
 
         await self.commit_value(sql, value)
 
-    async def fetch_all_answers(self, message_id) -> tuple[str, ...]:
+    async def fetch_all_answers(self, message_id) -> list[str, ...]:
         sql = "SELECT answers FROM `VoteButtons` WHERE message_id = %s"
         value = (message_id,)
 
         tuple_of_tuples_db = await self.fetch_all_values(sql, value)
 
-        answers = tuple(answer for tupl in tuple_of_tuples_db for answer in tupl)
+        answers = [
+            answer
+            for tupl in tuple_of_tuples_db
+            for answer in tupl
+        ]
 
         return answers
 

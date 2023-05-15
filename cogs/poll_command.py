@@ -1,6 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+from loguru import logger
 
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
@@ -55,13 +56,38 @@ class PollCreate(commands.Cog):
 
         self.bot.active_discord_polls.add(poll)
         await self.bot.set_presence()
-
+        logger.info(f"Successfully added Pool - {message.id}")
         return await message.edit(embed=embed, view=view)
 
     @pool.error
     async def pool_error(self, ctx: commands.Context, error):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(embed=CooldownErrorEmbed(error.retry_after))
+
+    @commands.command()
+    async def anketa(self, ctx: commands.Context, question, *answers):
+        message = await ctx.send(embed=PollEmbedBase("Dělám na tom, vydrž!"))
+
+        if error_handling(answers):
+            return await message.edit(embed=PollEmbedBase(error_handling(answers)))
+
+        poll = Poll(
+            message_id=message.id,
+            channel_id=message.channel.id,
+            question=question,
+            options=answers,
+            user_id=ctx.message.author.id
+        )
+
+        embed = PollEmbed(poll)
+        view = PollView(poll, embed, db_poll=self.bot.pool)
+        await PollDatabase(self.bot.pool).add(poll)
+        await VoteButtonDatabase(self.bot.pool).add_options(poll)
+
+        self.bot.active_discord_polls.add(poll)
+        await self.bot.set_presence()
+        logger.info(f"Successfully added Pool - {message.id}")
+        return await message.edit(embed=embed, view=view)
 
 
 async def setup(bot):
