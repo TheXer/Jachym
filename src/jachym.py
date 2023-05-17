@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from src.db_folder.databases import PollDatabase
-from src.help_command import HelpSystemCommand
 from src.helpers import timeit
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
@@ -29,7 +28,6 @@ class Jachym(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
             intents=discord.Intents.all(),
-            help_command=HelpSystemCommand(),
             owner_id=self.OWNER_ID,
         )
 

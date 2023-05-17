@@ -14,12 +14,23 @@ class Utility(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
+        name="pomoc", description="Pomocníček, který ti pomůže s různými věcmi."
+    )
+    async def pomoc(self, interaction: discord.Interaction) -> Message:
+        embed = EmbedFromJSON().add_fields_from_json("help")
+        return await interaction.response.send_message(
+            embed=embed, file=EmbedFromJSON.PICTURE, ephemeral=True
+        )
+
+    @app_commands.command(
         name="rozcestnik",
         description="Všechny věci, co skaut potřebuje. Odkazy na webové stránky.",
     )
     async def rozcestnik(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("rozcestnik")
-        return await interaction.response.send_message(embed=embed, ephemeral=True)
+        return await interaction.response.send_message(
+            embed=embed, file=EmbedFromJSON.PICTURE, ephemeral=True
+        )
 
     @app_commands.command(
         name="ping",

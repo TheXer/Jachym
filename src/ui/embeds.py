@@ -11,9 +11,7 @@ from src.ui.poll import Poll
 class CooldownErrorEmbed(discord.Embed):
     def __init__(self, seconds: float):
         self.seconds = round(seconds)
-        formatted_date = discord.utils.format_dt(
-            datetime.now() + timedelta(seconds=10), "R"
-        )
+        formatted_date = discord.utils.format_dt(datetime.now() + timedelta(seconds=10), "R")
 
         super().__init__(
             title=f"⚠️ Vydrž! Další anketu můžeš založit {formatted_date}! ⚠️",
@@ -45,9 +43,7 @@ class PollEmbed(PollEmbedBase):
 
     def _add_options(self):
         for index, option in enumerate(self.answers):
-            self.add_field(
-                name=f"{self.REACTIONS[index]} {option}", value="**0** |", inline=False
-            )
+            self.add_field(name=f"{self.REACTIONS[index]} {option}", value="**0** |", inline=False)
 
     def _add_timestamp(self):
         self.add_field(
@@ -68,4 +64,6 @@ class EmbedFromJSON(discord.Embed):
     def add_fields_from_json(cls, root_path):
         with open(cls.PATH, "r") as f:
             text = json.load(f)[root_path]
-        return EmbedFromJSON.from_dict(text)
+        em = EmbedFromJSON().from_dict(text)
+        em.set_thumbnail(url="attachment://LogoPotkani.png")
+        return em

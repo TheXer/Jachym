@@ -11,18 +11,12 @@ class Error(commands.Cog):
 
         self.logger = logging.getLogger("discord")
         self.logger.setLevel(logging.WARN)
-        handler = logging.FileHandler(
-            filename="discord.log", encoding="utf-8", mode="w"
-        )
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
-        )
+        handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+        handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
         self.logger.addHandler(handler)
 
     @commands.Cog.listener()
-    async def on_command_error(
-        self, ctx: commands.Context, error: commands.CommandError
-    ):
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         match error:
             case commands.ExpectedClosingQuoteError():
                 return await ctx.send(f"Pozor! Chybí tady: {error} uvozovka!")
@@ -34,9 +28,7 @@ class Error(commands.Cog):
                 pass
 
             case _:
-                self.logger.critical(
-                    f"{ctx.message.id}, {ctx.message.content} | {error}"
-                )
+                self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
                 print(error)
 
     @commands.Cog.listener()

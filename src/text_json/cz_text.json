@@ -1,27 +1,23 @@
 {
   "help": {
     "title": "Pomocníček",
-    "description": "Jak na to?",
+    "description": "Nynější bot podporuje slash commands, který můžete vyzkoušet s pomocí /. Ke všem příkazům a jejich argumentům už můžete najít popisky, jak co udělat! Hurá!",
     "fields": [
       {
         "name": "Pomoc",
-        "value": "> `!pomoc, !help`\nKdyž potřebuješ pomoct s příkazy (tento příkaz)"
+        "value": "> `/pomoc, /help`\nKdyž potřebuješ pomoct s příkazy (tento příkaz)"
       },
       {
         "name": "Anketa",
-        "value": "> `!anketa \"Ananas na pizzu?\" \"????\" \"Mňamka\"`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset možností."
-      },
-      {
-        "name": "Událost (event)",
-        "value": "> `!udalost`\nPomocník pro události"
+        "value": "> `/anketa Ananas na pizzu? ????\"Mňamka\"Ale jo, dal bych si`\nAnketa, zobrazí počet osob hlasujících i kdo hlasoval\nMaximálně deset možností.\nOdpovědi se rozdělují s pomocí \", uvozovky."
       },
       {
         "name": "Skautský rozcestník",
         "value": "> `!rozcestnik`\nVýpis všech odkazů, co skaut potřebuje"
       },
       {
-        "name": "Šifrovačka", 
-        "value": "> `!zasifruj \"Ahoj!\"`\n> `!desifruj \".-/..../---/.---/--...-\"`\nMorseova abeceda, daný text přeloží do ní."
+        "name": "Šifrovačka",
+        "value": "> `/zasifruj Ahoj!`\n> `/desifruj .-/..../---/.---/--...-`\nMorseova abeceda, daný text přeloží do ní."
       },
       {
         "name": "Latence bota",
@@ -29,7 +25,7 @@
       },
       {
         "name": "Smazání zpráv",
-        "value": "> `!clear 25, !smazat 14`\nAdministrátorský příkaz pro smazání zpráv. Maximálně však 99 zpráv."
+        "value": "> `/clear 25, /smazat 14`\nAdministrátorský příkaz pro smazání zpráv. Maximálně však 99 zpráv."
       },
       {
         "name": "Ono to negungujéééé!",
@@ -100,24 +96,6 @@
         "name": "Potkani",
         "value": "> [Webové stránky](https://arcuspraha.skauting.cz/oddily/potkani/)\n• Internetové stránky oddílu, který vyvíjí Jáchyma",
         "inline": true
-      }
-    ]
-  },
-  "udalost": {
-    "_comment": "Help system for events",
-    "title": "Událost",
-    "fields": [
-      {
-        "name": "Vytvoření události",
-        "value": "> `!udalost create \"Družinovka\" \"Šéfem bude Právě\" \"12.5.2021 14:00\"`\n> `!udalost create \"Jméno výpravy/akce\" \"Popis výpravy\" \"Datum\"`\nVytvoří událost. Na daný den v přesně tu hodinu se pošle zpráva od bota včetně všech účastníků"
-      },
-      {
-        "name": "Výpis všech událostí",
-        "value": "> `!udalost vypis`\nVypíše všechny události seřazené podle data akce"
-      },
-      {
-        "name": "Smazání události",
-        "value": "> `!udalost delete/smazat ID`\n> `!udalost delete 853927841875750547`\nSmaže event z databáze. Pro číslo se musí vždy zkopírovat ID ze zprávy události, tzn. Najet myší na event, najet na tři tečky napravo a vybrat z výpisu Kopírovat ID"
       }
     ]
   }

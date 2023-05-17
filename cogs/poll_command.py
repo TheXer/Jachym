@@ -25,33 +25,28 @@ class PollCreate(commands.Cog):
         "description": "Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
         "question": "Otázka, na kterou potřebuješ vědět odpověď",
         "answer": 'Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
-        "help":
-            """
+        "help": """
             Jednoduchá anketa, která obsahuje otázku a odpovědi. Povoleno je 10 možností. 
-            """
+            """,
     }
 
     # Bugfix for iPhone users who have different font for aposthrofe
-    REGEX_PATTERN = ['"', '”', '“', '„']
+    REGEX_PATTERN = ['"', "”", "“", "„"]
 
     def __init__(self, bot: Jachym):
         self.bot = bot
 
-    @app_commands.command(
-        name=POLL_PARAMETERS["name"],
-        description=POLL_PARAMETERS["description"],
-    )
+    @app_commands.command(name="anketa", description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.")
+    @app_commands.rename(question="otázka", answer="odpovědi")
     @app_commands.describe(
-        question=POLL_PARAMETERS["question"],
-        answer=POLL_PARAMETERS["answer"],
+        question="Otázka, kterou chceš položit.",
+        answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
     )
     async def pool(self, interaction: discord.Interaction, question: str, answer: str) -> discord.Message:
-        await interaction.response.send_message(
-            embed=PollEmbedBase("Dělám na tom, vydrž!")
-        )
+        await interaction.response.send_message(embed=PollEmbedBase("Dělám na tom, vydrž!"))
         message = await interaction.original_response()
 
-        answers = re.split('|'.join(self.REGEX_PATTERN), answer)
+        answers = re.split("|".join(self.REGEX_PATTERN), answer)
         if error_handling(answers):
             return await message.edit(embed=PollEmbedBase(error_handling(answers)))
 

@@ -1,3 +1,5 @@
+import re
+
 import discord
 from discord import Message, app_commands
 from discord.ext import commands
@@ -58,7 +60,6 @@ class Morse(commands.Cog):
     }
 
     REVERSED_MORSE_CODE_DICT = {value: key for key, value in MORSE_CODE_DICT.items()}
-    SEPARATOR = ["/", "|"]
 
     def __init__(self, bot):
         self.bot = bot
@@ -66,30 +67,25 @@ class Morse(commands.Cog):
     @app_commands.command(name="zasifruj", description="Zašifruj text do morserovky!")
     @app_commands.describe(message="Věta nebo slovo pro zašifrování")
     async def zasifruj(self, interaction: discord.Interaction, message: str) -> Message:
-        try:
-            cipher = "/".join(
-                self.MORSE_CODE_DICT.get(letter.upper()) for letter in message
-            )
-            return await interaction.response.send_message(cipher)
-        except TypeError:
-            return await interaction.response.send_message(
-                "Asi jsi nezadal správný text. Text musí být bez speciálních znaků!"
-            )
+        cipher = ""
+        for letter in message:
+            if letter.upper() in self.MORSE_CODE_DICT.keys():
+                cipher += self.MORSE_CODE_DICT[letter.upper()] + "/"
+            else:
+                return await interaction.response.send_message(
+                    f'"{letter}" je písmenko, které já nedokážu přeložit. Zkus to bez háčku a čárek :/',
+                    ephemral=True,
+                )
+        return await interaction.response.send_message(cipher)
 
     @app_commands.command(name="desifruj", description="Dešifruj text z morserovky!")
     @app_commands.describe(message="Věta nebo slovo pro dešifrování")
     async def desifruj(self, interaction: discord.Interaction, message: str) -> Message:
-        try:
-            decipher = "".join(
-                self.REVERSED_MORSE_CODE_DICT.get(letter)
-                for letter in message.split("/")
-            )
-            return await interaction.response.send_message(decipher)
-        except TypeError:
-            decipher = "".join(
-                self.REVERSED_MORSE_CODE_DICT.get(x) for x in message.split("|")
-            )
-            return await interaction.response.send_message(decipher)
+        decipher = "".join(
+            self.REVERSED_MORSE_CODE_DICT.get(letter)
+            for letter in re.split(r"\/|\\|\|", message)
+        )
+        return await interaction.response.send_message(decipher)
 
 
 async def setup(bot):
