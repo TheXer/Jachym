@@ -42,7 +42,6 @@ váš server použijte tento
 Samozřejmě taky můžete napsat [issues](https://github.com/TheXer/Jachym/issues) nebo na discordu The Xero#1273, každý názor uvítám a bude jedině dobře pokud se
 tímto zlepší Jáchym.
 
-Budoucí plán s Jáchymem je přidat dlouho očekáváné Slash commands, nějaký web dashboard a podobně. Bohužel na to tolik času nemám a momentálně bych ocenil každou pomoc. A taky čekám na [Pycord](https://pycord.dev/). 
 </div>
 
 #### Proč Jáchyma pozvat na server?
@@ -60,23 +59,12 @@ Pokud se Vám toto repo líbí, nezapomeňte dát hvězdičky! ⭐⭐⭐⭐
 
 ___
 
-`command_prefix` je `!` a slouží jako zavolání Jáchyma. Pro nalezení příkazů, které chcete najít, je zde příkaz `!help`
-
-Jáchym má nyní pár funkcí, z nichž jsou dvě stěžejní pro chod a komunikaci oddílu.
+Jáchym má nyní pár funkcí, ale všichni jste tu pravděpodobně pro anketu:
 
 * 📊 `anketa` - Příkaz pro anketu, momentálně podporuje maximálně 10 odpovědí. Zobrazí jména i počet hlasujících.
 
-<img src="https://media.giphy.com/media/twyXyf23KkoUiI7kLY/giphy.gif" alt="gif eventu" width="50%">
-
-* ⚠️ `udalost` - Příkaz pro jednorázovou událost, funguje na podobném principu jako `anketa`, s tím rozdílem, že se tam
-  hlasuje o to, kdo jede na tu událost a kdo ne. Na přesně tom dni se potom označí uživatelé, že jim nějaký event
-  začíná.
-
-<img src="https://media.giphy.com/media/tjUKo4lkVVk52OA2CW/giphy.gif" alt="gif eventu" width="50%">
-<img src="fotky/event_pic.png" alt="fotka eventu" width="40%">
-
-* 🎉 Pak jsou další fun commandy jako `!zasifruj` a `!desifruj`, který přeloží daný text do morseovky. Další commandy
-  najdete v `!help`, který se snažím udržovat co nejaktuálnější.
+* 🎉 Pak jsou další fun commandy jako `/zasifruj` a `/desifruj`, který přeloží daný text do morseovky. Další commandy
+  najdete v `/help`, který se snažím udržovat co nejaktuálnější.
 
 </div>
 
@@ -88,7 +76,6 @@ ___
 
 Protože je Jáchym stále ve procesu developementu, jsou věci, které jsou třeba dodělat. Momentálně to jsou tyto věci:
 
-- [ ] Slash commands
 
 ...další přibudou, až mě napadnou další věci, co budou potřeba udělat. Pokud si myslíte že něco není v pořádku a je to
 potřeba upravit, neváhejte napsat do [issues](https://github.com/TheXer/Jachym/issues).

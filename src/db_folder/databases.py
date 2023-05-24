@@ -83,7 +83,7 @@ class PollDatabase(Crud):
                     message_id
                 )
 
-            except discord.errors.NotFound:
+            except (discord.errors.NotFound, discord.errors.Forbidden):
                 await self.remove(message_id)
                 print(f"Removed a Pool: {message_id, question}")
                 continue
