@@ -1,8 +1,8 @@
-from typing import Literal, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Greedy, Context
+from discord.ext.commands import Context, Greedy
 
 if TYPE_CHECKING:
     from src.jachym import Jachym
@@ -16,10 +16,10 @@ class SyncSlashCommands(commands.Cog):
     @commands.guild_only()
     @commands.is_owner()
     async def sync(
-        self,
-        ctx: Context,
-        guilds: Greedy[discord.Guild],
-        spec: Optional[Literal["-", "*", "^"]] = None,
+            self,
+            ctx: Context,
+            guilds: Greedy[discord.Guild],
+            spec: Literal["-", "*", "^"] | None = None,
     ) -> None:
         """
         A command to sync all slash commands to servers user requires. Works like this:
@@ -57,7 +57,7 @@ class SyncSlashCommands(commands.Cog):
                 synced = await self.bot.tree.sync()
 
             await ctx.send(
-                f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
+                f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}",
             )
             return
 

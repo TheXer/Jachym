@@ -15,8 +15,7 @@ from src.ui.poll_view import PollView
 def error_handling(answer: list[str]) -> str:
     if len(answer) > Poll.MAX_OPTIONS:
         return f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
-    elif len(answer) < Poll.MIN_OPTIONS:
-        return f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+    return f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
 
 
 class PollCreate(commands.Cog):
@@ -26,7 +25,7 @@ class PollCreate(commands.Cog):
         "question": "Otázka, na kterou potřebuješ vědět odpověď",
         "answer": 'Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
         "help": """
-            Jednoduchá anketa, která obsahuje otázku a odpovědi. Povoleno je 10 možností. 
+            Jednoduchá anketa, která obsahuje otázku a odpovědi. Povoleno je 10 možností.
             """,
     }
 
@@ -36,17 +35,31 @@ class PollCreate(commands.Cog):
     def __init__(self, bot: Jachym):
         self.bot = bot
 
-    @app_commands.command(name="anketa", description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.")
+    @app_commands.command(
+        name="anketa",
+        description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
+    )
     @app_commands.rename(question="otázka", answer="odpovědi")
     @app_commands.describe(
         question="Otázka, kterou chceš položit.",
         answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
     )
-    async def pool(self, interaction: discord.Interaction, question: str, answer: str) -> discord.Message:
-        await interaction.response.send_message(embed=PollEmbedBase("Dělám na tom, vydrž!"))
+    async def pool(
+            self,
+            interaction: discord.Interaction,
+            question: str,
+            answer: str,
+    ) -> discord.Message:
+        await interaction.response.send_message(
+            embed=PollEmbedBase("Dělám na tom, vydrž!"),
+        )
         message = await interaction.original_response()
 
-        answers = re.split("|".join(self.REGEX_PATTERN), answer)
+        answers = [
+            answer
+            for answer in re.split("|".join(self.REGEX_PATTERN), answer)
+            if answer.strip()
+        ]
         if error_handling(answers):
             return await message.edit(embed=PollEmbedBase(error_handling(answers)))
 

@@ -11,7 +11,10 @@ from src.ui.poll import Poll
 class CooldownErrorEmbed(discord.Embed):
     def __init__(self, seconds: float):
         self.seconds = round(seconds)
-        formatted_date = discord.utils.format_dt(datetime.now() + timedelta(seconds=10), "R")
+        formatted_date = discord.utils.format_dt(
+            datetime.now() + timedelta(seconds=10),
+            "R",
+        )
 
         super().__init__(
             title=f"⚠️ Vydrž! Další anketu můžeš založit {formatted_date}! ⚠️",
@@ -21,10 +24,9 @@ class CooldownErrorEmbed(discord.Embed):
     def correct_czech_writing(self) -> str:
         if self.seconds > 4:
             return f"{self.seconds} sekund"
-        elif 4 >= self.seconds > 1:
+        if 4 >= self.seconds > 1:
             return f"{self.seconds} sekundy"
-        else:
-            return "sekundu"
+        return "sekundu"
 
 
 class PollEmbedBase(discord.Embed):
@@ -43,7 +45,11 @@ class PollEmbed(PollEmbedBase):
 
     def _add_options(self):
         for index, option in enumerate(self.answers):
-            self.add_field(name=f"{self.REACTIONS[index]} {option}", value="**0** |", inline=False)
+            self.add_field(
+                name=f"{self.REACTIONS[index]} {option}",
+                value="**0** |",
+                inline=False,
+            )
 
     def _add_timestamp(self):
         self.add_field(
@@ -62,8 +68,8 @@ class EmbedFromJSON(discord.Embed):
 
     @classmethod
     def add_fields_from_json(cls, root_path):
-        with open(cls.PATH, "r") as f:
+        with pathlib.Path.open(cls.PATH) as f:
             text = json.load(f)[root_path]
-        em = EmbedFromJSON().from_dict(text)
-        em.set_thumbnail(url="attachment://LogoPotkani.png")
-        return em
+            em = EmbedFromJSON().from_dict(text)
+            em.set_thumbnail(url="attachment://LogoPotkani.png")
+            return em

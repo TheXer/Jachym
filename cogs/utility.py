@@ -14,12 +14,15 @@ class Utility(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        name="pomoc", description="Pomocníček, který ti pomůže s různými věcmi."
+        name="pomoc",
+        description="Pomocníček, který ti pomůže s různými věcmi.",
     )
     async def pomoc(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("help")
         return await interaction.response.send_message(
-            embed=embed, file=EmbedFromJSON.PICTURE, ephemeral=True
+            embed=embed,
+            file=EmbedFromJSON.PICTURE,
+            ephemeral=True,
         )
 
     @app_commands.command(
@@ -29,7 +32,9 @@ class Utility(commands.Cog):
     async def rozcestnik(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("rozcestnik")
         return await interaction.response.send_message(
-            embed=embed, file=EmbedFromJSON.PICTURE, ephemeral=True
+            embed=embed,
+            file=EmbedFromJSON.PICTURE,
+            ephemeral=True,
         )
 
     @app_commands.command(
@@ -54,10 +59,9 @@ class Utility(commands.Cog):
         if 1 < limit < 100:
             deleted = await ctx.channel.purge(limit=limit)
             return await ctx.send(
-                "Smazáno {deleted} zpráv.".format(deleted=len(deleted))
+                f"Smazáno {len(deleted)} zpráv.",
             )
-        else:
-            return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
+        return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
 
     @commands.command()
     async def time(self, ctx: commands.Context):
@@ -67,11 +71,12 @@ class Utility(commands.Cog):
     async def birthday(self, ctx):
         today = datetime.date.today()
         bot_birthday = datetime.datetime.strptime(
-            self.bot.MY_BIRTHDAY, "%d.%m.%Y"
+            self.bot.MY_BIRTHDAY,
+            "%d.%m.%Y",
         ).replace(year=today.year)
         days_until_birthday = (bot_birthday.date() - today).days
         await ctx.send(
-            f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!"
+            f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!",
         )
 
 

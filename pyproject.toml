@@ -1,0 +1,11 @@
+[tool.ruff]
+
+select = ["ALL"]
+
+ignore = [
+    "D", # Ignore docstrings
+    "E501", # Line too long, let Black handle this
+    "ANN", # typing, let mypy handle tis
+    "INP001" # Namespace package eeeeh
+]
+
