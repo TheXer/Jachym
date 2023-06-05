@@ -9,7 +9,7 @@ from src.ui.poll import Poll
 
 
 class CooldownErrorEmbed(discord.Embed):
-    LIMIT = 4x
+    LIMIT = 4
 
     def __init__(self, seconds: float):
         self.seconds = round(seconds)
