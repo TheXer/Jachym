@@ -9,6 +9,8 @@ from src.ui.poll import Poll
 
 
 class CooldownErrorEmbed(discord.Embed):
+    LIMIT = 4
+
     def __init__(self, seconds: float):
         self.seconds = round(seconds)
         formatted_date = discord.utils.format_dt(
@@ -22,9 +24,9 @@ class CooldownErrorEmbed(discord.Embed):
         )
 
     def correct_czech_writing(self) -> str:
-        if self.seconds > 4:
+        if self.seconds > self.LIMIT:
             return f"{self.seconds} sekund"
-        if 4 >= self.seconds > 1:
+        if self.LIMIT >= self.seconds > 1:
             return f"{self.seconds} sekundy"
         return "sekundu"
 
