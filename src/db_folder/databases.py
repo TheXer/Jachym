@@ -1,11 +1,14 @@
 from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 import aiomysql
 import discord.errors
 from discord import Message
 from loguru import logger
 
-from src.jachym import Jachym
+if TYPE_CHECKING:
+    from src.jachym import Jachym
+
 from src.ui.poll import Poll
 
 
@@ -68,7 +71,7 @@ class PollDatabase(Crud):
         tuple_of_tuples_db = await self.fetch_all_values(sql, value)
         return [answer for tupl in tuple_of_tuples_db for answer in tupl]
 
-    async def fetch_all_polls(self, bot: Jachym) -> AsyncIterator[Poll and Message]:
+    async def fetch_all_polls(self, bot: "Jachym") -> AsyncIterator[Poll and Message]:
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 

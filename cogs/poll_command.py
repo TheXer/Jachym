@@ -15,7 +15,8 @@ from src.ui.poll_view import PollView
 def error_handling(answer: list[str]) -> str:
     if len(answer) > Poll.MAX_OPTIONS:
         return f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
-    return f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+    if len(answer) < Poll.MIN_OPTIONS:
+        return f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
 
 
 class PollCreate(commands.Cog):
@@ -45,16 +46,17 @@ class PollCreate(commands.Cog):
         answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
     )
     async def pool(
-            self,
-            interaction: discord.Interaction,
-            question: str,
-            answer: str,
+        self,
+        interaction: discord.Interaction,
+        question: str,
+        answer: str,
     ) -> discord.Message:
         await interaction.response.send_message(
             embed=PollEmbedBase("Dělám na tom, vydrž!"),
         )
         message = await interaction.original_response()
 
+        # bugfix for answers that were empty
         answers = [
             answer
             for answer in re.split("|".join(self.REGEX_PATTERN), answer)

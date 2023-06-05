@@ -14,14 +14,14 @@ class ButtonBackend(discord.ui.Button):
     LENTGH_STRING = 30
 
     def __init__(
-            self,
-            custom_id: str,
-            poll: Poll,
-            emoji: str,
-            embed: PollEmbed,
-            index: int,
-            label: str,
-            db_poll: aiomysql.pool.Pool,
+        self,
+        custom_id: str,
+        poll: Poll,
+        emoji: str,
+        embed: PollEmbed,
+        index: int,
+        label: str,
+        db_poll: aiomysql.pool.Pool,
     ) -> None:
         super().__init__(
             label=label if len(label) <= self.LENTGH_STRING else "",
