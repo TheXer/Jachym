@@ -11,3 +11,8 @@ ignore = [
     "DTZ005", # datetime object without "tz" is not allowed
 ]
 
+line-length = 120
+
+[tool.black]
+
+line-length = 120

@@ -17,6 +17,7 @@ def error_handling(answer: list[str]) -> str:
         return f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
     if len(answer) < Poll.MIN_OPTIONS:
         return f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+    return None
 
 
 class PollCreate(commands.Cog):
@@ -57,11 +58,7 @@ class PollCreate(commands.Cog):
         message = await interaction.original_response()
 
         # bugfix for answers that were empty
-        answers = [
-            answer
-            for answer in re.split("|".join(self.REGEX_PATTERN), answer)
-            if answer.strip()
-        ]
+        answers = [answer for answer in re.split("|".join(self.REGEX_PATTERN), answer) if answer.strip()]
         if error_handling(answers):
             return await message.edit(embed=PollEmbedBase(error_handling(answers)))
 

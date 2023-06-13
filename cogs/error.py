@@ -22,9 +22,9 @@ class Error(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(
-            self,
-            ctx: commands.Context,
-            error: commands.CommandError,
+        self,
+        ctx: commands.Context,
+        error: commands.CommandError,
     ):
         match error:
             case commands.MissingPermissions():
