@@ -1,6 +1,6 @@
-import logging
-
 from discord.ext import commands
+
+from src.ui.error_handling import EmbedBaseError
 
 
 class Error(commands.Cog):
@@ -9,24 +9,16 @@ class Error(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        self.logger = logging.getLogger("discord")
-        handler = logging.FileHandler(
-            filename="discord.log",
-            encoding="utf-8",
-            mode="w",
-        )
-        handler.setFormatter(
-            logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"),
-        )
-        self.logger.addHandler(handler)
-
     @commands.Cog.listener()
     async def on_command_error(
-        self,
-        ctx: commands.Context,
-        error: commands.CommandError,
+            self,
+            ctx: commands.Context,
+            error: commands.CommandError,
     ):
         match error:
+            case EmbedBaseError():
+                return await error.send()
+
             case commands.MissingPermissions():
                 return await ctx.send("Chybí ti požadovaná práva!")
 
