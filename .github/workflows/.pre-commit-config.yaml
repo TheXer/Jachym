@@ -17,5 +17,5 @@ jobs:
           pip install -U -r requirements.txt
     
     - name: Ruff Check
-      uses: jpetrucciani/ruff-check@0.0.239
+      run: ruff check .
  
