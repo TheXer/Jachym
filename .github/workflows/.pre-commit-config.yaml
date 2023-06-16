@@ -13,8 +13,7 @@ jobs:
     - name: Install dependencies
       id: install-deps
       run: |
-          python -m pip install --upgrade pip setuptools wheel ruff black
-          pip install -U -r requirements.txt
+          python -m pip install --upgrade pip setuptools wheel ruff 
     
     - name: Black format
       uses: psf/black@stable
