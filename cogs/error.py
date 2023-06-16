@@ -1,4 +1,5 @@
 from discord.ext import commands
+from loguru import logger
 
 from src.ui.error_handling import EmbedBaseError
 
@@ -11,30 +12,25 @@ class Error(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(
-            self,
-            ctx: commands.Context,
-            error: commands.CommandError,
+        self,
+        ctx: commands.Context,
+        error: commands.CommandError,
     ):
         match error:
             case EmbedBaseError():
+                logger.error(error)
                 return await error.send()
 
             case commands.MissingPermissions():
+                logger.error(f"Missing Permissions: {error}")
                 return await ctx.send("Chybí ti požadovaná práva!")
 
             case commands.CommandNotFound():
                 return None
 
             case _:
-                self.logger.critical(
-                    f"{ctx.message.id}, {ctx.message.content} | {error}",
-                )
-                print(error)
+                logger.critical(f"Catched an error: {error}")
                 return None
-
-    @commands.Cog.listener()
-    async def on_command(self, ctx: commands.Context):
-        self.logger.info(f"{ctx.message.id} {ctx.message.content}")
 
 
 async def setup(bot):

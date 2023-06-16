@@ -1,5 +1,5 @@
 import re
-from src.ui.error_handling import TooFewOptionsError, TooManyOptionsError
+
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -8,15 +8,18 @@ from loguru import logger
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
 from src.ui.embeds import PollEmbed, PollEmbedBase
+from src.ui.error_handling import TooFewOptionsError, TooManyOptionsError
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
 
 def error_handling(answer: list[str]) -> TooFewOptionsError | TooManyOptionsError | None:
     if len(answer) > Poll.MAX_OPTIONS:
-        raise TooManyOptionsError(f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!")
+        msg = f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
+        raise TooManyOptionsError(msg)
     if len(answer) < Poll.MIN_OPTIONS:
-        raise TooFewOptionsError(f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!")
+        msg = f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+        raise TooFewOptionsError(msg)
     return None
 
 
