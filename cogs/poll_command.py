@@ -71,7 +71,7 @@ class PollCreate(commands.Cog):
             question=question,
             options=answers,
             user_id=interaction.user.id,
-        )
+
 
         embed = PollEmbed(poll)
         view = PollView(poll, embed, db_poll=self.bot.pool)
