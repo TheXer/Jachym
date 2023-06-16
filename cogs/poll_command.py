@@ -61,9 +61,7 @@ class PollCreate(commands.Cog):
         message = await interaction.original_response()
 
         # bugfix for answers that were empty
-        answers = [answer
-                   for answer in re.split("|".join(self.REGEX_PATTERN), answer)
-                   if answer.strip()]
+        answers = [answer for answer in re.split("|".join(self.REGEX_PATTERN), answer) if answer.strip()]
         if error_handling(answers):
             return await message.edit(embed=PollEmbedBase(error_handling(answers)))
 
