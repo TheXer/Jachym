@@ -5,38 +5,47 @@ from discord import app_commands
 from discord.ext import commands
 from loguru import logger
 
+from cogs.error import TooFewOptionsError, TooManyOptionsError
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
 from src.ui.embeds import PollEmbed, PollEmbedBase
-from src.ui.error_handling import TooFewOptionsError, TooManyOptionsError
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
 
-def error_handling(answer: list[str]) -> TooFewOptionsError | TooManyOptionsError | None:
-    if len(answer) > Poll.MAX_OPTIONS:
-        msg = f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
-        raise TooManyOptionsError(msg)
-    if len(answer) < Poll.MIN_OPTIONS:
-        msg = f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
-        raise TooFewOptionsError(msg)
-    return None
+class OptionsTransformer(app_commands.Transformer):
+    async def transform(
+        self, interaction: discord.Interaction, option: str
+    ) -> TooManyOptionsError | TooFewOptionsError | list[str]:
+        """
+        Transformer method to transformate a single string to multiple options. If they are not within parameters,
+        raises an error, else returns options.
+
+        Parameters
+        ----------
+            interaction: discord.Interaction
+            option: str
+
+        Returns
+        -------
+            List of strings
+
+        Raises:
+        -------
+            TooManyOptionsError, TooFewOptionsError
+
+        """
+        answers = [option for option in re.split('"|"|“|„', option) if option.strip()]
+        if len(answers) > Poll.MAX_OPTIONS:
+            msg = f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
+            raise TooManyOptionsError(msg, interaction)
+        if len(answers) < Poll.MIN_OPTIONS:
+            msg = f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+            raise TooFewOptionsError(msg, interaction)
+        return answers
 
 
 class PollCreate(commands.Cog):
-    POLL_PARAMETERS = {
-        "name": "anketa",
-        "description": "Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
-        "question": "Otázka, na kterou potřebuješ vědět odpověď",
-        "answer": 'Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
-        "help": """
-            Jednoduchá anketa, která obsahuje otázku a odpovědi. Povoleno je 10 možností.
-            """,
-    }
-
-    # Bugfix for iPhone users who have different font for aposthrofe
-    REGEX_PATTERN = ['"', "”", "“", "„"]
-
     def __init__(self, bot: Jachym):
         self.bot = bot
 
@@ -53,23 +62,18 @@ class PollCreate(commands.Cog):
         self,
         interaction: discord.Interaction,
         question: str,
-        answer: str,
+        answer: app_commands.Transform[list[str, ...], OptionsTransformer],
     ) -> discord.Message:
         await interaction.response.send_message(
-            embed=PollEmbedBase("Dělám na tom, vydrž!"),
+            embed=PollEmbedBase("Nahrávám anketu..."),
         )
         message = await interaction.original_response()
-
-        # bugfix for answers that were empty
-        answers = [answer for answer in re.split("|".join(self.REGEX_PATTERN), answer) if answer.strip()]
-        if error_handling(answers):
-            return await message.edit(embed=PollEmbedBase(error_handling(answers)))
 
         poll = Poll(
             message_id=message.id,
             channel_id=message.channel.id,
             question=question,
-            options=answers,
+            options=answer,
             user_id=interaction.user.id,
         )
 
