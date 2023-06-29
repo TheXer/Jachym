@@ -2,6 +2,7 @@ import re
 
 import discord
 from discord import app_commands
+from discord.app_commands import Transform, Transformer
 from discord.ext import commands
 from loguru import logger
 
@@ -13,7 +14,7 @@ from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
 
-class OptionsTransformer(app_commands.Transformer):
+class OptionsTransformer(Transformer):
     async def transform(
         self, interaction: discord.Interaction, option: str
     ) -> TooManyOptionsError | TooFewOptionsError | list[str]:
@@ -62,11 +63,9 @@ class PollCreate(commands.Cog):
         self,
         interaction: discord.Interaction,
         question: str,
-        answer: app_commands.Transform[list[str, ...], OptionsTransformer],
+        answer: Transform[list[str, ...], OptionsTransformer],
     ) -> discord.Message:
-        await interaction.response.send_message(
-            embed=PollEmbedBase("Nahrávám anketu..."),
-        )
+        await interaction.response.send_message(embed=PollEmbedBase("Nahrávám anketu..."))
         message = await interaction.original_response()
 
         poll = Poll(
