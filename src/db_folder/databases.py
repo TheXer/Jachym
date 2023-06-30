@@ -1,11 +1,14 @@
 from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 import aiomysql
 import discord.errors
 from discord import Message
 from loguru import logger
 
-from src.jachym import Jachym
+if TYPE_CHECKING:
+    from src.jachym import Jachym
+
 from src.ui.poll import Poll
 
 
@@ -68,7 +71,7 @@ class PollDatabase(Crud):
         tuple_of_tuples_db = await self.fetch_all_values(sql, value)
         return [answer for tupl in tuple_of_tuples_db for answer in tupl]
 
-    async def fetch_all_polls(self, bot: Jachym) -> AsyncIterator[Poll and Message]:
+    async def fetch_all_polls(self, bot: "Jachym") -> AsyncIterator[Poll and Message]:
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 
@@ -102,26 +105,21 @@ class VoteButtonDatabase(Crud):
 
     async def add_options(self, discord_poll: Poll):
         sql = "INSERT INTO `VoteButtons`(message_id, answers) VALUES (%s, %s)"
-        values = [
-            (discord_poll.message_id, vote_option)
-            for vote_option in discord_poll.options
-        ]
+        values = [(discord_poll.message_id, vote_option) for vote_option in discord_poll.options]
         await self.commit_many_values(sql, values)
 
-    async def add_user(self, message_id: Poll, user: int, index: int):
+    async def add_user(self, discord_poll: Poll, user: int, index: int):
         sql = "INSERT INTO `Answers`(message_id, vote_user, iter_index) VALUES (%s, %s, %s)"
-        values = (message_id, user, index)
+        values = (discord_poll.message_id, user, index)
         await self.commit_value(sql, values)
 
-    async def remove_user(self, message_id: Poll, user: int, index: int):
+    async def remove_user(self, discord_poll: Poll, user: int, index: int):
         sql = "DELETE FROM `Answers` WHERE message_id = %s AND vote_user = %s AND iter_index = %s"
-        value = (message_id, user, index)
+        value = (discord_poll.message_id, user, index)
         await self.commit_value(sql, value)
 
     async def fetch_all_users(self, poll: Poll, index: int) -> set[int]:
-        sql = (
-            "SELECT vote_user FROM `Answers` WHERE message_id = %s AND iter_index = %s"
-        )
+        sql = "SELECT vote_user FROM `Answers` WHERE message_id = %s AND iter_index = %s"
 
         values = (poll.message_id, index)
         users_voted_for = await self.fetch_all_values(sql, values)
