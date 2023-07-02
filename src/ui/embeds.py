@@ -15,7 +15,7 @@ class ErrorMessage(discord.Embed):
 
         description = (
             f"{message}\n\n"
-            f"{ScoutEmojis.FLEUR_DE_LIS} *Pokud máš pocit, že tohle by chyba být neměla, "
+            f"{ScoutEmojis.FLEUR_DE_LIS.value} *Pokud máš pocit, že tohle by chyba být neměla, "
             f"napiš [sem](https://github.com/TheXer/Jachym/issues/new/choose)*"
         )
 

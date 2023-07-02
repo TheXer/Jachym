@@ -1,5 +1,5 @@
 from discord import Interaction
-from discord.app_commands import CommandInvokeError
+from discord.app_commands import AppCommandError
 from discord.ext import commands
 from loguru import logger
 
@@ -32,7 +32,7 @@ class Error(commands.Cog):
                 )
 
 
-class PrettyError(CommandInvokeError):
+class PrettyError(AppCommandError):
     """Pretty errors useful for raise keyword"""
 
     def __init__(self, message: str, interaction: Interaction, inner_exception: Exception | None = None):
@@ -52,6 +52,10 @@ class TooManyOptionsError(PrettyError):
 
 
 class TooFewOptionsError(PrettyError):
+    pass
+
+
+class NoPermissionError(PrettyError):
     pass
 
 

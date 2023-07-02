@@ -108,6 +108,11 @@ class VoteButtonDatabase(Crud):
         values = [(discord_poll.message_id, vote_option) for vote_option in discord_poll.options]
         await self.commit_many_values(sql, values)
 
+    async def add_option(self, discord_poll: Poll, option: str):
+        sql = "INSERT INTO `VoteButtons`(message_id, answers) VALUES (%s, %s)"
+        value = discord_poll.message_id, option
+        await self.commit_value(sql, value)
+
     async def add_user(self, discord_poll: Poll, user: int, index: int):
         sql = "INSERT INTO `Answers`(message_id, vote_user, iter_index) VALUES (%s, %s, %s)"
         values = (discord_poll.message_id, user, index)
