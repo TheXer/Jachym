@@ -75,7 +75,7 @@ class PollDatabase(Crud):
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 
-        for message_id, channel_id, question, date, _ in polls:
+        for message_id, channel_id, question, date, user_id in polls:
             try:
                 message = await bot.get_partial_messageable(channel_id).fetch_message(
                     message_id,
@@ -94,6 +94,7 @@ class PollDatabase(Crud):
                 question=question,
                 date_created=date,
                 options=options,
+                user_id=user_id,
             )
 
             yield pool, message

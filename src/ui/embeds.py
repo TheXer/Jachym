@@ -5,7 +5,7 @@ from datetime import datetime
 import discord
 from discord.colour import Color, Colour
 
-from src.ui.emojis import ScoutEmojis
+from src.ui.emojis import NUMBER_EMOJIS, ScoutEmojis
 from src.ui.poll import Poll
 
 
@@ -35,8 +35,6 @@ class PollEmbedBase(discord.Embed):
 
 
 class PollEmbed(PollEmbedBase):
-    REACTIONS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-
     def __init__(self, poll: Poll):
         super().__init__(poll.question)
         self.answers = poll.options
@@ -48,7 +46,7 @@ class PollEmbed(PollEmbedBase):
     def _add_options(self):
         for index, option in enumerate(self.answers):
             self.add_field(
-                name=f"{self.REACTIONS[index]} {option}",
+                name=f"{NUMBER_EMOJIS[index]} {option}",
                 value="**0** |",
                 inline=False,
             )

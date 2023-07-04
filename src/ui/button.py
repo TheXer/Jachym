@@ -1,10 +1,9 @@
 import aiomysql.pool
 import discord
 
-from cogs.error import TooManyOptionsError
 from src.db_folder.databases import VoteButtonDatabase
 from src.ui.embeds import PollEmbed
-from src.ui.emojis import EssentialEmojis, ScoutEmojis
+from src.ui.emojis import ScoutEmojis
 from src.ui.modals import NewOptionModal
 from src.ui.poll import Poll
 
@@ -53,7 +52,7 @@ class ButtonBackend(discord.ui.Button):
             await vote_button_db.remove_user(self.poll, user, self.index)
             users_id.remove(user)
 
-        return {interaction.guild.get_member(user_id).display_name for user_id in users_id}
+        return {interaction.guild.get_member(user_id).mention for user_id in users_id}
 
     async def edit_embed(self, members: set[str]) -> discord.Embed:
         return self.embed.set_field_at(
@@ -67,7 +66,6 @@ class ButtonBackend(discord.ui.Button):
         members = await self.toggle_vote(interaction)
 
         edited_embed = await self.edit_embed(members)
-
         await interaction.response.edit_message(embed=edited_embed)
 
 
@@ -87,5 +85,30 @@ class NewOptionButton(discord.ui.Button):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        await self.interaction_check(interaction)
+
         modal = NewOptionModal(self.embed, self.db_pool, self.poll, self.view)
         await interaction.response.send_modal(modal)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> PermissionError | ValueError | None:
+        """
+        This function does error handling for pressing the button, before anything shows. Unfortunately it can't
+        use PrettyError() class, because components derived from Item() class has errors silently passed. This means
+        that we should use errors derived from Exception() class instead.
+
+        Parameters
+        ----------
+            interaction: discord.Interaction
+
+        Raises
+        -------
+            PermissionError, ValueError
+        """
+        if not self.poll.user_id == interaction.user.id:
+            raise PermissionError(
+                "Nejsi uživatel, kdo vytvořil tuto anketu. Nemáš tedy nárok ji upravovat.",
+            )
+        if len(self.embed.fields) >= 10:
+            raise ValueError("Nemůžeš mít víc jak 10 možností!")
+
+        return None

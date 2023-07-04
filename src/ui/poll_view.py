@@ -1,14 +1,13 @@
 import aiomysql.pool
-import discord
 
 from src.ui.button import ButtonBackend, NewOptionButton
 from src.ui.embeds import PollEmbed
+from src.ui.emojis import NUMBER_EMOJIS
+from src.ui.error_view import ErrorView
 from src.ui.poll import Poll
 
 
-class PollView(discord.ui.View):
-    REACTIONS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-
+class PollView(ErrorView):
     def __init__(self, poll: Poll, embed: PollEmbed, db_poll: aiomysql.pool.Pool):
         super().__init__(timeout=None)
         self.poll = poll
@@ -22,7 +21,7 @@ class PollView(discord.ui.View):
             button = ButtonBackend(
                 custom_id=f"{index}:{self.poll.message_id}",
                 label=f"{option}",
-                emoji=self.REACTIONS[index],
+                emoji=NUMBER_EMOJIS[index],
                 poll=self.poll,
                 embed=self.embed,
                 index=index,

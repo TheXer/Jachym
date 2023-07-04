@@ -6,10 +6,10 @@ from discord.app_commands import Transform, Transformer
 from discord.ext import commands
 from loguru import logger
 
-from cogs.error import TooFewOptionsError, TooManyOptionsError
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
 from src.ui.embeds import PollEmbed, PollEmbedBase
+from src.ui.error_view import TooFewOptionsError, TooManyOptionsError
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
