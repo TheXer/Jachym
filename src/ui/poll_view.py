@@ -8,6 +8,8 @@ from src.ui.poll import Poll
 
 
 class PollView(ErrorView):
+    """Poll View to add buttons to."""
+
     def __init__(self, poll: Poll, embed: PollEmbed, db_poll: aiomysql.pool.Pool):
         super().__init__(timeout=None)
         self.poll = poll

@@ -10,6 +10,8 @@ from src.ui.poll import Poll
 
 
 class ErrorMessage(discord.Embed):
+    """Whether an error occurs, this embed is sent."""
+
     def __init__(self, message: str):
         title = "⚠️ Jejda, někde se stala chyba..."
 
@@ -35,6 +37,8 @@ class PollEmbedBase(discord.Embed):
 
 
 class PollEmbed(PollEmbedBase):
+    """Base Embed view for Poll objects."""
+
     def __init__(self, poll: Poll):
         super().__init__(poll.question)
         self.answers = poll.options

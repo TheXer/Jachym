@@ -1,5 +1,6 @@
 import aiomysql.pool
 import discord
+from discord import InteractionResponse, Member
 
 from src.db_folder.databases import VoteButtonDatabase
 from src.ui.embeds import PollEmbed
@@ -39,7 +40,7 @@ class ButtonBackend(discord.ui.Button):
     def index(self):
         return self._index
 
-    async def toggle_vote(self, interaction: discord.Interaction) -> set[str]:
+    async def toggle_vote(self, interaction: discord.Interaction) -> set[Member]:
         vote_button_db = VoteButtonDatabase(self.db_poll)
         user = interaction.user.id
 
@@ -52,21 +53,21 @@ class ButtonBackend(discord.ui.Button):
             await vote_button_db.remove_user(self.poll, user, self.index)
             users_id.remove(user)
 
-        return {interaction.guild.get_member(user_id).mention for user_id in users_id}
+        return {interaction.guild.get_member(user_id) for user_id in users_id}
 
-    async def edit_embed(self, members: set[str]) -> discord.Embed:
+    async def edit_embed(self, members: set[Member]) -> discord.Embed:
         return self.embed.set_field_at(
             index=self.index,
             name=self.embed.fields[self.index].name,
-            value=f"**{len(members)}** | {', '.join(members)}",
+            value=f"**{len(members)}** | {', '.join(member.mention for member in members)}",
             inline=False,
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> InteractionResponse:
         members = await self.toggle_vote(interaction)
 
         edited_embed = await self.edit_embed(members)
-        await interaction.response.edit_message(embed=edited_embed)
+        return await interaction.response.edit_message(embed=edited_embed)
 
 
 class NewOptionButton(discord.ui.Button):
@@ -84,11 +85,11 @@ class NewOptionButton(discord.ui.Button):
             row=4,
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> InteractionResponse:
         await self.interaction_check(interaction)
 
         modal = NewOptionModal(self.embed, self.db_pool, self.poll, self.view)
-        await interaction.response.send_modal(modal)
+        return await interaction.response.send_modal(modal)
 
     async def interaction_check(self, interaction: discord.Interaction) -> PermissionError | ValueError | None:
         """
@@ -104,11 +105,10 @@ class NewOptionButton(discord.ui.Button):
         -------
             PermissionError, ValueError
         """
-        if not self.poll.user_id == interaction.user.id:
-            raise PermissionError(
-                "Nejsi uživatel, kdo vytvořil tuto anketu. Nemáš tedy nárok ji upravovat.",
-            )
+        if self.poll.user_id != interaction.user.id:
+            msg = "Nejsi uživatel, kdo vytvořil tuto anketu. Nemáš tedy nárok ji upravovat."
+            raise PermissionError(msg)
         if len(self.embed.fields) >= 10:
-            raise ValueError("Nemůžeš mít víc jak 10 možností!")
-
+            msg = "Nemůžeš mít víc jak 10 možností!"
+            raise ValueError(msg)
         return None

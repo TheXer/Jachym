@@ -2,9 +2,7 @@ from datetime import date, datetime
 
 
 class Poll:
-    """
-    Slot class for each Pool object.
-    """
+    """Slot class for each Pool object."""
 
     MAX_OPTIONS = 10
     MIN_OPTIONS = 2

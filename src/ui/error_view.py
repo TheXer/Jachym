@@ -1,5 +1,5 @@
 import discord
-from discord import Interaction
+from discord import Interaction, InteractionResponse
 from discord.app_commands import CommandInvokeError
 from discord.ui import Item
 from loguru import logger
@@ -15,26 +15,28 @@ class PrettyError(CommandInvokeError):
         self.message = message
         self.interaction = interaction
 
-    async def send(self):
+    async def send(self) -> InteractionResponse:
         if not self.interaction.response.is_done():
-            await self.interaction.response.send_message(embed=ErrorMessage(self.message), ephemeral=True)
-        else:
-            await self.interaction.followup.send(embed=ErrorMessage(self.message), ephemeral=True)
+            return await self.interaction.response.send_message(embed=ErrorMessage(self.message), ephemeral=True)
+        return await self.interaction.followup.send(embed=ErrorMessage(self.message), ephemeral=True)
 
 
 class ErrorView(discord.ui.View):
-    async def on_error(self, interaction: Interaction, error: Exception, item: Item):
+    async def on_error(self, interaction: Interaction, error: Exception, item: Item) -> InteractionResponse:
         logger.error(f"{item.__class__.__name__} raised an error: {str(error)}")
-        await interaction.response.send_message(embed=ErrorMessage(str(error)), ephemeral=True)
+        return await interaction.response.send_message(embed=ErrorMessage(str(error)), ephemeral=True)
 
 
 class TooManyOptionsError(PrettyError):
+    "Whether the view has too many options."
     pass
 
 
 class TooFewOptionsError(PrettyError):
+    "Whether the view has too few options."
     pass
 
 
 class NoPermissionError(PrettyError):
+    "Whether the user has no permissions to edit."
     pass

@@ -1,16 +1,19 @@
+import aiomysql
 import discord
 
 from src.db_folder.databases import VoteButtonDatabase
+from src.ui.embeds import PollEmbed
 from src.ui.emojis import NUMBER_EMOJIS
+from src.ui.poll import Poll
 
 
 class NewOptionModal(discord.ui.Modal):
-    def __init__(self, embed, db_poll, poll, view):
-        super().__init__(title="Nová možnost")
+    def __init__(self, embed: PollEmbed, db_poll: aiomysql.pool.Pool, poll: Poll, view):
+        super().__init__(title="Přidání nové možnosti do ankety")
 
         self.new_option = discord.ui.TextInput(
             label="Jméno nové možnosti",
-            min_length=2,
+            min_length=1,
             max_length=255,
             required=True,
             placeholder="Vymysli príma otázku!",
@@ -25,10 +28,10 @@ class NewOptionModal(discord.ui.Modal):
         self.view = view
 
     async def on_submit(self, interaction: discord.Interaction):
-        em = await self.add_item_to_embed(interaction)
+        em = await self.add_item_to_embed()
         await interaction.response.edit_message(embed=em, view=self.view)
 
-    async def add_item_to_embed(self, interaction: discord.Interaction):
+    async def add_item_to_embed(self) -> PollEmbed:
         # To avoid circular import
         from src.ui.button import ButtonBackend
 
