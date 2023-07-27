@@ -40,3 +40,8 @@ class TooFewOptionsError(PrettyError):
 class NoPermissionError(PrettyError):
     "Whether the user has no permissions to edit."
     pass
+
+
+class DatetimeNotRecognizedError(PrettyError):
+    "Whether the datetime is not recognized."
+    pass

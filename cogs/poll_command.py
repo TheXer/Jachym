@@ -1,5 +1,7 @@
+import datetime
 import re
 
+import dateparser
 import discord
 from discord import app_commands
 from discord.app_commands import Transform, Transformer
@@ -9,7 +11,7 @@ from loguru import logger
 from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
 from src.ui.embeds import PollEmbed, PollEmbedBase
-from src.ui.error_view import TooFewOptionsError, TooManyOptionsError
+from src.ui.error_view import DatetimeNotRecognizedError, TooFewOptionsError, TooManyOptionsError
 from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 
@@ -46,6 +48,21 @@ class OptionsTransformer(Transformer):
         return answers
 
 
+class DatetimeTransformer(Transformer):
+    async def transform(self, interaction: discord.Interaction, date_time: str) -> datetime.datetime:
+        parsed_datetime = dateparser.parse(
+            date_time,
+            languages=["cs", "en", "sk"],
+        )
+        if not parsed_datetime:
+            msg = "Daný datum jsem bohužel nerozpoznal, zkusíš to znova?"
+            raise DatetimeNotRecognizedError(msg, interaction)
+        if parsed_datetime < datetime.datetime.now():
+            msg = "Datum nemůžeš zakládat v minulosti!"
+            raise DatetimeNotRecognizedError(msg, interaction)
+        return parsed_datetime
+
+
 class PollCreate(commands.Cog):
     def __init__(self, bot: Jachym):
         self.bot = bot
@@ -54,16 +71,22 @@ class PollCreate(commands.Cog):
         name="anketa",
         description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
     )
-    @app_commands.rename(question="otázka", answer="odpovědi")
+    @app_commands.rename(
+        question="otázka",
+        answer="odpovědi",
+        date_time="datum",
+    )
     @app_commands.describe(
         question="Otázka, kterou chceš položit.",
         answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
+        date_time="Den, na který anketa skončí.",
     )
     async def pool(
         self,
         interaction: discord.Interaction,
         question: str,
         answer: Transform[list[str, ...], OptionsTransformer],
+        date_time: Transform[datetime.datetime, DatetimeTransformer] | None,
     ) -> discord.Message:
         await interaction.response.send_message(embed=PollEmbedBase("Nahrávám anketu..."))
         message = await interaction.original_response()
@@ -74,6 +97,7 @@ class PollCreate(commands.Cog):
             question=question,
             options=answer,
             user_id=interaction.user.id,
+            date_created=date_time,
         )
 
         embed = PollEmbed(poll)
