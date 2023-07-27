@@ -70,10 +70,9 @@ class PollCreate(commands.Cog):
         "question": "Otázka, na kterou potřebuješ znát odpověď",
         "answers": f'Odpovědi, odpovědi rozděluj uvozovkami ("), maximálně až {Poll.MAX_OPTIONS} možností',
         "date_time": "Datum, kdy anketa skončí",
-        "help":
-            f"""
+        "help": f"""
             Jednoduchá anketa, která obsahuje otázku a odpovědi. Povoleno je až {Poll.MAX_OPTIONS} možností. 
-            """
+            """,
     }
 
     def __init__(self, bot: Jachym):
