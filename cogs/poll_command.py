@@ -43,7 +43,7 @@ class OptionsTransformer(Transformer):
             msg = f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
             raise TooManyOptionsError(msg, interaction)
         if len(answers) < Poll.MIN_OPTIONS:
-            msg = f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+            msg = f"Zadal jsi příliš málo odpovědí, zadej alespoň {Poll.MIN_OPTIONS}!"
             raise TooFewOptionsError(msg, interaction)
         return answers
 
@@ -64,12 +64,24 @@ class DatetimeTransformer(Transformer):
 
 
 class PollCreate(commands.Cog):
+    POLL_PARAMETERS = {
+        "name": "anketa",
+        "description": "Anketa pro hlasování. Jsou vidět všichni, kteří se zapojili.",
+        "question": "Otázka, na kterou potřebuješ znát odpověď",
+        "answers": f'Odpovědi, odpovědi rozděluj uvozovkami ("), maximálně až {Poll.MAX_OPTIONS} možností',
+        "date_time": "Datum, kdy anketa skončí",
+        "help":
+            f"""
+            Jednoduchá anketa, která obsahuje otázku a odpovědi. Povoleno je až {Poll.MAX_OPTIONS} možností. 
+            """
+    }
+
     def __init__(self, bot: Jachym):
         self.bot = bot
 
     @app_commands.command(
-        name="anketa",
-        description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
+        name=POLL_PARAMETERS["name"],
+        description=POLL_PARAMETERS["description"],
     )
     @app_commands.rename(
         question="otázka",
@@ -77,9 +89,9 @@ class PollCreate(commands.Cog):
         date_time="datum",
     )
     @app_commands.describe(
-        question="Otázka, kterou chceš položit.",
-        answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
-        date_time="Den, na který anketa skončí.",
+        question=POLL_PARAMETERS["question"],
+        answer=POLL_PARAMETERS["answers"],
+        date_time=POLL_PARAMETERS["date_time"],
     )
     async def pool(
         self,
