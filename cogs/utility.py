@@ -31,6 +31,7 @@ class Utility(commands.Cog):
     )
     async def rozcestnik(self, interaction: discord.Interaction) -> Message:
         embed = EmbedFromJSON().add_fields_from_json("rozcestnik")
+
         return await interaction.response.send_message(
             embed=embed,
             file=EmbedFromJSON.PICTURE,
@@ -74,6 +75,7 @@ class Utility(commands.Cog):
             self.bot.MY_BIRTHDAY,
             "%d.%m.%Y",
         ).replace(year=today.year)
+
         days_until_birthday = (bot_birthday.date() - today).days
         await ctx.send(
             f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!",

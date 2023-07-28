@@ -28,11 +28,7 @@ class Crud:
             await cursor.executemany(sql, values)
             await conn.commit()
 
-    async def fetch_all_values(
-        self,
-        sql: str,
-        value: tuple | None = None,
-    ) -> list[tuple]:
+    async def fetch_all_values(self, sql: str, value: Optional[tuple] = None) -> list[tuple]:
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.execute(sql, value)
@@ -77,9 +73,7 @@ class PollDatabase(Crud):
 
         for message_id, channel_id, question, date, _ in polls:
             try:
-                message = await bot.get_partial_messageable(channel_id).fetch_message(
-                    message_id,
-                )
+                message = await bot.get_partial_messageable(channel_id).fetch_message(message_id)
 
             except (discord.errors.NotFound, discord.errors.Forbidden):
                 await self.remove(message_id)
@@ -106,6 +100,7 @@ class VoteButtonDatabase(Crud):
     async def add_options(self, discord_poll: Poll):
         sql = "INSERT INTO `VoteButtons`(message_id, answers) VALUES (%s, %s)"
         values = [(discord_poll.message_id, vote_option) for vote_option in discord_poll.options]
+
         await self.commit_many_values(sql, values)
 
     async def add_user(self, discord_poll: Poll, user: int, index: int):
@@ -123,4 +118,5 @@ class VoteButtonDatabase(Crud):
 
         values = (poll.message_id, index)
         users_voted_for = await self.fetch_all_values(sql, values)
+
         return {user for user_tuple in users_voted_for for user in user_tuple}

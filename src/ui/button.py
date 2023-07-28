@@ -28,6 +28,7 @@ class ButtonBackend(discord.ui.Button):
             emoji=emoji,
             custom_id=custom_id,
         )
+
         self.poll = poll
         self.embed = embed
         self._index = index

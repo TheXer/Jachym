@@ -56,9 +56,8 @@ class SyncSlashCommands(commands.Cog):
             else:
                 synced = await self.bot.tree.sync()
 
-            await ctx.send(
-                f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}",
-            )
+            await ctx.send(f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}")
+
             return
 
         ret = 0
