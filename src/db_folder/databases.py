@@ -75,7 +75,6 @@ class PollDatabase(Crud):
             try:
                 message = await bot.get_partial_messageable(channel_id).fetch_message(message_id)
 
-
             except (discord.errors.NotFound, discord.errors.Forbidden):
                 await self.remove(message_id)
                 logger.warning(f"Removed a Pool: {message_id, question}")
@@ -121,4 +120,3 @@ class VoteButtonDatabase(Crud):
         users_voted_for = await self.fetch_all_values(sql, values)
 
         return {user for user_tuple in users_voted_for for user in user_tuple}
-

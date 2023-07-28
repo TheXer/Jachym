@@ -23,7 +23,6 @@ class ButtonBackend(discord.ui.Button):
         label: str,
         db_poll: aiomysql.pool.Pool,
     ) -> None:
-      
         super().__init__(
             label=label if len(label) <= self.LENTGH_STRING else "",
             emoji=emoji,
@@ -45,14 +44,12 @@ class ButtonBackend(discord.ui.Button):
 
         users_id = await vote_button_db.fetch_all_users(self.poll, self.index)
 
-
         if user not in users_id:
             await vote_button_db.add_user(self.poll, user, self.index)
             users_id.add(user)
         else:
             await vote_button_db.remove_user(self.poll, user, self.index)
             users_id.remove(user)
-
 
         return {interaction.guild.get_member(user_id).display_name for user_id in users_id}
 

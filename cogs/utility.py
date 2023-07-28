@@ -25,7 +25,6 @@ class Utility(commands.Cog):
             ephemeral=True,
         )
 
-
     @app_commands.command(
         name="rozcestnik",
         description="Všechny věci, co skaut potřebuje. Odkazy na webové stránky.",
@@ -38,7 +37,6 @@ class Utility(commands.Cog):
             file=EmbedFromJSON.PICTURE,
             ephemeral=True,
         )
-
 
     @app_commands.command(
         name="ping",
@@ -66,7 +64,6 @@ class Utility(commands.Cog):
             )
         return await ctx.send("Limit musí být někde mezi 1 nebo 99!")
 
-
     @commands.command()
     async def time(self, ctx: commands.Context):
         return await ctx.send(str(datetime.datetime.now()))
@@ -78,7 +75,7 @@ class Utility(commands.Cog):
             self.bot.MY_BIRTHDAY,
             "%d.%m.%Y",
         ).replace(year=today.year)
-        
+
         days_until_birthday = (bot_birthday.date() - today).days
         await ctx.send(
             f"Moje narozeniny jsou 27. prosince 2020 a zbývá přesně {days_until_birthday} dní do mých narozenin!",

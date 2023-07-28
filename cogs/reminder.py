@@ -52,6 +52,8 @@ class Reminder(commands.Cog):
     async def reminder(self, interaction: discord.Interaction, time: str, topic: str) -> Message:
         """Reminder command"""
         trigger_time: datetime = dateparser.parse(time)
-        await interaction.response.send_message(f"Za {self.countdown(trigger_time)} ti připomenu {topic}!", ephemeral=True)
+        await interaction.response.send_message(
+            f"Za {self.countdown(trigger_time)} ti připomenu {topic}!", ephemeral=True
+        )
         await asyncio.sleep(trigger_time.timestamp() - datetime.now().timestamp())
         await interaction.followup.send(f"{interaction.user.mention} připomínám ti {topic}!", ephemeral=True)
