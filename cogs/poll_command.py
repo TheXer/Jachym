@@ -36,7 +36,10 @@ class PollCreate(commands.Cog):
     def __init__(self, bot: Jachym):
         self.bot = bot
 
-    @app_commands.command(name="anketa", description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.")
+    @app_commands.command(
+        name="anketa",
+        description="Anketa pro hlasování. Jsou vidět všichni hlasovatelé.",
+    )
     @app_commands.rename(question="otázka", answer="odpovědi")
     @app_commands.describe(
         question="Otázka, kterou chceš položit.",

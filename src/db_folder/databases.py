@@ -27,9 +27,7 @@ class Crud(ABC):
             await cursor.executemany(sql, values)
             await conn.commit()
 
-    async def fetch_all_values(
-        self, sql: str, value: Optional[tuple] = None
-    ) -> list[tuple]:
+    async def fetch_all_values(self, sql: str, value: Optional[tuple] = None) -> list[tuple]:
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.execute(sql, value)
@@ -79,9 +77,7 @@ class PollDatabase(Crud):
 
         for message_id, channel_id, question, date, _ in polls:
             try:
-                message = await bot.get_partial_messageable(channel_id).fetch_message(
-                    message_id
-                )
+                message = await bot.get_partial_messageable(channel_id).fetch_message(message_id)
 
             except (discord.errors.NotFound, discord.errors.Forbidden):
                 await self.remove(message_id)
@@ -107,10 +103,7 @@ class VoteButtonDatabase(Crud):
 
     async def add_options(self, discord_poll: Poll):
         sql = "INSERT INTO `VoteButtons`(message_id, answers) VALUES (%s, %s)"
-        values = [
-            (discord_poll.message_id, vote_option)
-            for vote_option in discord_poll.options
-        ]
+        values = [(discord_poll.message_id, vote_option) for vote_option in discord_poll.options]
 
         await self.commit_many_values(sql, values)
 
@@ -127,15 +120,11 @@ class VoteButtonDatabase(Crud):
         await self.commit_value(sql, value)
 
     async def fetch_all_users(self, message_id: Poll.message_id, index) -> set[int]:
-        sql = (
-            "SELECT vote_user FROM `Answers` WHERE message_id = %s AND iter_index = %s"
-        )
+        sql = "SELECT vote_user FROM `Answers` WHERE message_id = %s AND iter_index = %s"
         values = (message_id, index)
 
         users_voted_for = await self.fetch_all_values(sql, values)
 
-        clean_users_voted_for = set(
-            user for user_tuple in users_voted_for for user in user_tuple
-        )
+        clean_users_voted_for = set(user for user_tuple in users_voted_for for user in user_tuple)
 
         return clean_users_voted_for

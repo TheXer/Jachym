@@ -26,9 +26,7 @@ class Poll:
         question: str,
         options: list[str],
         user_id: Optional[int] = None,
-        date_created: Optional[Union[datetime, str]] = datetime.now().strftime(
-            "%Y-%m-%d"
-        ),
+        date_created: Optional[Union[datetime, str]] = datetime.now().strftime("%Y-%m-%d"),
     ):
         self._message_id = message_id
         self._channel_id = channel_id

@@ -36,9 +36,7 @@ class Jachym(commands.Bot):
         poll_database = PollDatabase(self.pool)
 
         async for poll, message in poll_database.fetch_all_polls(self):
-            self.add_view(
-                PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool)
-            )
+            self.add_view(PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool))
             self.active_discord_polls.add(poll)
 
         logger.success(f"There are now {len(self.active_discord_polls)} active pools!")

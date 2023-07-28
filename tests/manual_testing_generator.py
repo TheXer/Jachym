@@ -19,9 +19,7 @@ def test_pools(count=2) -> str:
 
 def test_events():
     date = datetime.now() + timedelta(minutes=1)
-    test_string = (
-        f'!udalost create "Name" "Description" "{date.strftime("%d.%m.%Y %H:%M")}"'
-    )
+    test_string = f'!udalost create "Name" "Description" "{date.strftime("%d.%m.%Y %H:%M")}"'
 
     return test_string
 
