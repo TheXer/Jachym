@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 """
 I'd like to test using the pytest, unfortunately I have to use manual testing through discord to check the correct

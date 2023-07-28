@@ -1,30 +1,32 @@
 import json
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import discord
-from discord.colour import Color
+from discord.colour import Color, Colour
 
+from src.ui.emojis import ScoutEmojis
 from src.ui.poll import Poll
 
 
-class CooldownErrorEmbed(discord.Embed):
-    def __init__(self, seconds: float):
-        self.seconds = round(seconds)
-        formatted_date = discord.utils.format_dt(datetime.now() + timedelta(seconds=10), "R")
+class ErrorMessage(discord.Embed):
+    def __init__(self, message: str):
+        title = "⚠️ Jejda, někde se stala chyba..."
 
-        super().__init__(
-            title=f"⚠️ Vydrž! Další anketu můžeš založit {formatted_date}! ⚠️",
-            colour=Color.red(),
+        description = (
+            f"{message}\n\n"
+            f"{ScoutEmojis.FLEUR_DE_LIS} *Pokud máš pocit, že tohle by chyba být neměla, "
+            f"napiš [sem](https://github.com/TheXer/Jachym/issues/new/choose)*"
         )
 
-    def correct_czech_writing(self) -> str:
-        if self.seconds > 4:
-            return f"{self.seconds} sekund"
-        elif 4 >= self.seconds > 1:
-            return f"{self.seconds} sekundy"
-        else:
-            return "sekundu"
+        self.set_footer(text="Uděláno s ♥!")
+
+        super().__init__(
+            title=title,
+            description=description,
+            colour=Colour.red(),
+            timestamp=datetime.now(),
+        )
 
 
 class PollEmbedBase(discord.Embed):
@@ -39,18 +41,17 @@ class PollEmbed(PollEmbedBase):
         super().__init__(poll.question)
         self.answers = poll.options
         self._add_options()
-        self._add_timestamp()
+
+        self.set_footer(text="Uděláno s ♥!")
+        self.timestamp = datetime.now()
 
     def _add_options(self):
         for index, option in enumerate(self.answers):
-            self.add_field(name=f"{self.REACTIONS[index]} {option}", value="**0** |", inline=False)
-
-    def _add_timestamp(self):
-        self.add_field(
-            name="",
-            value=f"Anketa byla vytvořena {discord.utils.format_dt(datetime.now(), 'R')}",
-            inline=False,
-        )
+            self.add_field(
+                name=f"{self.REACTIONS[index]} {option}",
+                value="**0** |",
+                inline=False,
+            )
 
 
 class EmbedFromJSON(discord.Embed):
@@ -62,8 +63,8 @@ class EmbedFromJSON(discord.Embed):
 
     @classmethod
     def add_fields_from_json(cls, root_path):
-        with open(cls.PATH, "r") as f:
+        with pathlib.Path.open(cls.PATH) as f:
             text = json.load(f)[root_path]
-        em = EmbedFromJSON().from_dict(text)
-        em.set_thumbnail(url="attachment://LogoPotkani.png")
-        return em
+            em = EmbedFromJSON().from_dict(text)
+            em.set_thumbnail(url="attachment://LogoPotkani.png")
+            return em

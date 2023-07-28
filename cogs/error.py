@@ -1,6 +1,9 @@
-import logging
-
+from discord import Interaction
+from discord.app_commands import CommandInvokeError
 from discord.ext import commands
+from loguru import logger
+
+from src.ui.embeds import ErrorMessage
 
 
 class Error(commands.Cog):
@@ -8,32 +11,48 @@ class Error(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-
-        self.logger = logging.getLogger("discord")
-        self.logger.setLevel(logging.WARN)
-        handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
-        handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
-        self.logger.addHandler(handler)
+        tree = self.bot.tree
+        self._old_tree_error = tree.on_error
+        tree.on_error = self.on_app_command_error
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+    async def on_app_command_error(self, interaction: Interaction, error: Exception):
         match error:
-            case commands.ExpectedClosingQuoteError():
-                return await ctx.send(f"Pozor! Chybí tady: {error} uvozovka!")
-
-            case commands.MissingPermissions():
-                return await ctx.send("Chybí ti požadovaná práva!")
-
-            case commands.CommandNotFound():
-                pass
-
+            case PrettyError():
+                # if I use only 'error', gives me NoneType. Solved by this
+                logger.error(f"{error.__class__.__name__}: {interaction.command.name}")
+                await error.send()
             case _:
-                self.logger.critical(f"{ctx.message.id}, {ctx.message.content} | {error}")
-                print(error)
+                logger.critical(error)
+                await interaction.response.send_message(
+                    embed=ErrorMessage(
+                        "Tato zpráva by se nikdy zobrazit správně neměla. "
+                        "Jsi borec, že jsi mi dokázal rozbít Jáchyma, nechceš mi o tom napsat do issues na githubu?"
+                    )
+                )
 
-    @commands.Cog.listener()
-    async def on_command(self, ctx: commands.Context):
-        self.logger.info(f"{ctx.message.id} {ctx.message.content}")
+
+class PrettyError(CommandInvokeError):
+    """Pretty errors useful for raise keyword"""
+
+    def __init__(self, message: str, interaction: Interaction, inner_exception: Exception | None = None):
+        super().__init__(interaction.command, inner_exception)
+        self.message = message
+        self.interaction = interaction
+
+    async def send(self):
+        if not self.interaction.response.is_done():
+            await self.interaction.response.send_message(embed=ErrorMessage(self.message))
+        else:
+            await self.interaction.followup.send(embed=ErrorMessage(self.message))
+
+
+class TooManyOptionsError(PrettyError):
+    pass
+
+
+class TooFewOptionsError(PrettyError):
+    pass
 
 
 async def setup(bot):

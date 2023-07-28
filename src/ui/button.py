@@ -8,8 +8,10 @@ from src.ui.poll import Poll
 
 class ButtonBackend(discord.ui.Button):
     """
-    Button class to edit a poll embed with
+    Button class to edit a poll embed with.
     """
+
+    LENTGH_STRING = 30
 
     def __init__(
         self,
@@ -21,7 +23,13 @@ class ButtonBackend(discord.ui.Button):
         label: str,
         db_poll: aiomysql.pool.Pool,
     ) -> None:
-        super().__init__(label=label if len(label) <= 30 else "", emoji=emoji, custom_id=custom_id)
+      
+        super().__init__(
+            label=label if len(label) <= self.LENTGH_STRING else "",
+            emoji=emoji,
+            custom_id=custom_id,
+        )
+
         self.poll = poll
         self.embed = embed
         self._index = index
@@ -35,18 +43,18 @@ class ButtonBackend(discord.ui.Button):
         vote_button_db = VoteButtonDatabase(self.db_poll)
         user = interaction.user.id
 
-        users_ID = await vote_button_db.fetch_all_users(self.poll.message_id, self.index)
+        users_id = await vote_button_db.fetch_all_users(self.poll, self.index)
 
-        if user not in users_ID:
-            await vote_button_db.add_user(self.poll.message_id, user, self.index)
-            users_ID.add(user)
+
+        if user not in users_id:
+            await vote_button_db.add_user(self.poll, user, self.index)
+            users_id.add(user)
         else:
-            await vote_button_db.remove_user(self.poll.message_id, user, self.index)
-            users_ID.remove(user)
+            await vote_button_db.remove_user(self.poll, user, self.index)
+            users_id.remove(user)
 
-        members = set(interaction.guild.get_member(user_id).display_name for user_id in users_ID)
 
-        return members
+        return {interaction.guild.get_member(user_id).display_name for user_id in users_id}
 
     async def edit_embed(self, members: set[str]) -> discord.Embed:
         return self.embed.set_field_at(

@@ -4,7 +4,6 @@ import discord
 from discord import Message, app_commands
 from discord.ext import commands
 
-
 # Klasická morseovka
 
 
@@ -69,7 +68,7 @@ class Morse(commands.Cog):
     async def zasifruj(self, interaction: discord.Interaction, message: str) -> Message:
         cipher = ""
         for letter in message:
-            if letter.upper() in self.MORSE_CODE_DICT.keys():
+            if letter.upper() in self.MORSE_CODE_DICT:
                 cipher += self.MORSE_CODE_DICT[letter.upper()] + "/"
             else:
                 return await interaction.response.send_message(

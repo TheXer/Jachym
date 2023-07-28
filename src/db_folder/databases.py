@@ -1,17 +1,18 @@
-from abc import ABC
-from typing import TYPE_CHECKING, AsyncIterator, Optional
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 import aiomysql
 import discord.errors
 from discord import Message
+from loguru import logger
+
+if TYPE_CHECKING:
+    from src.jachym import Jachym
 
 from src.ui.poll import Poll
 
-if TYPE_CHECKING:
-    from ..jachym import Jachym
 
-
-class Crud(ABC):
+class Crud:
     def __init__(self, poll: aiomysql.pool.Pool):
         self.poll = poll
 
@@ -21,7 +22,7 @@ class Crud(ABC):
             await cursor.execute(sql, value)
             await conn.commit()
 
-    async def commit_many_values(self, sql: str, values: list[tuple]) -> None:
+    async def commit_many_values(self, sql: str, values: list[tuple[int, str]]) -> None:
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.executemany(sql, values)
@@ -31,9 +32,7 @@ class Crud(ABC):
         async with self.poll.acquire() as conn:
             cursor = await conn.cursor()
             await cursor.execute(sql, value)
-            values = await cursor.fetchall()
-
-        return values
+            return await cursor.fetchall()
 
 
 class PollDatabase(Crud):
@@ -66,12 +65,9 @@ class PollDatabase(Crud):
         value = (message_id,)
 
         tuple_of_tuples_db = await self.fetch_all_values(sql, value)
+        return [answer for tupl in tuple_of_tuples_db for answer in tupl]
 
-        answers = [answer for tupl in tuple_of_tuples_db for answer in tupl]
-
-        return answers
-
-    async def fetch_all_polls(self, bot: "Jachym") -> AsyncIterator[Poll | Message]:
+    async def fetch_all_polls(self, bot: "Jachym") -> AsyncIterator[Poll and Message]:
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 
@@ -79,9 +75,10 @@ class PollDatabase(Crud):
             try:
                 message = await bot.get_partial_messageable(channel_id).fetch_message(message_id)
 
+
             except (discord.errors.NotFound, discord.errors.Forbidden):
                 await self.remove(message_id)
-                print(f"Removed a Pool: {message_id, question}")
+                logger.warning(f"Removed a Pool: {message_id, question}")
                 continue
 
             options = await self.fetch_all_answers(message_id)
@@ -107,24 +104,21 @@ class VoteButtonDatabase(Crud):
 
         await self.commit_many_values(sql, values)
 
-    async def add_user(self, message_id: Poll.message_id, user: int, index: int):
+    async def add_user(self, discord_poll: Poll, user: int, index: int):
         sql = "INSERT INTO `Answers`(message_id, vote_user, iter_index) VALUES (%s, %s, %s)"
-        values = (message_id, user, index)
-
+        values = (discord_poll.message_id, user, index)
         await self.commit_value(sql, values)
 
-    async def remove_user(self, message_id: Poll.message_id, user, index):
+    async def remove_user(self, discord_poll: Poll, user: int, index: int):
         sql = "DELETE FROM `Answers` WHERE message_id = %s AND vote_user = %s AND iter_index = %s"
-        value = (message_id, user, index)
-
+        value = (discord_poll.message_id, user, index)
         await self.commit_value(sql, value)
 
-    async def fetch_all_users(self, message_id: Poll.message_id, index) -> set[int]:
+    async def fetch_all_users(self, poll: Poll, index: int) -> set[int]:
         sql = "SELECT vote_user FROM `Answers` WHERE message_id = %s AND iter_index = %s"
-        values = (message_id, index)
 
+        values = (poll.message_id, index)
         users_voted_for = await self.fetch_all_values(sql, values)
 
-        clean_users_voted_for = set(user for user_tuple in users_voted_for for user in user_tuple)
+        return {user for user_tuple in users_voted_for for user in user_tuple}
 
-        return clean_users_voted_for

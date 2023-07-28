@@ -1,4 +1,3 @@
-import datetime
 import aiomysql.pool
 import discord
 
@@ -29,7 +28,3 @@ class PollView(discord.ui.View):
             )
 
             self.add_item(button)
-
-    def check_date_difference(self) -> bool:
-        date_deletion = self.poll.created_at + datetime.timedelta(days=25)
-        return datetime.date.today() > date_deletion
