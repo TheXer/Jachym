@@ -75,7 +75,7 @@ class PollDatabase(Crud):
         sql = "SELECT * FROM `Poll`"
         polls = await self.fetch_all_values(sql)
 
-        for message_id, channel_id, question, date, _ in polls:
+        for message_id, channel_id, question, date, user_id in polls:
             try:
                 message = await bot.get_partial_messageable(channel_id).fetch_message(
                     message_id,
@@ -94,6 +94,7 @@ class PollDatabase(Crud):
                 question=question,
                 date_created=date,
                 options=options,
+                user_id=user_id,
             )
 
             yield pool, message
@@ -107,6 +108,11 @@ class VoteButtonDatabase(Crud):
         sql = "INSERT INTO `VoteButtons`(message_id, answers) VALUES (%s, %s)"
         values = [(discord_poll.message_id, vote_option) for vote_option in discord_poll.options]
         await self.commit_many_values(sql, values)
+
+    async def add_option(self, discord_poll: Poll, option: str):
+        sql = "INSERT INTO `VoteButtons`(message_id, answers) VALUES (%s, %s)"
+        value = discord_poll.message_id, option
+        await self.commit_value(sql, value)
 
     async def add_user(self, discord_poll: Poll, user: int, index: int):
         sql = "INSERT INTO `Answers`(message_id, vote_user, iter_index) VALUES (%s, %s, %s)"
