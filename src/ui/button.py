@@ -1,4 +1,5 @@
-from functools import cached_property
+
+import asyncio
 
 import aiomysql.pool
 import discord
@@ -9,7 +10,6 @@ from src.ui.embeds import PollEmbed
 from src.ui.emojis import ScoutEmojis
 from src.ui.modals import NewOptionModal
 from src.ui.poll import Poll
-import asyncio
 
 
 class ButtonBackend(discord.ui.Button):

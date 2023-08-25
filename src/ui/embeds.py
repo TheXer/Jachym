@@ -1,6 +1,6 @@
 import json
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import discord
 from discord.colour import Color, Colour
