@@ -27,7 +27,7 @@ class Jachym(commands.Bot):
     def __init__(self) -> None:
         # https://discordpy.readthedocs.io/en/stable/intents.html
         self.pool: aiomysql.pool.Pool | None = None
-        self.active_discord_polls: set[Poll] = set()
+        self.active_discord_polls: set[tuple[Poll, discord.Message]] = set()
 
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
@@ -43,7 +43,7 @@ class Jachym(commands.Bot):
             self.add_view(
                 PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool),
             )
-            self.active_discord_polls.add(poll)
+            self.active_discord_polls.add((poll, message))
 
         logger.success(f"There are now {len(self.active_discord_polls)} active pools!")
 

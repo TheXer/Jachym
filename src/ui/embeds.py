@@ -1,6 +1,6 @@
 import json
 import pathlib
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import discord
 from discord.colour import Color, Colour
@@ -47,6 +47,9 @@ class PollEmbed(PollEmbedBase):
         self.set_footer(text="Uděláno s ♥!")
         self.timestamp = datetime.now()
 
+        if poll.created_at is not None:
+            self._add_timestamp(poll.created_at)
+
     def _add_options(self):
         for index, option in enumerate(self.answers):
             self.add_field(
@@ -54,6 +57,14 @@ class PollEmbed(PollEmbedBase):
                 value="**0** |",
                 inline=False,
             )
+
+    def _add_timestamp(self, timestamp: datetime):
+        unix_time = discord.utils.format_dt(timestamp, "R")
+        self.add_field(
+            name="",
+            value=f"Anketa vyprší {unix_time}",
+            inline=False,
+        )
 
 
 class EmbedFromJSON(discord.Embed):

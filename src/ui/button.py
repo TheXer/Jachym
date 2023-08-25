@@ -1,3 +1,5 @@
+from functools import cached_property
+
 import aiomysql.pool
 import discord
 from discord import InteractionResponse, Member
@@ -7,6 +9,7 @@ from src.ui.embeds import PollEmbed
 from src.ui.emojis import ScoutEmojis
 from src.ui.modals import NewOptionModal
 from src.ui.poll import Poll
+import asyncio
 
 
 class ButtonBackend(discord.ui.Button):
@@ -47,10 +50,10 @@ class ButtonBackend(discord.ui.Button):
         users_id = await vote_button_db.fetch_all_users(self.poll, self.index)
 
         if user not in users_id:
-            await vote_button_db.add_user(self.poll, user, self.index)
+            asyncio.create_task(vote_button_db.add_user(self.poll, user, self.index))
             users_id.add(user)
         else:
-            await vote_button_db.remove_user(self.poll, user, self.index)
+            asyncio.create_task(vote_button_db.remove_user(self.poll, user, self.index))
             users_id.remove(user)
 
         return {interaction.guild.get_member(user_id) for user_id in users_id}

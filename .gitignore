@@ -5,3 +5,5 @@ __pycache__
 /discord.log
 .DS_STORE
 .vscode
+.ruff_cache
+.pytest_cache
