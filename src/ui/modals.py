@@ -35,11 +35,6 @@ class NewOptionModal(discord.ui.Modal):
         # To avoid circular import
         from src.ui.button import ButtonBackend
 
-        options = {
-            "name": f"{NUMBER_EMOJIS[len(self.embed.fields)]} {self.new_option.value}",
-            "value": "**0** | ",
-            "inline": False,
-        }
         date_field = len(self.embed.fields) - 1
 
         # Lmao, not ideal, but it is what it is.
@@ -50,7 +45,12 @@ class NewOptionModal(discord.ui.Modal):
             index = len(self.embed.fields)
             emoji = len(self.embed.fields)
 
-        options["index"] = index
+        options = {
+            "name": f"{NUMBER_EMOJIS[emoji]} {self.new_option.value}",
+            "value": "**0** | ",
+            "inline": False,
+            "index": index,
+        }
 
         self.view.add_item(
             ButtonBackend(
