@@ -35,11 +35,25 @@ class NewOptionModal(discord.ui.Modal):
         # To avoid circular import
         from src.ui.button import ButtonBackend
 
+        options = {
+            "name": f"{NUMBER_EMOJIS[len(self.embed.fields)]} {self.new_option.value}",
+            "value": "**0** | ",
+            "inline": False,
+        }
+
+        # Lmao, not ideal, but it is what it is.
+        if self.embed.fields[len(self.embed.fields) - 1].value.startswith("Anketa vyprší"):
+            index = len(self.embed.fields) - 1
+        else:
+            index = len(self.embed.fields)
+
+        options["index"] = index
+
         self.view.add_item(
             ButtonBackend(
                 label=self.new_option.value,
                 emoji=NUMBER_EMOJIS[len(self.embed.fields)],
-                index=len(self.embed.fields),
+                index=index,
                 poll=self.poll,
                 custom_id=f"{len(self.embed.fields)}:{self.poll.message_id}",
                 embed=self.embed,
@@ -48,8 +62,4 @@ class NewOptionModal(discord.ui.Modal):
         )
         await VoteButtonDatabase(self.db_poll).add_option(self.poll, self.new_option.value)
 
-        return self.embed.add_field(
-            name=f"{NUMBER_EMOJIS[len(self.embed.fields)]} {self.new_option.value}",
-            value="**0** | ",
-            inline=False,
-        )
+        return self.embed.insert_field_at(**options)

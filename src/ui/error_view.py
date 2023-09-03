@@ -28,20 +28,24 @@ class ErrorView(discord.ui.View):
 
 
 class TooManyOptionsError(PrettyError):
-    "Whether the view has too many options."
+    """Whether the view has too many options."""
+
     pass
 
 
 class TooFewOptionsError(PrettyError):
-    "Whether the view has too few options."
+    """Whether the view has too few options."""
+
     pass
 
 
 class NoPermissionError(PrettyError):
-    "Whether the user has no permissions to edit."
+    """Whether the user has no permissions to edit."""
+
     pass
 
 
 class DatetimeNotRecognizedError(PrettyError):
-    "Whether the datetime is not recognized."
+    """Whether the datetime is not recognized."""
+
     pass

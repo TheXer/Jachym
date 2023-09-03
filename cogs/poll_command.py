@@ -39,7 +39,7 @@ class PollCreate(commands.Cog):
         question: str,
         answer: Transform[list[str, ...], OptionsTransformer],
         date_time: Transform[datetime.datetime, DatetimeTransformer] | None,
-    ) -> discord.Message:
+    ):
         await interaction.response.send_message(embed=PollEmbedBase("Nahrávám anketu..."))
         message = await interaction.original_response()
 
@@ -57,11 +57,11 @@ class PollCreate(commands.Cog):
         await PollDatabase(self.bot.pool).add(poll)
         await VoteButtonDatabase(self.bot.pool).add_options(poll)
 
-        self.bot.active_discord_polls.add((poll, message))
         await self.bot.set_presence()
-
         logger.info(f"Successfully added Pool - {message.id}")
-        return await message.edit(embed=embed, view=view)
+
+        await message.edit(embed=embed, view=view)
+        self.bot.active_discord_polls.add((poll, message))
 
 
 class PollTaskLoops(commands.Cog):
@@ -76,9 +76,12 @@ class PollTaskLoops(commands.Cog):
                 continue
 
             embed = message.embeds[0]
-            embed.title = f"{embed.title[0]} [UZAVŘENO] {embed.title[1:]}"
+            embed_copy = embed.copy()
+            embed_copy.title = f"{embed.title[0]} [UZAVŘENO] {embed.title[1:]}"
+            embed_copy.remove_field(len(embed_copy.fields) - 1)
+
             channel = self.bot.get_channel(poll.channel_id)
-            await channel.send(embed=embed)
+            await channel.send(embed=embed_copy)
 
             asyncio.create_task(PollDatabase(self.bot.pool).remove(poll.message_id))
             asyncio.create_task(message.delete())
