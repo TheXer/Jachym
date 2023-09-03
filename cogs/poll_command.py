@@ -87,6 +87,10 @@ class PollTaskLoops(commands.Cog):
             asyncio.create_task(message.delete())
             self.bot.active_discord_polls.remove((poll, message))
 
+    @send_completed_pool.before_loop
+    async def prepare_loop(self):
+        await self.bot.wait_until_ready()
+
 
 async def setup(bot):
     await bot.add_cog(PollCreate(bot))
