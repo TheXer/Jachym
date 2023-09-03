@@ -1,11 +1,23 @@
 [tool.ruff]
 
-select = ["ALL"]
-
-ignore = [
-    "D", # Ignore docstrings
-    "E501", # Line too long, let Black handle this
-    "ANN", # typing, let mypy handle tis
-    "INP001" # Namespace package eeeeh
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "UP",  # pyupgrade,
+    "I",   # isort
+    "UP", # pyupgrade
+    "ASYNC",
+    "BLE", # Blind Exception
+    "T20", # Found a print!
+    "RET", # Unnecessary return
+    "SIM", # Simplify
+]
+exclude = [
+    "tests",
 ]
 
+line-length = 120
+
+[tool.black]
+
+line-length = 120

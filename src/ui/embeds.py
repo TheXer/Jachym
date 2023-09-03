@@ -1,32 +1,34 @@
 import json
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import discord
-from discord.colour import Color
+from discord.colour import Color, Colour
 
+from src.ui.emojis import NUMBER_EMOJIS, ScoutEmojis
 from src.ui.poll import Poll
 
 
-class CooldownErrorEmbed(discord.Embed):
-    def __init__(self, seconds: float):
-        self.seconds = round(seconds)
-        formatted_date = discord.utils.format_dt(
-            datetime.now() + timedelta(seconds=10),
-            "R",
+class ErrorMessage(discord.Embed):
+    """Whether an error occurs, this embed is sent."""
+
+    def __init__(self, message: str):
+        title = "⚠️ Jejda, někde se stala chyba..."
+
+        description = (
+            f"{message}\n\n"
+            f"{ScoutEmojis.FLEUR_DE_LIS.value} *Pokud máš pocit, že tohle by chyba být neměla, "
+            f"napiš [sem](https://github.com/TheXer/Jachym/issues/new/choose)*"
         )
+
+        self.set_footer(text="Uděláno s ♥!")
 
         super().__init__(
-            title=f"⚠️ Vydrž! Další anketu můžeš založit {formatted_date}! ⚠️",
-            colour=Color.red(),
+            title=title,
+            description=description,
+            colour=Colour.red(),
+            timestamp=datetime.now(),
         )
-
-    def correct_czech_writing(self) -> str:
-        if self.seconds > 4:
-            return f"{self.seconds} sekund"
-        if 4 >= self.seconds > 1:
-            return f"{self.seconds} sekundy"
-        return "sekundu"
 
 
 class PollEmbedBase(discord.Embed):
@@ -35,26 +37,32 @@ class PollEmbedBase(discord.Embed):
 
 
 class PollEmbed(PollEmbedBase):
-    REACTIONS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    """Base Embed view for Poll objects."""
 
     def __init__(self, poll: Poll):
         super().__init__(poll.question)
         self.answers = poll.options
         self._add_options()
-        self._add_timestamp()
+
+        self.set_footer(text="Uděláno s ♥!")
+        self.timestamp = datetime.now()
+
+        if poll.created_at is not None:
+            self._add_timestamp(poll.created_at)
 
     def _add_options(self):
         for index, option in enumerate(self.answers):
             self.add_field(
-                name=f"{self.REACTIONS[index]} {option}",
+                name=f"{NUMBER_EMOJIS[index]} {option}",
                 value="**0** |",
                 inline=False,
             )
 
-    def _add_timestamp(self):
+    def _add_timestamp(self, timestamp: datetime):
+        unix_time = discord.utils.format_dt(timestamp, "R")
         self.add_field(
             name="",
-            value=f"Anketa byla vytvořena {discord.utils.format_dt(datetime.now(), 'R')}",
+            value=f"Anketa vyprší {unix_time}",
             inline=False,
         )
 

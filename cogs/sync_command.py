@@ -16,10 +16,10 @@ class SyncSlashCommands(commands.Cog):
     @commands.guild_only()
     @commands.is_owner()
     async def sync(
-            self,
-            ctx: Context,
-            guilds: Greedy[discord.Guild],
-            spec: Literal["-", "*", "^"] | None = None,
+        self,
+        ctx: Context,
+        guilds: Greedy[discord.Guild],
+        spec: Literal["-", "*", "^"] | None = None,
     ) -> None:
         """
         A command to sync all slash commands to servers user requires. Works like this:
