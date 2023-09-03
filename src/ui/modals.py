@@ -40,19 +40,22 @@ class NewOptionModal(discord.ui.Modal):
             "value": "**0** | ",
             "inline": False,
         }
+        date_field = len(self.embed.fields) - 1
 
         # Lmao, not ideal, but it is what it is.
-        if self.embed.fields[len(self.embed.fields) - 1].value.startswith("Anketa vyprší"):
-            index = len(self.embed.fields) - 1
+        if self.embed.fields[date_field].value.startswith("Anketa vyprší"):
+            index = date_field
+            emoji = date_field
         else:
             index = len(self.embed.fields)
+            emoji = len(self.embed.fields)
 
         options["index"] = index
 
         self.view.add_item(
             ButtonBackend(
                 label=self.new_option.value,
-                emoji=NUMBER_EMOJIS[len(self.embed.fields)],
+                emoji=NUMBER_EMOJIS[emoji],
                 index=index,
                 poll=self.poll,
                 custom_id=f"{len(self.embed.fields)}:{self.poll.message_id}",
