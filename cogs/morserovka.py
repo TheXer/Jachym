@@ -4,7 +4,6 @@ import discord
 from discord import Message, app_commands
 from discord.ext import commands
 
-
 # Klasická morseovka
 
 
@@ -69,7 +68,7 @@ class Morse(commands.Cog):
     async def zasifruj(self, interaction: discord.Interaction, message: str) -> Message:
         cipher = ""
         for letter in message:
-            if letter.upper() in self.MORSE_CODE_DICT.keys():
+            if letter.upper() in self.MORSE_CODE_DICT:
                 cipher += self.MORSE_CODE_DICT[letter.upper()] + "/"
             else:
                 return await interaction.response.send_message(
@@ -81,10 +80,7 @@ class Morse(commands.Cog):
     @app_commands.command(name="desifruj", description="Dešifruj text z morserovky!")
     @app_commands.describe(message="Věta nebo slovo pro dešifrování")
     async def desifruj(self, interaction: discord.Interaction, message: str) -> Message:
-        decipher = "".join(
-            self.REVERSED_MORSE_CODE_DICT.get(letter)
-            for letter in re.split(r"\/|\\|\|", message)
-        )
+        decipher = "".join(self.REVERSED_MORSE_CODE_DICT.get(letter) for letter in re.split(r"\/|\\|\|", message))
         return await interaction.response.send_message(decipher)
 
 

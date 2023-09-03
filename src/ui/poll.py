@@ -1,11 +1,8 @@
-from datetime import datetime
-from typing import Optional, Union
+from datetime import date, datetime
 
 
 class Poll:
-    """
-    Slot class for each Pool object.
-    """
+    """Slot class for each Pool object."""
 
     MAX_OPTIONS = 10
     MIN_OPTIONS = 2
@@ -25,10 +22,8 @@ class Poll:
         channel_id: int,
         question: str,
         options: list[str],
-        user_id: Optional[int] = None,
-        date_created: Optional[Union[datetime, str]] = datetime.now().strftime(
-            "%Y-%m-%d"
-        ),
+        user_id: int | None = None,
+        date_created: datetime | None = None,
     ):
         self._message_id = message_id
         self._channel_id = channel_id
@@ -54,13 +49,9 @@ class Poll:
         return self._options
 
     @property
-    def created_at(self) -> datetime.date:
-        if isinstance(self._date_created_at, str):
-            return datetime.fromisoformat(self._date_created_at).date()
-        if isinstance(self._date_created_at, datetime):
-            return self._date_created_at.date()
+    def created_at(self) -> datetime | date | None:
         return self._date_created_at
 
     @property
-    def user_id(self) -> int:
+    def user_id(self) -> int | None:
         return self._user_id

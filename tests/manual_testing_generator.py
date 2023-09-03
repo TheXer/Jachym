@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 """
 I'd like to test using the pytest, unfortunately I have to use manual testing through discord to check the correct
@@ -19,9 +18,7 @@ def test_pools(count=2) -> str:
 
 def test_events():
     date = datetime.now() + timedelta(minutes=1)
-    test_string = (
-        f'!udalost create "Name" "Description" "{date.strftime("%d.%m.%Y %H:%M")}"'
-    )
+    test_string = f'!udalost create "Name" "Description" "{date.strftime("%d.%m.%Y %H:%M")}"'
 
     return test_string
 
