@@ -55,7 +55,7 @@ class ButtonBackend(discord.ui.Button):
             asyncio.create_task(vote_button_db.remove_user(self.poll, user, self.index))
             users_id.remove(user)
 
-        return {interaction.guild.get_member(user_id) for user_id in users_id}
+        return {interaction.guild.get_member(user_id).display_name for user_id in users_id}
 
     async def edit_embed(self, members: set[Member]) -> discord.Embed:
         return self.embed.set_field_at(
