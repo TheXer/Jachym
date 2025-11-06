@@ -1,23 +1,13 @@
-[tool.ruff]
-
-select = [
-    "E",   # pycodestyle
-    "F",   # pyflakes
-    "UP",  # pyupgrade,
-    "I",   # isort
-    "UP", # pyupgrade
-    "ASYNC",
-    "BLE", # Blind Exception
-    "T20", # Found a print!
-    "RET", # Unnecessary return
-    "SIM", # Simplify
+[project]
+name = "jachym"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+    "aiomysql>=0.3.2",
+    "dateparser>=1.2.2",
+    "discord-py>=2.6.4",
+    "dotenv>=0.9.9",
+    "loguru>=0.7.3",
 ]
-exclude = [
-    "tests",
-]
-
-line-length = 120
-
-[tool.black]
-
-line-length = 120
