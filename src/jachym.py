@@ -72,8 +72,6 @@ class Jachym(commands.Bot):
             maxsize=20,
         )
 
-        await self._fetch_pools_from_database()
-
         logger.success("Setup ready!")
 
     @commands.Cog.listener()
