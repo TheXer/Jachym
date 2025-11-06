@@ -72,7 +72,7 @@ class Jachym(commands.Bot):
             maxsize=20,
         )
 
-        logger.success("Setup ready!")
+        logger.success("Setup ready!!!")
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
