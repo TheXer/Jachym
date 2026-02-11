@@ -6,6 +6,7 @@ from src.ui.emojis import NUMBER_EMOJIS
 from src.models import PollOption, Vote, Poll, PollSubscriber
 from src.ui.button import rebuild_and_display_poll
 
+from loguru import logger
 
 # ==================== Helper Functions ====================
 
@@ -37,7 +38,7 @@ async def get_option_vote_counts(
 async def notify_poll_subscribers(
     poll: Poll,
     results_embed: discord.Embed,
-    bot_user: discord.ClientUser,
+    bot,
 ) -> None:
     """Send poll results to all subscribers and poll creator via DM.
     
@@ -48,7 +49,7 @@ async def notify_poll_subscribers(
     Args:
         poll: Poll model instance.
         results_embed: Formatted embed with poll results.
-        bot_user: Bot's user object (for embeds).
+        bot: Bot instance (for fetching users and sending DMs).
         
     Edge cases:
         - Poll creator receives notification regardless of subscription
@@ -65,11 +66,10 @@ async def notify_poll_subscribers(
     # Send DMs to all users
     for user_id in notify_ids:
         try:
-            user = await bot_user.client.fetch_user(user_id)
+            user = await bot.fetch_user(user_id)
             await user.send(embed=results_embed)
-        except Exception:
-            # Silently ignore: user has DMs disabled, user deleted, etc
-            pass
+        except Exception as e:
+            logger.debug(f"Failed to send DM to user {user_id}: {e}")
 
 
 # ==================== New Option Modal ====================
@@ -422,7 +422,7 @@ class ClosePollView(discord.ui.View):
             await notify_poll_subscribers(
                 self.poll,
                 results_embed,
-                interaction.client.user,
+                interaction.client,
             )
             
             await interaction.followup.send(

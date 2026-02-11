@@ -48,7 +48,7 @@ class PollCreate(commands.Cog):
         question="Otázka, kterou chceš položit.",
         answer='Odpovědi, rozděluješ odpovědi uvozovkou ("), maximálně pouze 10 možností',
         date_time="Den, na který anketa skončí (např. zítra ve 12 nebo 2025-02-12).",
-        multiple_choice="Mohou uživatelé volit více odpovědí? (výchozí: ano)",
+        multiple_choice="Mohou uživatelé volit více odpovědí? (True pokud ano, False pokud ne, defaultně False)",
     )
     async def pool(
         self,
@@ -95,14 +95,6 @@ class PollCreate(commands.Cog):
         # Build embed with poll mode indicator
         embed = PollEmbed(poll.question, options, created_at=poll.created_at)
         
-        # Add poll mode field
-        mode_text = "🔘 Jedna odpověď" if not multiple_choice else "☑️ Vícenásobná volba"
-        embed.insert_field_at(
-            index=0,
-            name="Režim:",
-            value=mode_text,
-            inline=False,
-        )
         
         view = PollView(poll, options, embed)
 
@@ -204,7 +196,7 @@ class PollCreate(commands.Cog):
             await notify_poll_subscribers(
                 poll,
                 results_embed,
-                self.bot.user,
+                self.bot,
             )
             
             logger.info(f"Poll {poll.id} closed and results sent")

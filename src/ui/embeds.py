@@ -35,6 +35,7 @@ class ErrorMessage(discord.Embed):
 class PollEmbedBase(discord.Embed):
     def __init__(self, question) -> None:
         super().__init__(title=f"📊 {question}", colour=Color.blue())
+        self.set_footer(text="Momentální verze běží na beta verzi! Očekávej nějaké chyby sem a tam.")
 
 
 class PollEmbed(PollEmbedBase):
@@ -47,8 +48,6 @@ class PollEmbed(PollEmbedBase):
         super().__init__(question)
         self.answers = list(options)
         self._add_options()
-
-        self.set_footer(text="Uděláno s ♥!")
         self.timestamp = datetime.now()
 
         if created_at is not None:

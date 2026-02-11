@@ -7,3 +7,6 @@ __pycache__
 .vscode
 .ruff_cache
 .pytest_cache
+db.sqlite3
+db.sqlite3
+db.sqlite3-wal

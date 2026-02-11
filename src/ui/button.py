@@ -49,7 +49,6 @@ async def rebuild_and_display_poll(
     
     # Build fresh embed
     fresh_embed = PollEmbedBase(poll.question)
-    fresh_embed.set_footer(text="Uděláno s ♥!")
     fresh_embed.timestamp = datetime.now()
     
     # Add option fields with vote counts
@@ -218,7 +217,7 @@ class VoteButton(discord.ui.Button):
         """
         poll = await Poll.get(id=self.poll_id)
 
-        if poll.allow_multiple_votes:
+        if not poll.allow_multiple_votes:
             # Single vote mode: remove other votes by this user
             existing_same = await Vote.filter(
                 poll_id=self.poll_id,
