@@ -1,82 +1,154 @@
-from os import getenv, listdir
-from typing import TYPE_CHECKING
-
-import discord
-from aiomysql import create_pool
 from discord.ext import commands
-from discord.ext.commands import ExtensionFailed, ExtensionNotFound
-from dotenv import load_dotenv
+import discord
+from tortoise import Tortoise
 from loguru import logger
+from os import getenv, listdir
+from discord.ext.commands import ExtensionNotFound, ExtensionFailed, ExtensionAlreadyLoaded
 
-from src.db_folder.databases import PollDatabase
-from src.helpers import timeit
+from src.models import Poll, PollStatus
 from src.ui.poll_view import PollView
-
-if TYPE_CHECKING:
-    import aiomysql.pool
-
-    from src.ui.poll import Poll
-
-load_dotenv("password.env")
-
+from src.helpers import timeit
 
 class Jachym(commands.Bot):
     MY_BIRTHDAY = "27.12.2020"
     OWNER_ID = 337971071485607936
 
     def __init__(self) -> None:
-        # https://discordpy.readthedocs.io/en/stable/intents.html
-        self.pool: aiomysql.pool.Pool | None = None
-        self.active_discord_polls: set[tuple[Poll, discord.Message]] = set()
-
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
             intents=discord.Intents.all(),
             owner_id=self.OWNER_ID,
         )
-
-    @timeit
-    async def _fetch_pools_from_database(self) -> None:
-        poll_database = PollDatabase(self.pool)
-
-        async for poll, message in poll_database.fetch_all_polls(self):
-            self.add_view(
-                PollView(poll=poll, embed=message.embeds[0], db_poll=self.pool),
-            )
-            self.active_discord_polls.add((poll, message))
-
-        logger.success(f"There are now {len(self.active_discord_polls)} active pools!")
-
-    async def set_presence(self) -> None:
-        activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {len(self.active_discord_polls)} anket!"
-        await self.change_presence(activity=discord.Game(name=activity_name))
-
-    async def load_extensions(self) -> None:
-        for filename in listdir("cogs/"):
-            if filename.endswith(".py"):
-                try:
-                    await self.load_extension(f"cogs.{filename[:-3]}")
-                    logger.success(f"{filename[:-3]} has loaded successfully")
-                except (ExtensionNotFound, ExtensionFailed) as error:
-                    logger.error(error)
+        self.db_initialized = False
+        self._poll_views_restored = False
 
     async def setup_hook(self) -> None:
+        """Called when the bot is starting up."""
         logger.info("Getting setup ready...")
 
-        self.pool = await create_pool(
-            user=getenv("USER_DATABASE"),
-            password=getenv("PASSWORD"),
-            host=getenv("HOST"),
-            db=getenv("DATABASE"),
-            pool_recycle=30,
-            maxsize=20,
-        )
+        # Initialize Tortoise ORM
+        await self.init_database()
 
-        await self._fetch_pools_from_database()
+        # Load extensions (cogs)
+        await self.load_extensions()
 
         logger.success("Setup ready!")
 
-    @commands.Cog.listener()
+    async def init_database(self) -> None:
+        """Initialize Tortoise ORM connection."""
+        try:
+            await Tortoise.init(
+                db_url=self.get_database_url(),
+                modules={"models": ["src.models"]},
+            )
+            # Generate schemas if they don't exist
+            await Tortoise.generate_schemas()
+            
+            self.db_initialized = True
+            logger.success("Database connected successfully!")
+        except Exception as e:
+            logger.error(f"Failed to connect to database: {e}")
+            self.db_initialized = False
+            raise
+
+    @staticmethod
+    def get_database_url() -> str:
+        """Build database URL from environment variables."""
+        db_type = getenv("DB_TYPE", "sqlite")
+        
+        if db_type == "sqlite":
+            db_path = getenv("DB_PATH", "db.sqlite3")
+            return f"sqlite://{db_path}"
+        
+        elif db_type == "mysql":
+            user = getenv("USER_DATABASE")
+            password = getenv("PASSWORD")
+            host = getenv("HOST", "localhost")
+            port = getenv("DB_PORT", "3306")
+            database = getenv("DATABASE")
+            
+            if not all([user, password, database]):
+                raise ValueError("Missing MySQL credentials in environment variables")
+            
+            return f"mysql://{user}:{password}@{host}:{port}/{database}"
+        
+        else:
+            raise ValueError(f"Unsupported DB_TYPE: {db_type}")
+
+    @timeit
+    async def restore_poll_views(self) -> None:
+        """Restore persistent views for all active polls."""
+        active_polls = await Poll.filter(status=PollStatus.ACTIVE).all()
+        
+        restored_count = 0
+        for poll in active_polls:
+            try:
+                # Get the channel
+                channel = self.get_channel(poll.channel_id)
+                if not channel:
+                    logger.warning(f"Channel {poll.channel_id} not found for poll {poll.id}")
+                    continue
+
+                # Fetch the message
+                try:
+                    message = await channel.fetch_message(poll.message_id)
+                except discord.NotFound:
+                    logger.warning(f"Message {poll.message_id} not found for poll {poll.id}")
+                    # Mark poll as ended since message is gone
+                    poll.status = PollStatus.ENDED
+                    await poll.save()
+                    continue
+
+                # Create and attach the view
+                view = PollView(poll=poll, options=await poll.options.all(), embed=message.embeds[0])
+                
+                # Re-attach view to the message (Discord remembers button custom_ids)
+                await message.edit(view=view)
+                
+                restored_count += 1
+                logger.debug(f"Restored view for poll {poll.id}")
+
+            except Exception as e:
+                logger.error(f"Error restoring poll {poll.id}: {e}")
+
+        logger.success(f"Restored {restored_count} active poll views!")
+
+    async def set_presence(self) -> None:
+        """Update bot presence with server and poll count."""
+        active_count = await Poll.filter(status=PollStatus.ACTIVE).count()
+        
+        activity_name = f"Jsem na {len(self.guilds)} serverech a mám spuštěno {active_count} anket!"
+        await self.change_presence(activity=discord.Game(name=activity_name))
+
+    async def load_extensions(self) -> None:
+        """Load all cogs from the cogs/ directory."""
+        
+        for filename in listdir("cogs/"):
+            if filename.endswith(".py") and not filename.startswith("_"):
+                try:
+                    await self.load_extension(f"cogs.{filename[:-3]}")
+                    logger.success(f"{filename[:-3]} loaded successfully")
+                except (ExtensionNotFound, ExtensionFailed, ExtensionAlreadyLoaded) as error:
+                    logger.error(f"Failed to load {filename}: {error}")
+
     async def on_ready(self) -> None:
+        """Called when bot is fully ready and connected to Discord."""
         await self.set_presence()
-        logger.success("Bot online!")
+        
+        # Restore poll views only once when bot first becomes ready
+        if not self._poll_views_restored:
+            self._poll_views_restored = True
+            await self.restore_poll_views()
+        
+        logger.success(f"Bot online as {self.user}!")
+
+    async def close(self) -> None:
+        """Cleanup when bot shuts down."""
+        logger.info("Shutting down...")
+        
+        # Close Tortoise connections
+        await Tortoise.close_connections()
+        logger.success("Database connections closed")
+        
+        # Call parent close
+        await super().close()

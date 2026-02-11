@@ -1,36 +1,46 @@
-import aiomysql.pool
-
-from src.ui.button import ButtonBackend, NewOptionButton
+import discord
+from src.ui.button import (
+    VoteButton,
+    NewOptionButton,
+    RemoveOptionButton,
+    ClosePollButton,
+    SubscribeButton,
+)
 from src.ui.embeds import PollEmbed
 from src.ui.emojis import NUMBER_EMOJIS
-from src.ui.error_view import ErrorView
 
 
-class PollView(ErrorView):
-    """Poll View to add buttons to."""
+class PollView(discord.ui.View):
+    """Poll View that renders one `VoteButton` per `PollOption`.
 
-    def __init__(self, poll: Poll, embed: PollEmbed, db_poll: aiomysql.pool.Pool):
+    Parameters
+    - poll: tortoise.models.Poll instance
+    - options: iterable of PollOption instances (ordered)
+    - embed: PollEmbed instance
+    """
+
+    def __init__(self, poll, options, embed: PollEmbed):
         super().__init__(timeout=None)
         self.poll = poll
         self.embed = embed
-        self.db_poll = db_poll
-        self.add_buttons()
-        self.add_option_button()
+        self.options = list(options)
 
-    def add_buttons(self):
-        for index, option in enumerate(self.poll.options):
-            button = ButtonBackend(
-                custom_id=f"{index}:{self.poll.message_id}",
-                label=f"{option}",
-                emoji=NUMBER_EMOJIS[index],
-                poll=self.poll,
-                embed=self.embed,
+        for index, option in enumerate(self.options):
+            btn = VoteButton(
+                poll_id=poll.id,
+                option_id=option.id,
                 index=index,
-                db_poll=self.db_poll,
+                label=option.text,
+                emoji=NUMBER_EMOJIS[index],
+                embed=embed,
             )
+            self.add_item(btn)
 
-            self.add_item(button)
-
-    def add_option_button(self):
-        button = NewOptionButton(self.embed, self.poll, self.db_poll)
-        self.add_item(button)
+        # Add button to allow adding new option (permission checked inside button/modal)
+        self.add_item(NewOptionButton(poll, self.options, embed, self))
+        # Add button to allow removing an option
+        self.add_item(RemoveOptionButton(poll, self.options, embed, self))
+        # Add button to close poll and show results
+        self.add_item(ClosePollButton(poll, self.options, embed, self))
+        # Add button to subscribe to poll results
+        self.add_item(SubscribeButton(poll))

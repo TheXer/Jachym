@@ -6,12 +6,12 @@ import discord
 from discord.app_commands import Transformer
 
 from src.ui.error_view import DatetimeNotRecognizedError, TooFewOptionsError, TooManyOptionsError
-from src.ui.poll import Poll
+from src.models import Poll
 
 
 class OptionsTransformer(Transformer):
     async def transform(
-        self, interaction: discord.Interaction, option: str
+        self, interaction: discord.Interaction, options: str
     ) -> TooManyOptionsError | TooFewOptionsError | list[str]:
         """
         Transformer method to transformate a single string to multiple options. If they are not within parameters,
@@ -31,14 +31,17 @@ class OptionsTransformer(Transformer):
             TooManyOptionsError, TooFewOptionsError
 
         """
-        answers = [option for option in re.split('"|"|“|„', option) if option.strip()]
+        print(f"Transforming options: {options}")
+        answers = [option for option in re.split('"|"|“|„', options)]
 
-        if len(answers) > Poll.MAX_OPTIONS:
-            msg = f"Zadal jsi příliš mnoho odpovědí, můžeš maximálně {Poll.MAX_OPTIONS}!"
+        print(f"Parsed options: {answers}")
+        
+        if len(answers) > 10:
+            msg = "Zadal jsi příliš mnoho odpovědí, můžeš maximálně 10!"
             raise TooManyOptionsError(msg, interaction)
 
-        if len(answers) < Poll.MIN_OPTIONS:
-            msg = f"Zadal jsi příliš málo odpovědí, můžeš alespoň {Poll.MIN_OPTIONS}!"
+        if len(answers) < 2:
+            msg = "Zadal jsi příliš málo odpovědí, můžeš alespoň 2!"
             raise TooFewOptionsError(msg, interaction)
 
         return answers

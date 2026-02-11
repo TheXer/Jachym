@@ -6,7 +6,8 @@ import discord
 from discord.colour import Color, Colour
 
 from src.ui.emojis import NUMBER_EMOJIS, ScoutEmojis
-from src.ui.poll import Poll
+from typing import Iterable
+from src.models import PollOption
 
 
 class ErrorMessage(discord.Embed):
@@ -37,23 +38,27 @@ class PollEmbedBase(discord.Embed):
 
 
 class PollEmbed(PollEmbedBase):
-    """Base Embed view for Poll objects."""
+    """Base Embed view for Poll objects.
 
-    def __init__(self, poll: Poll):
-        super().__init__(poll.question)
-        self.answers = poll.options
+    Accepts a question string and an iterable of options (either strings or PollOption
+    instances)."""
+
+    def __init__(self, question: str, options: Iterable, created_at: datetime | None = None):
+        super().__init__(question)
+        self.answers = list(options)
         self._add_options()
 
         self.set_footer(text="Uděláno s ♥!")
         self.timestamp = datetime.now()
 
-        if poll.created_at is not None:
-            self._add_timestamp(poll.created_at)
+        if created_at is not None:
+            self._add_timestamp(created_at)
 
     def _add_options(self):
         for index, option in enumerate(self.answers):
+            label = option.text if hasattr(option, "text") else str(option)
             self.add_field(
-                name=f"{NUMBER_EMOJIS[index]} {option}",
+                name=f"{NUMBER_EMOJIS[index]} {label}",
                 value="**0** |",
                 inline=False,
             )

@@ -23,7 +23,7 @@ class Error(commands.Cog):
                 logger.error(f"{error.__class__.__name__}: {interaction.command.name}")
                 await error.send()
             case _:
-                logger.critical(error)
+                logger.critical(f"Unexpected error: {error}")
                 await interaction.response.send_message(
                     embed=ErrorMessage(
                         "Tato zpráva by se nikdy zobrazit správně neměla. "
