@@ -1,10 +1,8 @@
 import aiomysql
 import discord
 
-from src.db_folder.databases import VoteButtonDatabase
 from src.ui.embeds import PollEmbed
 from src.ui.emojis import NUMBER_EMOJIS
-from src.ui.poll import Poll
 
 
 class NewOptionModal(discord.ui.Modal):

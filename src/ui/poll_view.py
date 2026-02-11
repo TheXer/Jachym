@@ -4,7 +4,6 @@ from src.ui.button import ButtonBackend, NewOptionButton
 from src.ui.embeds import PollEmbed
 from src.ui.emojis import NUMBER_EMOJIS
 from src.ui.error_view import ErrorView
-from src.ui.poll import Poll
 
 
 class PollView(ErrorView):

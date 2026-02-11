@@ -6,13 +6,12 @@ from discord import app_commands
 from discord.app_commands import Transform
 from discord.ext import commands, tasks
 from loguru import logger
-
-from src.db_folder.databases import PollDatabase, VoteButtonDatabase
 from src.jachym import Jachym
 from src.ui.embeds import PollEmbed, PollEmbedBase
-from src.ui.poll import Poll
 from src.ui.poll_view import PollView
 from src.ui.transformers import DatetimeTransformer, OptionsTransformer
+
+from src.models import Poll, PollOption
 
 
 class PollCreate(commands.Cog):
@@ -37,61 +36,49 @@ class PollCreate(commands.Cog):
         self,
         interaction: discord.Interaction,
         question: str,
-        answer: Transform[list[str, ...], OptionsTransformer],
+        answer: Transform[list[str], OptionsTransformer],
         date_time: Transform[datetime.datetime, DatetimeTransformer] | None,
     ):
-        await interaction.response.send_message(embed=PollEmbedBase("Nahrávám anketu..."))
-        message = await interaction.original_response()
-
-        poll = Poll(
-            message_id=message.id,
-            channel_id=message.channel.id,
+        await interaction.response.defer()
+        
+        poll = await Poll.create(
+            guild_id=interaction.guild_id,
+            channel_id=interaction.channel_id,
+            message_id=interaction.id,
+            creator_id=interaction.user.id,
             question=question,
-            options=answer,
-            user_id=interaction.user.id,
-            date_created=date_time,
+            is_anonymous=False,  # This command creates non-anonymous polls
+            is_indefinite=(date_time is None),
+            allow_multiple_votes=False,
+            end_date=date_time,
         )
+        
+        options_data = [
+            PollOption(
+                poll=poll,
+                text=text,
+                position=i,
+                created_by=interaction.user.id,
+                )
+        for i, text in enumerate(answer)
+        ]
+        
+        await PollOption.bulk_create(options_data)
 
-        embed = PollEmbed(poll)
-        view = PollView(poll, embed, db_poll=self.bot.pool)
-        await PollDatabase(self.bot.pool).add(poll)
-        await VoteButtonDatabase(self.bot.pool).add_options(poll)
+        # Fetch for embed
+        
+        logger.info(f"Successfully added Poll - {poll.id}")
 
+        message = await interaction.followup.send(embed=embed, view=view, wait=True)
+        
+        poll.message_id = message.id
+        await poll.save()
+    
         await self.bot.set_presence()
-        logger.info(f"Successfully added Pool - {message.id}")
-
-        await message.edit(embed=embed, view=view)
-        self.bot.active_discord_polls.add((poll, message))
+        logger.info(f"Poll {poll.id} created in message {message.id}")
 
 
-class PollTaskLoops(commands.Cog):
-    def __init__(self, bot: Jachym):
-        self.bot = bot
-        self.send_completed_pool.start()
-
-    @tasks.loop(seconds=5)
-    async def send_completed_pool(self):
-        for poll, message in self.bot.active_discord_polls.copy():
-            if poll.created_at is None or datetime.datetime.now() < poll.created_at:
-                continue
-
-            embed = message.embeds[0]
-            embed_copy = embed.copy()
-            embed_copy.title = f"{embed.title[0]} [UZAVŘENO] {embed.title[1:]}"
-            embed_copy.remove_field(len(embed_copy.fields) - 1)
-
-            channel = self.bot.get_channel(poll.channel_id)
-            await channel.send(embed=embed_copy)
-
-            asyncio.create_task(PollDatabase(self.bot.pool).remove(poll.message_id))
-            asyncio.create_task(message.delete())
-            self.bot.active_discord_polls.remove((poll, message))
-
-    @send_completed_pool.before_loop
-    async def prepare_loop(self):
-        await self.bot.wait_until_ready()
 
 
 async def setup(bot):
     await bot.add_cog(PollCreate(bot))
-    await bot.add_cog(PollTaskLoops(bot))
