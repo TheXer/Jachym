@@ -11,6 +11,8 @@ from src.ui.embeds import PollEmbed
 from src.ui.poll_view import PollView
 from src.helpers import timeit
 
+import urllib.parse
+
 class Jachym(commands.Bot):
     MY_BIRTHDAY = "27.12.2020"
     OWNER_ID = 337971071485607936
@@ -66,10 +68,18 @@ class Jachym(commands.Bot):
             return f"sqlite://{db_path}"
         
         elif db_type == "mysql":
-            db_url = getenv("DB_URL", None)
-            if not db_url:
-                raise ValueError("DB_URL environment variable is required for MySQL")
+            user_database = getenv("USER_DATABASE")
+            password = getenv("PASSWORD")
+            host = getenv("HOST")
+            port = getenv("PORT", "3306")
+            database = getenv("DATABASE")
             
+            if not all([user_database, password, host, port, database]):
+                raise ValueError("Missing required MySQL environment variables")
+
+            password = urllib.parse.quote_plus(password)  # Ensure password is URL-encoded
+
+            db_url = f"mysql://{user_database}:{password}@{host}:{port}/{database}"
             return db_url
         
         else:
