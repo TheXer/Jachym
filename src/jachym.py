@@ -6,9 +6,9 @@ from loguru import logger
 from os import getenv, listdir
 from discord.ext.commands import ExtensionNotFound, ExtensionFailed, ExtensionAlreadyLoaded
 
-from src.models import Poll, PollStatus
-from src.ui.embeds import PollEmbed
-from src.ui.poll_view import PollView
+from src.models.database import Poll, PollStatus
+
+from src.views.poll_view import PollView
 from src.helpers import timeit
 
 import urllib.parse
@@ -125,8 +125,9 @@ class Jachym(commands.Bot):
                     logger.warning(f"Channel {poll.channel_id} not found for poll {poll.id}")
                     continue
 
-                
-                embed = PollEmbed(poll.question, options=await poll.options.all(), created_at=poll.created_at)  
+                # Create managed embed with options initialized
+                from src.embeds.embeds import ManagedPollEmbed
+                embed = ManagedPollEmbed(poll.question, options=await poll.options.all(), created_at=poll.created_at)  
 
                 # Create and attach the view
                 view = PollView(poll=poll, options=await poll.options.all(), embed=embed)

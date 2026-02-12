@@ -5,7 +5,7 @@ import dateparser
 import discord
 from discord.app_commands import Transformer
 
-from src.ui.error_view import DatetimeNotRecognizedError, TooFewOptionsError, TooManyOptionsError
+from src.views.error_view import DatetimeNotRecognizedError, TooFewOptionsError, TooManyOptionsError
 
 
 class OptionsTransformer(Transformer):
@@ -30,10 +30,8 @@ class OptionsTransformer(Transformer):
             TooManyOptionsError, TooFewOptionsError
 
         """
-        print(f"Transforming options: {options}")
         answers = [option for option in re.split('"|"|“|„', options)]
 
-        print(f"Parsed options: {answers}")
         
         if len(answers) > 10:
             msg = "Zadal jsi příliš mnoho odpovědí, můžeš maximálně 10!"

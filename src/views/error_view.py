@@ -4,7 +4,7 @@ from discord.app_commands import CommandInvokeError
 from discord.ui import Item
 from loguru import logger
 
-from src.ui.embeds import ErrorMessage
+from src.embeds.embeds import ErrorMessage
 
 
 class PrettyError(CommandInvokeError):

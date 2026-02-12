@@ -2,9 +2,9 @@ import discord
 from discord import Interaction
 from datetime import datetime
 
-from src.ui.embeds import PollEmbed
+from src.embeds.embeds import ManagedPollEmbed
 from src.ui.emojis import ScoutEmojis, NUMBER_EMOJIS
-from src.models import Vote, Poll, PollOption, PollSubscriber
+from src.models.database import Vote, Poll, PollOption, PollSubscriber
 
 
 # ==================== Helper Functions ====================
@@ -13,28 +13,25 @@ from src.models import Vote, Poll, PollOption, PollSubscriber
 async def rebuild_and_display_poll(
     interaction: discord.Interaction,
     poll_id: int,
-    embed: PollEmbed,
+    embed: ManagedPollEmbed,
 ) -> discord.Embed:
     """Rebuild poll embed from database with current vote counts.
     
-    Fetches all poll data and votes from the database, then reconstructs
-    the embed with up-to-date information. This is used after any vote
-    or option change to ensure the display is consistent.
+    Uses the centralized ManagedPollEmbed manager to update vote displays
+    in place for efficiency and consistency.
     
     Args:
         interaction: Discord interaction context.
         poll_id: ID of the poll to rebuild.
-        embed: Original embed object (for reference).
+        embed: ManagedPollEmbed instance to update.
         
     Returns:
-        A fresh embed with current poll state.
+        The updated embed with current poll state.
         
     Edge cases:
         - Handles polls with no votes gracefully (shows "0 | " for empty options)
         - Filters out deleted guild members (if member left server)
     """
-    from src.ui.embeds import PollEmbedBase
-    
     # Fetch poll data (3 queries total)
     poll = await Poll.get(id=poll_id)
     options = await PollOption.filter(poll_id=poll_id).order_by("position").all()
@@ -47,11 +44,7 @@ async def rebuild_and_display_poll(
             votes_by_option[vote.option_id] = []
         votes_by_option[vote.option_id].append(vote)
     
-    # Build fresh embed
-    fresh_embed = PollEmbedBase(poll.question)
-    fresh_embed.timestamp = datetime.now()
-    
-    # Add option fields with vote counts
+    # Update each option's vote display using the managed embed
     for index, option in enumerate(options):
         votes = votes_by_option.get(option.id, [])
         member_ids = {v.user_id for v in votes}
@@ -62,22 +55,9 @@ async def rebuild_and_display_poll(
         }
         
         vote_text = f"**{len(members)}** | {', '.join(m.display_name for m in members)}"
-        fresh_embed.add_field(
-            name=f"{NUMBER_EMOJIS[index]} {option.text}",
-            value=vote_text,
-            inline=False,
-        )
+        embed.update_option_votes(index, vote_text)
     
-    # Add end date if present
-    if poll.end_date is not None:
-        unix_time = discord.utils.format_dt(poll.end_date, "R")
-        fresh_embed.add_field(
-            name="",
-            value=f"Anketa vyprší {unix_time}",
-            inline=False,
-        )
-    
-    return fresh_embed
+    return embed
 
 
 def check_poll_creator(poll, interaction: discord.Interaction) -> bool:
@@ -116,7 +96,7 @@ class PollManagementButton(discord.ui.Button):
         custom_id: str,
         poll,
         options,
-        embed: PollEmbed,
+        embed: ManagedPollEmbed,
         parent_view: discord.ui.View,
     ):
         """Initialize a poll management button.
@@ -175,7 +155,7 @@ class VoteButton(discord.ui.Button):
         index: int,
         label: str,
         emoji: str,
-        embed: PollEmbed,
+        embed: ManagedPollEmbed,
     ):
         """Initialize a vote button.
         
@@ -274,7 +254,7 @@ class NewOptionButton(PollManagementButton):
         - Modal submission adds button and rebuild embed
     """
 
-    def __init__(self, poll, options, embed: PollEmbed, parent_view: discord.ui.View):
+    def __init__(self, poll, options, embed: ManagedPollEmbed, parent_view: discord.ui.View):
         """Initialize add option button."""
         super().__init__(
             label="Přidat novou možnost",
@@ -302,7 +282,7 @@ class NewOptionButton(PollManagementButton):
             )
             return
 
-        from src.ui.modals import NewOptionModal
+        from src.modals.modals import NewOptionModal
 
         modal = NewOptionModal(
             self.poll, self.options, self.embed, self.parent_view
@@ -323,7 +303,7 @@ class RemoveOptionButton(PollManagementButton):
         - Rebuilds all vote buttons with new indices after removal
     """
 
-    def __init__(self, poll, options, embed: PollEmbed, parent_view: discord.ui.View):
+    def __init__(self, poll, options, embed: ManagedPollEmbed, parent_view: discord.ui.View):
         """Initialize remove option button."""
         super().__init__(
             label="Odebrat možnost",
@@ -351,7 +331,7 @@ class RemoveOptionButton(PollManagementButton):
             )
             return
 
-        from src.ui.modals import SelectOptionView
+        from src.modals.modals import SelectOptionView
 
         view = SelectOptionView(
             self.poll, self.options, self.embed, self.parent_view
@@ -375,7 +355,7 @@ class ClosePollButton(PollManagementButton):
         - Sends results as new message in channel
     """
 
-    def __init__(self, poll, options, embed: PollEmbed, parent_view: discord.ui.View):
+    def __init__(self, poll, options, embed: ManagedPollEmbed, parent_view: discord.ui.View):
         """Initialize close poll button."""
         super().__init__(
             label="Ukončit anketu",
@@ -396,7 +376,7 @@ class ClosePollButton(PollManagementButton):
             )
             return
 
-        from src.ui.modals import ClosePollView
+        from src.modals.modals import ClosePollView
 
         view = ClosePollView(
             self.poll, self.options, self.embed, self.parent_view
@@ -406,6 +386,8 @@ class ClosePollButton(PollManagementButton):
             view=view,
             ephemeral=True,
         )
+        
+        await interaction.message.delete()  
 
 
 class SubscribeButton(discord.ui.Button):

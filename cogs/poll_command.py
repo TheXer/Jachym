@@ -7,11 +7,11 @@ from discord.app_commands import Transform
 from discord.ext import commands, tasks
 from loguru import logger
 from src.jachym import Jachym
-from src.ui.embeds import PollEmbed, PollEmbedBase
-from src.ui.poll_view import PollView
+from src.embeds.embeds import PollEmbedBase
+from src.views.poll_view import PollView
 from src.ui.transformers import DatetimeTransformer, OptionsTransformer
 
-from src.models import Poll, PollOption
+from src.models.database import Poll, PollOption
 
 
 class PollCreate(commands.Cog):
@@ -92,8 +92,9 @@ class PollCreate(commands.Cog):
         # Fetch created options ordered by position
         options = await PollOption.filter(poll=poll).order_by("position").all()
 
-        # Build embed with poll mode indicator
-        embed = PollEmbed(poll.question, options, created_at=poll.created_at)
+        # Build embed with poll mode indicator using centralized manager
+        from src.embeds.embeds import ManagedPollEmbed
+        embed = ManagedPollEmbed(poll.question, options, created_at=poll.created_at)
         
         
         view = PollView(poll, options, embed)
@@ -178,7 +179,7 @@ class PollCreate(commands.Cog):
                 poll_id=poll.id
             ).order_by("position").all()
             
-            from src.ui.modals import get_option_vote_counts
+            from src.modals.modals import get_option_vote_counts
             votes_by_option = await get_option_vote_counts(poll.id)
             
             # Build results embed
@@ -192,7 +193,7 @@ class PollCreate(commands.Cog):
                 await channel.send(embed=results_embed)
             
             # Notify subscribers
-            from src.ui.modals import notify_poll_subscribers
+            from src.modals.modals import notify_poll_subscribers
             await notify_poll_subscribers(
                 poll,
                 results_embed,

@@ -1,10 +1,10 @@
 import discord
 from datetime import datetime
 
-from src.ui.embeds import PollEmbed
+from src.embeds.embeds import ManagedPollEmbed
 from src.ui.emojis import NUMBER_EMOJIS
-from src.models import PollOption, Vote, Poll, PollSubscriber
-from src.ui.button import rebuild_and_display_poll
+from src.models.database import PollOption, Vote, Poll, PollSubscriber
+from src.buttons.button import rebuild_and_display_poll
 
 from loguru import logger
 
@@ -85,20 +85,22 @@ class NewOptionModal(discord.ui.Modal):
     Attributes:
         poll: Poll model instance.
         options: List of PollOption instances.
-        embed: Current poll embed.
+        embed: ManagedPollEmbed instance.
         parent_view: Parent view containing vote buttons.
         new_option: discord.ui.TextInput for the option text.
         
     Edge cases:
         - Inserts new field before timestamp if present (maintains ordering)
         - Keeps local options list in sync for button reference
+        - Uses centralized embed manager for clean field operations
+        - Uses centralized embed manager for clean field operations
     """
 
     def __init__(
         self,
         poll,
         options,
-        embed: PollEmbed,
+        embed: ManagedPollEmbed,
         parent_view: discord.ui.View,
     ):
         """Initialize new option modal.
@@ -106,7 +108,7 @@ class NewOptionModal(discord.ui.Modal):
         Args:
             poll: Poll model instance.
             options: List of PollOption instances.
-            embed: Current poll embed.
+            embed: ManagedPollEmbed instance.
             parent_view: Parent view containing this modal's parent button.
         """
         super().__init__(title="Přidání nové možnosti do ankety")
@@ -142,19 +144,6 @@ class NewOptionModal(discord.ui.Modal):
         Returns:
             Updated embed with new option field.
         """
-        # Compute insertion index (before timestamp if present)
-        has_timestamp = (
-            self.embed.fields
-            and self.embed.fields[-1].value.startswith("Anketa vyprší")
-        )
-        
-        if has_timestamp:
-            insertion_index = len(self.embed.fields) - 1
-            emoji_index = insertion_index
-        else:
-            insertion_index = len(self.embed.fields)
-            emoji_index = len(self.embed.fields)
-
         # Create new option in database
         # Get the maximum position from database to avoid conflicts when options are deleted
         existing_options = await PollOption.filter(poll_id=self.poll.id).all()
@@ -169,26 +158,23 @@ class NewOptionModal(discord.ui.Modal):
         )
 
         # Add vote button for new option
-        from src.ui.button import VoteButton
+        from src.buttons.button import VoteButton
+
+        # Use centralized embed manager to add the option
+        emoji_index = self.embed.add_option(new_opt.text)
 
         new_btn = VoteButton(
             poll_id=self.poll.id,
             option_id=new_opt.id,
-            index=insertion_index,
+            index=emoji_index,
             label=new_opt.text,
             emoji=NUMBER_EMOJIS[emoji_index],
             embed=self.embed,
         )
         self.parent_view.add_item(new_btn)
 
-        # Update embed with new option field
+        # Update local options list
         self.options.append(new_opt)
-        self.embed.insert_field_at(
-            index=insertion_index,
-            name=f"{NUMBER_EMOJIS[emoji_index]} {self.new_option.value}",
-            value="**0** | ",
-            inline=False,
-        )
 
         return self.embed
 
@@ -206,7 +192,7 @@ class SelectOptionView(discord.ui.View):
     Attributes:
         poll: Poll model instance.
         options: List of PollOption instances (reference).
-        embed: Current poll embed.
+        embed: ManagedPollEmbed instance.
         parent_view: Parent view containing vote buttons.
         select: discord.ui.Select dropdown component.
         
@@ -220,7 +206,7 @@ class SelectOptionView(discord.ui.View):
         self,
         poll,
         options,
-        embed: PollEmbed,
+        embed: ManagedPollEmbed,
         parent_view: discord.ui.View,
     ):
         """Initialize option removal view.
@@ -228,7 +214,7 @@ class SelectOptionView(discord.ui.View):
         Args:
             poll: Poll model instance.
             options: List of PollOption instances (will be mutated).
-            embed: Current poll embed.
+            embed: ManagedPollEmbed instance.
             parent_view: Parent view containing vote buttons.
         """
         super().__init__(timeout=180)
@@ -299,7 +285,7 @@ class SelectOptionView(discord.ui.View):
 
     async def _rebuild_vote_buttons(self):
         """Remove old vote buttons and create new ones with correct indices."""
-        from src.ui.button import VoteButton
+        from src.buttons.button import VoteButton
 
         # Remove all vote buttons
         vote_buttons = [
@@ -367,7 +353,7 @@ class ClosePollView(discord.ui.View):
         self,
         poll,
         options,
-        embed: PollEmbed,
+        embed: ManagedPollEmbed,
         parent_view: discord.ui.View,
     ):
         """Initialize poll closing view.
@@ -375,7 +361,7 @@ class ClosePollView(discord.ui.View):
         Args:
             poll: Poll model instance.
             options: List of PollOption instances.
-            embed: Current poll embed.
+            embed: ManagedPollEmbed instance.
             parent_view: Parent view (for consistency with other views).
         """
         super().__init__(timeout=180)
@@ -460,7 +446,7 @@ class ClosePollView(discord.ui.View):
         Returns:
             Formatted results embed showing ranked options.
         """
-        from src.ui.embeds import PollEmbedBase
+        from src.embeds.embeds import PollEmbedBase
 
         results_embed = PollEmbedBase(f"Výsledky: {self.poll.question}")
         results_embed.timestamp = datetime.now()

@@ -4,7 +4,7 @@ import discord
 from discord import Message, app_commands
 from discord.ext import commands
 
-from src.ui.embeds import EmbedFromJSON
+from src.embeds.embeds import EmbedFromJSON
 
 
 class Utility(commands.Cog):

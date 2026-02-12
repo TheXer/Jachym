@@ -1,12 +1,12 @@
 import discord
-from src.ui.button import (
+from src.buttons.button import (
     VoteButton,
     NewOptionButton,
     RemoveOptionButton,
     ClosePollButton,
     SubscribeButton,
 )
-from src.ui.embeds import PollEmbed
+from src.embeds.embeds import ManagedPollEmbed
 from src.ui.emojis import NUMBER_EMOJIS
 
 
@@ -16,10 +16,10 @@ class PollView(discord.ui.View):
     Parameters
     - poll: tortoise.models.Poll instance
     - options: iterable of PollOption instances (ordered)
-    - embed: PollEmbed instance
+    - embed: ManagedPollEmbed instance
     """
 
-    def __init__(self, poll, options, embed: PollEmbed):
+    def __init__(self, poll, options, embed: ManagedPollEmbed):
         super().__init__(timeout=None)
         self.poll = poll
         self.embed = embed
@@ -38,9 +38,12 @@ class PollView(discord.ui.View):
 
         # Add button to allow adding new option (permission checked inside button/modal)
         self.add_item(NewOptionButton(poll, self.options, embed, self))
+        
         # Add button to allow removing an option
         self.add_item(RemoveOptionButton(poll, self.options, embed, self))
+        
         # Add button to close poll and show results
         self.add_item(ClosePollButton(poll, self.options, embed, self))
+        
         # Add button to subscribe to poll results
         self.add_item(SubscribeButton(poll))

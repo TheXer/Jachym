@@ -2,8 +2,8 @@ from discord import Interaction
 from discord.ext import commands
 from loguru import logger
 
-from src.ui.embeds import ErrorMessage
-from src.ui.error_view import PrettyError
+from src.embeds.embeds import ErrorMessage
+from src.views.error_view import PrettyError
 
 
 class Error(commands.Cog):
