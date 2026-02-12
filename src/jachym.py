@@ -47,12 +47,18 @@ class Jachym(commands.Bot):
             await Tortoise.init(
                 config=
                     {
-                        "credentials": {
-                            "host": getenv("HOST"),
-                            "port": getenv("PORT"),
-                            "user": getenv("USER_DATABASE"),
-                            "password": getenv("PASSWORD"),
-                            "database": getenv("DATABASE"),
+                        "connections": {
+                            "default": {
+                                "engine": "tortoise.backends.mysql",
+                                    "credentials": {
+                                        "host": getenv("HOST"),
+                                        "port": getenv("PORT"),
+                                        "user": getenv("USER_DATABASE"),
+                                        "password": getenv("PASSWORD"),
+                                        "database": getenv("DATABASE"),
+                                }
+                            },
+                        
                     }},
                 modules={"models": ["src.models"]},
             )
