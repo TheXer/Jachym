@@ -6,7 +6,6 @@ import discord
 from discord.app_commands import Transformer
 
 from src.ui.error_view import DatetimeNotRecognizedError, TooFewOptionsError, TooManyOptionsError
-from src.models import Poll
 
 
 class OptionsTransformer(Transformer):

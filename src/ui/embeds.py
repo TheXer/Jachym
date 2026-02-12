@@ -7,7 +7,6 @@ from discord.colour import Color, Colour
 
 from src.ui.emojis import NUMBER_EMOJIS, ScoutEmojis
 from typing import Iterable
-from src.models import PollOption
 
 
 class ErrorMessage(discord.Embed):
