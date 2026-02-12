@@ -56,11 +56,18 @@ class Jachym(commands.Bot):
                                         "user": getenv("USER_DATABASE"),
                                         "password": getenv("PASSWORD"),
                                         "database": getenv("DATABASE"),
+                                        "charset": "utf8mb4",
+                                        
                                 }
                             },
-                        
-                    }},
-                modules={"models": ["src.models"]},
+                        },
+                        "apps": {
+                            "models": {
+                                "models": ["src.models"],
+                                "default_connection": "default",
+                            },
+                    },
+                }
             )
             # Generate schemas if they don't exist
             await Tortoise.generate_schemas()
