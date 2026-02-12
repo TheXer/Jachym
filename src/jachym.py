@@ -45,7 +45,15 @@ class Jachym(commands.Bot):
         """Initialize Tortoise ORM connection."""
         try:
             await Tortoise.init(
-                db_url=self.get_database_url(),
+                config=
+                    {
+                        "credentials": {
+                            "host": getenv("HOST"),
+                            "port": getenv("PORT"),
+                            "user": getenv("USER_DATABASE"),
+                            "password": getenv("PASSWORD"),
+                            "database": getenv("DATABASE"),
+                    }},
                 modules={"models": ["src.models"]},
             )
             # Generate schemas if they don't exist
