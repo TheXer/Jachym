@@ -13,7 +13,6 @@ async def main() -> None:
     bot = Jachym()
     async with bot:
         discord.utils.setup_logging()
-        await bot.load_extensions()
         await bot.start(getenv("DISCORD_TOKEN"))
 
 

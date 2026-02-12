@@ -56,7 +56,7 @@ class PollCreate(commands.Cog):
         question: str,
         answer: Transform[list[str], OptionsTransformer],
         date_time: Transform[datetime.datetime, DatetimeTransformer] | None,
-        multiple_choice: bool = False,
+        multiple_choice: bool = True,
     ):
         await interaction.response.defer()
         
@@ -196,7 +196,7 @@ class PollCreate(commands.Cog):
             await notify_poll_subscribers(
                 poll,
                 results_embed,
-                self.bot,
+                self.bot.user,
             )
             
             logger.info(f"Poll {poll.id} closed and results sent")

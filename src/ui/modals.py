@@ -156,7 +156,11 @@ class NewOptionModal(discord.ui.Modal):
             emoji_index = len(self.embed.fields)
 
         # Create new option in database
-        position = len(self.options)
+        # Get the maximum position from database to avoid conflicts when options are deleted
+        existing_options = await PollOption.filter(poll_id=self.poll.id).all()
+        max_position = max([opt.position for opt in existing_options], default=-1)
+        position = max_position + 1
+        
         new_opt = await PollOption.create(
             poll_id=self.poll.id,
             text=self.new_option.value,
@@ -255,6 +259,13 @@ class SelectOptionView(discord.ui.View):
         await interaction.response.defer()
 
         selected_id = int(self.select.values[0])
+        
+        if len(self.options) <= 2:
+            await interaction.followup.send(
+                "Anketa musí mít alespoň 2 možnosti, nelze odebrat!",
+                ephemeral=True,
+            )
+            return
 
         # Find the option to remove
         option_to_remove = next(
@@ -451,7 +462,7 @@ class ClosePollView(discord.ui.View):
         """
         from src.ui.embeds import PollEmbedBase
 
-        results_embed = PollEmbedBase(f"📊 Výsledky: {self.poll.question}")
+        results_embed = PollEmbedBase(f"Výsledky: {self.poll.question}")
         results_embed.timestamp = datetime.now()
         results_embed.set_footer(text="Anketa ukončena ✅")
 
@@ -485,7 +496,7 @@ class ClosePollView(discord.ui.View):
             vote_text = f"**{vote_count}** hlasů | {voter_names}"
 
             results_embed.add_field(
-                name=f"#{rank} {option.text}",
+                name=f"*#{rank}* {option.text}",
                 value=vote_text,
                 inline=False,
             )

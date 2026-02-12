@@ -1,4 +1,5 @@
 from discord.ext import commands
+import asyncio
 import discord
 from tortoise import Tortoise
 from loguru import logger
@@ -6,6 +7,7 @@ from os import getenv, listdir
 from discord.ext.commands import ExtensionNotFound, ExtensionFailed, ExtensionAlreadyLoaded
 
 from src.models import Poll, PollStatus
+from src.ui.embeds import PollEmbed
 from src.ui.poll_view import PollView
 from src.helpers import timeit
 
@@ -21,6 +23,9 @@ class Jachym(commands.Bot):
         )
         self.db_initialized = False
         self._poll_views_restored = False
+        # Semaphore to limit concurrent message edits (avoid rate limit)
+        self._message_edit_semaphore = asyncio.Semaphore(10)
+
 
     async def setup_hook(self) -> None:
         """Called when the bot is starting up."""
@@ -61,26 +66,26 @@ class Jachym(commands.Bot):
             return f"sqlite://{db_path}"
         
         elif db_type == "mysql":
-            user = getenv("USER_DATABASE")
-            password = getenv("PASSWORD")
-            host = getenv("HOST", "localhost")
-            port = getenv("DB_PORT", "3306")
-            database = getenv("DATABASE")
+            db_url = getenv("DB_URL", None)
+            if not db_url:
+                raise ValueError("DB_URL environment variable is required for MySQL")
             
-            if not all([user, password, database]):
-                raise ValueError("Missing MySQL credentials in environment variables")
-            
-            return f"mysql://{user}:{password}@{host}:{port}/{database}"
+            return db_url
         
         else:
             raise ValueError(f"Unsupported DB_TYPE: {db_type}")
 
     @timeit
     async def restore_poll_views(self) -> None:
-        """Restore persistent views for all active polls."""
+        """Restore persistent views for all active polls.
+        
+        Processes polls sequentially with a conservative delay between API calls
+        to respect Discord's strict per-message-channel rate limits.
+        """
         active_polls = await Poll.filter(status=PollStatus.ACTIVE).all()
         
         restored_count = 0
+        
         for poll in active_polls:
             try:
                 # Get the channel
@@ -89,28 +94,19 @@ class Jachym(commands.Bot):
                     logger.warning(f"Channel {poll.channel_id} not found for poll {poll.id}")
                     continue
 
-                # Fetch the message
-                try:
-                    message = await channel.fetch_message(poll.message_id)
-                except discord.NotFound:
-                    logger.warning(f"Message {poll.message_id} not found for poll {poll.id}")
-                    # Mark poll as ended since message is gone
-                    poll.status = PollStatus.ENDED
-                    await poll.save()
-                    continue
+                
+                embed = PollEmbed(poll.question, options=await poll.options.all(), created_at=poll.created_at)  
 
                 # Create and attach the view
-                view = PollView(poll=poll, options=await poll.options.all(), embed=message.embeds[0])
+                view = PollView(poll=poll, options=await poll.options.all(), embed=embed)
                 
-                # Re-attach view to the message (Discord remembers button custom_ids)
-                await message.edit(view=view)
-                
+                self.add_view(view=view, message_id=poll.message_id)
                 restored_count += 1
                 logger.debug(f"Restored view for poll {poll.id}")
 
             except Exception as e:
                 logger.error(f"Error restoring poll {poll.id}: {e}")
-
+        
         logger.success(f"Restored {restored_count} active poll views!")
 
     async def set_presence(self) -> None:
